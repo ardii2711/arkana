@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 1 — Backend Foundation
-- **Task aktif:** P1.2 — Database Foundation (`IN_PROGRESS`, menunggu migration manual dan commit)
-- **Task berikutnya:** P1.3 — Infrastruktur Backend
+- **Task aktif:** P1.3 — Infrastruktur Backend (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P1.3 — Infrastruktur Backend (lanjutan verifikasi)
 - **Update terakhir:** 14 November 2026
 
 ## Kesiapan Proyek
@@ -20,7 +20,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 ## Task Selesai
 
 - **P1.1 — Inisialisasi Monorepo dan Backend:** `DONE` (commit `91c1198`).
-- **P1.2 — Database Foundation:** implementasi selesai, menunggu migration manual + seed + commit.
+- **P1.2 — Database Foundation:** `DONE` (commit `b2db9d2`).
 
 ## Hasil Terakhir — P1.2
 
@@ -39,12 +39,24 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - TypeScript tetap 6.0.3 (typescript-eslint belum mendukung TS 7).
 - Model token/invitation belum dibuat; menyusul di P2.1–P2.3.
 
+## Hasil Berjalan — P1.3
+
+- `@aws-sdk/client-s3` 3.1169.0 (R2) dan `nodemailer` 10.5.0 (SMTP) ditambahkan.
+- `src/lib/storage.ts`: `S3Client` R2 (region `auto`, endpoint dari `R2_ENDPOINT` atau diturunkan dari `R2_ACCOUNT_ID`).
+- `src/lib/mailer.ts`: transport SMTP + `sendMail()`.
+- `src/middlewares/validate.ts`: validasi Zod `body`/`query`/`params`, hasil terparse di `res.locals.input`.
+- `error-handler.ts`: `ZodError` → 400 `VALIDATION_ERROR` dengan daftar `details`.
+- Env baru: `R2_*`, `SMTP_*`, `MAIL_FROM` (wajib, fail fast).
+- Verifikasi R2 `HeadBucket` dengan kredensial aktual: **berhasil**.
+- Verifikasi SMTP Resend (`transport.verify()`): **berhasil** (`smtp.resend.com:465`, domain sender terverifikasi).
+- Smoke test: server start dengan env lengkap, `GET /api/health` 200.
+
 ## Pemeriksaan P1.2
 
 - `prisma validate`, `prisma generate`, `typecheck`, `lint`, `format:check`, `build`: lulus.
 - Smoke import Prisma Client via tsx: OK; server start + `GET /api/health` 200.
-- `prisma migrate status`: koneksi database berhasil, belum ada migration.
-- Tindakan manual tertunda: `npm --prefix backend exec prisma migrate dev --name init`, lalu `npm --prefix backend run db:seed`.
+- `prisma migrate status`: migration `init` sudah applied, schema up to date.
+- Seed terverifikasi: 1 user, 1 Admin di database.
 
 ## Urutan Pengembangan
 
@@ -56,9 +68,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Jalankan migration dan seed (manual oleh pengguna), konfirmasi hasilnya.
-2. Commit P1.2.
-3. Mulai P1.3 — Infrastruktur Backend (R2, email, logging/keamanan dasar, pola response + validasi request).
+1. Commit P1.3.
+2. Lanjut P2.1 — Authentication.
 
 ## Aturan Pembaruan
 
