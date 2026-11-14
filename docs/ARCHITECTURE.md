@@ -238,6 +238,14 @@ Penghapusan file harus memperhatikan konsistensi antara metadata database dan ob
 - Admin hanya mengelola akun pengguna dan tidak memiliki akses ke isi data pribadi User.
 - Pemeriksaan otorisasi wajib dilakukan di backend pada setiap operasi yang membutuhkan perlindungan data.
 
+### 7.4 Authorization Pattern
+
+- Router modul data pribadi memasang `requireAuth` dan `requireRole('USER')`.
+- Setiap query atau mutasi data User wajib menyertakan kepemilikan: `where: { id, userId: req.user.id }` atau filter setara pada `updateMany`/`deleteMany`.
+- Resource milik pengguna lain dijawab `404 NOT_FOUND`, bukan `403`, agar keberadaan data tidak terbocorkan.
+- Admin tidak memiliki endpoint untuk membaca atau mengubah data pribadi User; pembatasan ditegakkan di lapisan rute, bukan hanya di antarmuka.
+- Role dan status akun dimuat ulang dari database pada setiap request melalui `requireAuth`; klaim JWT tidak dijadikan sumber otorisasi.
+
 ## 8. Public Evidence Sharing
 
 Setiap catatan kegiatan memiliki satu tautan publik permanen.

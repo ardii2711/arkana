@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 2 — Backend Authentication & User Management
-- **Task aktif:** P2.3 — Google OAuth & Password Recovery (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P2.4 — Authorization
+- **Task aktif:** P2.4 — Authorization (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P2.5 — Self-Service Password & Account Notifications
 - **Update terakhir:** 14 November 2026
 
 ## Kesiapan Proyek
@@ -23,17 +23,19 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P1.2 — Database Foundation:** `DONE` (commit `b2db9d2`).
 - **P1.3 — Infrastruktur Backend:** `DONE` (commit `875ff5c`).
 - **P2.1 — Authentication:** `DONE` (commit `080bf9a`).
+- **P2.2 — Account Management:** `DONE` (commit `a2d815b`).
+- **P2.3 — Google OAuth & Password Recovery:** `DONE` (commit `f7c1ce1`).
 
 ## Hasil Berjalan
 
-### P2.2 — Account Management (menunggu commit)
+### P2.2 — Account Management (DONE)
 
 - Schema: enum `AccountTokenType` (`INVITATION`, `PASSWORD_RESET`), model `AccountToken` (hash token, TTL, `usedAt`, cascade delete).
 - `src/lib/tokens.ts`: token acak 32 byte + hash SHA-256; `src/middlewares/require-role.ts`: `requireRole('ADMIN')`.
 - Endpoint Admin: `POST /api/users/invite`, `GET /api/users`, `PATCH /api/users/:id`; aktivasi publik `GET /api/auth/activation/:token`, `POST /api/auth/activate`.
 - Penonaktifan: `INACTIVE` + hapus refresh token, data tetap. Akun `ADMIN` tidak dapat diubah lewat endpoint ini.
 
-### P2.3 — Google OAuth & Password Recovery (menunggu commit)
+### P2.3 — Google OAuth & Password Recovery (DONE)
 
 - Dependency baru: `google-auth-library` 11.3.4.
 - Google: Authorization Code + PKCE (S256) + cookie `state`/verifier 10 menit (path `/api/auth/google`).
@@ -46,6 +48,16 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Env opsional `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`; bila kosong endpoint Google membalas 503 `GOOGLE_NOT_CONFIGURED`.
 - `POST /api/auth/login` dan `POST /api/auth/refresh` memakai helper sesi bersama `createSession()`.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
+
+### P2.4 — Authorization (menunggu commit)
+
+- Audit seluruh rute yang ada:
+  - Publik: `GET /api/health`; `POST /api/auth/login`, `/refresh`, `/logout`, `/activate`, `/password/forgot`, `/password/reset`; `GET /api/auth/activation/:token`, `/google`, `/google/callback`.
+  - Login: `GET /api/auth/me`.
+  - Admin: `GET /api/users`, `POST /api/users/invite`, `PATCH /api/users/:id` (via `requireRole('ADMIN')`).
+- Tidak ada endpoint data milik User pada tahap ini, sehingga pola ownership ditetapkan sebagai konvensi, bukan helper baru: lihat `ARCHITECTURE.md` §7.4.
+- Otorisasi tidak memakai klaim role dari JWT; `requireAuth` memuat ulang user dari database dan menolak akun non-`ACTIVE`.
+- Tidak ada perubahan kode; hanya `ARCHITECTURE.md` §7.4.
 
 ### Temuan Di Luar Scope
 
@@ -71,10 +83,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Commit P2.2 dan P2.3.
+1. Commit P2.4.
 2. Isi kredensial Google di `backend/.env` (client ID/secret + redirect URI yang terdaftar di Google Cloud Console) dan `SMTP_*` untuk uji email reset.
-3. Lanjut P2.4 — Authorization.
-4. P2.5 — Self-Service Password & Account Notifications.
+3. Lanjut P2.5 — Self-Service Password & Account Notifications.
 
 ## Aturan Pembaruan
 
