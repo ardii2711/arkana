@@ -1,5 +1,3 @@
-import { createHash, randomBytes } from 'node:crypto';
-
 import { SignJWT, jwtVerify } from 'jose';
 
 import { env } from '../../config/env.js';
@@ -25,12 +23,4 @@ export async function verifyAccessToken(token: string): Promise<string | null> {
   } catch {
     return null;
   }
-}
-
-export function createRefreshToken(): string {
-  return randomBytes(32).toString('hex');
-}
-
-export function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
 }

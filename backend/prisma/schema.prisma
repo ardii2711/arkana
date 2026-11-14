@@ -20,6 +20,11 @@ enum UserStatus {
   INACTIVE
 }
 
+enum AccountTokenType {
+  INVITATION
+  PASSWORD_RESET
+}
+
 model User {
   id           String     @id @default(uuid())
   name         String
@@ -33,6 +38,7 @@ model User {
   updatedAt    DateTime   @updatedAt
 
   refreshTokens RefreshToken[]
+  accountTokens AccountToken[]
 }
 
 model RefreshToken {
@@ -42,6 +48,19 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AccountToken {
+  id        String           @id @default(uuid())
+  tokenHash String           @unique
+  type      AccountTokenType
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime         @default(now())
 
   @@index([userId])
 }

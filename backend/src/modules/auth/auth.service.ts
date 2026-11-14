@@ -1,14 +1,10 @@
 import argon2 from 'argon2';
 
 import { prisma } from '../../lib/prisma.js';
+import { createToken, hashToken } from '../../lib/tokens.js';
 import type { AuthUser } from '../../types/auth.js';
 import { ApiError } from '../../utils/api-error.js';
-import {
-  REFRESH_TOKEN_TTL_MS,
-  createRefreshToken,
-  hashToken,
-  signAccessToken,
-} from './auth.tokens.js';
+import { REFRESH_TOKEN_TTL_MS, signAccessToken } from './auth.tokens.js';
 
 export interface AuthResult {
   user: AuthUser;
@@ -27,7 +23,7 @@ function toAuthUser(user: {
 }
 
 async function issueTokens(userId: string): Promise<{ accessToken: string; refreshToken: string }> {
-  const refreshToken = createRefreshToken();
+  const refreshToken = createToken();
 
   await prisma.refreshToken.create({
     data: {
@@ -85,4 +81,41 @@ export async function logout(refreshToken: string | undefined): Promise<void> {
   }
 
   await prisma.refreshToken.deleteMany({ where: { tokenHash: hashToken(refreshToken) } });
+}
+
+async function findInvitation(token: string) {
+  const record = await prisma.accountToken.findUnique({
+    where: { tokenHash: hashToken(token) },
+    include: { user: true },
+  });
+
+  if (
+    !record ||
+    record.type !== 'INVITATION' ||
+    record.usedAt ||
+    record.expiresAt.getTime() <= Date.now() ||
+    record.user.status !== 'INVITED'
+  ) {
+    throw new ApiError(400, 'INVALID_TOKEN', 'Tautan aktivasi tidak valid atau kedaluwarsa');
+  }
+
+  return record;
+}
+
+export async function getActivationInfo(token: string): Promise<{ name: string; email: string }> {
+  const record = await findInvitation(token);
+  return { name: record.user.name, email: record.user.email };
+}
+
+export async function activateAccount(token: string, password: string): Promise<void> {
+  const record = await findInvitation(token);
+  const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: record.userId },
+      data: { passwordHash, status: 'ACTIVE', activatedAt: new Date() },
+    }),
+    prisma.accountToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+  ]);
 }

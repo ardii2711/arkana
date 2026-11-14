@@ -11,11 +11,7 @@ export const logger = pino({
     },
   }),
   redact: {
-    paths: [
-      'req.headers.authorization',
-      'req.headers.cookie',
-      'res.headers["set-cookie"]',
-    ],
+    paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]'],
     remove: true,
   },
 });

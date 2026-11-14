@@ -1,0 +1,21 @@
+import type { RequestHandler } from 'express';
+
+import { sendSuccess } from '../../utils/api-response.js';
+import type { InviteUserInput, ListUsersQuery, UpdateUserInput } from './users.schema.js';
+import { inviteUser, listUsers, updateUser } from './users.service.js';
+
+export const listUsersHandler: RequestHandler = async (_req, res) => {
+  const query = res.locals.input.query as ListUsersQuery;
+  sendSuccess(res, await listUsers(query));
+};
+
+export const inviteUserHandler: RequestHandler = async (_req, res) => {
+  const input = res.locals.input.body as InviteUserInput;
+  sendSuccess(res, { user: await inviteUser(input) }, 201);
+};
+
+export const updateUserHandler: RequestHandler = async (_req, res) => {
+  const { id } = res.locals.input.params as { id: string };
+  const input = res.locals.input.body as UpdateUserInput;
+  sendSuccess(res, { user: await updateUser(id, input) });
+};

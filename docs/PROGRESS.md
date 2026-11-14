@@ -5,9 +5,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 ## Status
 
 - **Tahap:** Implementasi Backend
-- **Fase aktif:** Phase 1 — Backend Foundation
-- **Task aktif:** P2.1 — Authentication (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P2.2 — Account Management
+- **Fase aktif:** Phase 2 — Backend Authentication & User Management
+- **Task aktif:** P2.2 — Account Management (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P2.3 — Google OAuth & Password Recovery
 - **Update terakhir:** 14 November 2026
 
 ## Kesiapan Proyek
@@ -22,57 +22,32 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P1.1 — Inisialisasi Monorepo dan Backend:** `DONE` (commit `91c1198`).
 - **P1.2 — Database Foundation:** `DONE` (commit `b2db9d2`).
 - **P1.3 — Infrastruktur Backend:** `DONE` (commit `875ff5c`).
+- **P2.1 — Authentication:** `DONE` (commit `080bf9a`).
 
-## Hasil Terakhir — P1.2
+## Hasil Berjalan — P2.2
 
-- Prisma 7.10.1 + `@prisma/adapter-pg` + `pg`; `argon2` untuk hash password seed.
-- `backend/prisma/schema.prisma`: enum `Role`, `UserStatus`, model `User` (fondasi akun).
-- `backend/prisma.config.ts`: schema path, `migrations.path`, `prisma db seed`, datasource `DIRECT_URL`, `SHADOW_DATABASE_URL` opsional, env dimuat via `process.loadEnvFile()`.
-- `backend/prisma/seed.ts`: Admin idempoten (upsert by email), Argon2id, menolak Admin kedua.
-- `backend/src/lib/prisma.ts`: singleton PrismaClient + adapter dari `DATABASE_URL`; disconnect saat shutdown.
-- Script: `postinstall`/`db:generate`/`db:migrate`/`db:seed`; kode generated di `src/generated/prisma` (gitignored).
-- `.env.example` memuat `DATABASE_URL` (transaction pooler 6543), `DIRECT_URL` (session pooler 5432), `ADMIN_EMAIL`, `ADMIN_PASSWORD`.
-
-### Keputusan Teknis
-
-- Prisma dipin 7.10.1; `latest` 8.0.0-rc belum stabil.
-- Migration memakai session pooler karena direct connection Supabase IPv6-only.
-- TypeScript tetap 6.0.3 (typescript-eslint belum mendukung TS 7).
-- Model token/invitation belum dibuat; menyusul di P2.1–P2.3.
-
-## Hasil Berjalan — P1.3
-
-- `@aws-sdk/client-s3` 3.1169.0 (R2) dan `nodemailer` 10.5.0 (SMTP) ditambahkan.
-- `src/lib/storage.ts`: `S3Client` R2 (region `auto`, endpoint dari `R2_ENDPOINT` atau diturunkan dari `R2_ACCOUNT_ID`).
-- `src/lib/mailer.ts`: transport SMTP + `sendMail()`.
-- `src/middlewares/validate.ts`: validasi Zod `body`/`query`/`params`, hasil terparse di `res.locals.input`.
-- `error-handler.ts`: `ZodError` → 400 `VALIDATION_ERROR` dengan daftar `details`.
-- Env baru: `R2_*`, `SMTP_*`, `MAIL_FROM` (wajib, fail fast).
-- Verifikasi R2 `HeadBucket` dengan kredensial aktual: **berhasil**.
-- Verifikasi SMTP Resend (`transport.verify()`): **berhasil** (`smtp.resend.com:465`, domain sender terverifikasi).
-- Smoke test: server start dengan env lengkap, `GET /api/health` 200.
-
-## Hasil Berjalan — P2.1
-
-- Dependensi: `jose` 6.2.17 (JWT HS256), `cookie-parser`, `express-rate-limit` 8.7.4.
-- Schema: model `RefreshToken` (hash token, `expiresAt`, relasi `User`, cascade delete, index `userId`).
-- `src/modules/auth/`: routes, controller, service, schema Zod, token helper, cookie helper.
-- `src/middlewares/require-auth.ts`: verifikasi access cookie, muat user, wajib `ACTIVE`.
-- Endpoint: `POST /api/auth/login` (rate limit 10/15 menit per IP), `POST /api/auth/refresh`, `POST /api/auth/logout`, `GET /api/auth/me`.
-- Cookie HTTP-only `arkana_access` (path `/`, 15 menit) dan `arkana_refresh` (path `/api/auth`, 30 hari), `secure` di production, `sameSite=lax`; `trust proxy` aktif di production.
-- Logger meredaksi `req.headers.cookie`, `req.headers.authorization`, dan `res.headers["set-cookie"]` (token tidak pernah masuk log).
-- Rotasi sesi: token lama dihapus, token baru diterbitkan; token kedaluwarsa dibersihkan saat refresh.
-- Env baru: `JWT_ACCESS_SECRET` (minimal 32 karakter).
+- Schema: enum `AccountTokenType` (`INVITATION`, `PASSWORD_RESET`) dan model `AccountToken` (hash token, TTL, `usedAt`, cascade delete).
+- `src/lib/tokens.ts`: token acak 32 byte + hash SHA-256, dipakai bersama auth dan users.
+- `src/middlewares/require-role.ts`: `requireRole('ADMIN')`, akan dipakai ulang di P2.4.
+- Endpoint Admin: `POST /api/users/invite`, `GET /api/users` (page/limit/search), `PATCH /api/users/:id`.
+- Undangan: User `INVITED`, token 7 hari, email Resend berisi `${CORS_ORIGIN}/activate?token=...`; bila pengiriman gagal, user dihapus kembali.
+- Aktivasi publik: `GET /api/auth/activation/:token`, `POST /api/auth/activate` (Argon2id, token sekali pakai, rate limit).
+- Penonaktifan: `INACTIVE` + hapus semua refresh token; data user tetap. Akun `ADMIN` tidak dapat diubah lewat endpoint ini. Aktivasi manual tanpa password ditolak.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
-- Smoke end-to-end dengan akun Admin: login 200, `/me` 200, refresh 200 + token rotasi, replay refresh lama 401, logout 204, refresh setelah logout 401, password salah 401.
-- Catatan: access token bersifat stateless, tetap valid sampai kedaluwarsa setelah logout (sesuai desain).
+- Smoke end-to-end (data uji dihapus setelahnya): invite 201 (`INVITED`), list 200, activation info 200, activate 200, replay token 400, login user 200, deactivate 200 (`INACTIVE`), login setelah nonaktif 401, patch Admin 403, invite duplikat 409, list tanpa auth 401.
 
-## Pemeriksaan P1.2
+### Temuan Di Luar Scope
 
-- `prisma validate`, `prisma generate`, `typecheck`, `lint`, `format:check`, `build`: lulus.
-- Smoke import Prisma Client via tsx: OK; server start + `GET /api/health` 200.
-- `prisma migrate status`: migration `init` sudah applied, schema up to date.
-- Seed terverifikasi: 1 user, 1 Admin di database.
+- Endpoint ubah password user, kirim ulang undangan, dan email notifikasi status akun dipindahkan ke task baru **P2.5** yang sudah disetujui.
+
+## Keputusan Teknis Kumulatif
+
+- Prisma 7.10.1 (stable; `latest` 8.0.0-rc dihindari), driver adapter `@prisma/adapter-pg`.
+- TypeScript 6.0.3 (typescript-eslint belum mendukung TS 7).
+- Migration memakai session pooler Supabase; runtime memakai transaction pooler.
+- Auth: access JWT 15 menit di cookie HTTP-only, refresh token opaque 30 hari (hash di DB, rotasi), `sameSite=lax`, `secure` di production.
+- Logger meredaksi `cookie`, `authorization`, dan `set-cookie`.
+- Env wajib fail-fast via Zod; `JWT_ACCESS_SECRET` minimal 32 karakter.
 
 ## Urutan Pengembangan
 
@@ -84,8 +59,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Commit P2.1.
-2. Lanjut P2.2 — Account Management.
+1. Commit P2.2.
+2. Lanjut P2.3 — Google OAuth & Password Recovery (`AccountToken` tipe `PASSWORD_RESET` sudah tersedia).
+3. P2.4 — Authorization, lalu P2.5 — Self-Service Password & Account Notifications (task baru disetujui).
 
 ## Aturan Pembaruan
 

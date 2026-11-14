@@ -81,6 +81,14 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 **Kriteria penerimaan:** User hanya mengakses data miliknya dan Admin hanya mengelola akun.
 
+### P2.5 — Self-Service Password & Account Notifications
+
+- Implementasikan perubahan password oleh User yang sudah login (wajib password lama, cabut sesi lain).
+- Implementasikan pengiriman ulang undangan akun untuk token yang kedaluwarsa.
+- Implementasikan email notifikasi status akun: aktivasi berhasil, email diubah, dan akun dinonaktifkan.
+
+**Kriteria penerimaan:** User dapat mengganti password sendiri, undangan dapat dikirim ulang, dan perubahan status akun penting diberitahukan melalui email.
+
 ## Phase 3 — Backend Work Log & Evidence
 
 **Tujuan:** Menyelesaikan API pencatatan pekerjaan dan bukti dukung.
