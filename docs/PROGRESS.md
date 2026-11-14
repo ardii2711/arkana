@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 1 — Backend Foundation
-- **Task aktif:** P1.3 — Infrastruktur Backend (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P1.3 — Infrastruktur Backend (lanjutan verifikasi)
+- **Task aktif:** P2.1 — Authentication (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P2.2 — Account Management
 - **Update terakhir:** 14 November 2026
 
 ## Kesiapan Proyek
@@ -21,6 +21,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **P1.1 — Inisialisasi Monorepo dan Backend:** `DONE` (commit `91c1198`).
 - **P1.2 — Database Foundation:** `DONE` (commit `b2db9d2`).
+- **P1.3 — Infrastruktur Backend:** `DONE` (commit `875ff5c`).
 
 ## Hasil Terakhir — P1.2
 
@@ -51,6 +52,21 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Verifikasi SMTP Resend (`transport.verify()`): **berhasil** (`smtp.resend.com:465`, domain sender terverifikasi).
 - Smoke test: server start dengan env lengkap, `GET /api/health` 200.
 
+## Hasil Berjalan — P2.1
+
+- Dependensi: `jose` 6.2.17 (JWT HS256), `cookie-parser`, `express-rate-limit` 8.7.4.
+- Schema: model `RefreshToken` (hash token, `expiresAt`, relasi `User`, cascade delete, index `userId`).
+- `src/modules/auth/`: routes, controller, service, schema Zod, token helper, cookie helper.
+- `src/middlewares/require-auth.ts`: verifikasi access cookie, muat user, wajib `ACTIVE`.
+- Endpoint: `POST /api/auth/login` (rate limit 10/15 menit per IP), `POST /api/auth/refresh`, `POST /api/auth/logout`, `GET /api/auth/me`.
+- Cookie HTTP-only `arkana_access` (path `/`, 15 menit) dan `arkana_refresh` (path `/api/auth`, 30 hari), `secure` di production, `sameSite=lax`; `trust proxy` aktif di production.
+- Logger meredaksi `req.headers.cookie`, `req.headers.authorization`, dan `res.headers["set-cookie"]` (token tidak pernah masuk log).
+- Rotasi sesi: token lama dihapus, token baru diterbitkan; token kedaluwarsa dibersihkan saat refresh.
+- Env baru: `JWT_ACCESS_SECRET` (minimal 32 karakter).
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
+- Smoke end-to-end dengan akun Admin: login 200, `/me` 200, refresh 200 + token rotasi, replay refresh lama 401, logout 204, refresh setelah logout 401, password salah 401.
+- Catatan: access token bersifat stateless, tetap valid sampai kedaluwarsa setelah logout (sesuai desain).
+
 ## Pemeriksaan P1.2
 
 - `prisma validate`, `prisma generate`, `typecheck`, `lint`, `format:check`, `build`: lulus.
@@ -68,8 +84,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Commit P1.3.
-2. Lanjut P2.1 — Authentication.
+1. Commit P2.1.
+2. Lanjut P2.2 — Account Management.
 
 ## Aturan Pembaruan
 
