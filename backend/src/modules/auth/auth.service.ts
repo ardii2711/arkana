@@ -1,6 +1,7 @@
 import argon2 from 'argon2';
 
 import { env } from '../../config/env.js';
+import { notifyAccountActivated } from '../../lib/account-mail.js';
 import { logger } from '../../lib/logger.js';
 import { sendMail } from '../../lib/mailer.js';
 import { prisma } from '../../lib/prisma.js';
@@ -129,6 +130,52 @@ export async function activateAccount(token: string, password: string): Promise<
       data: { passwordHash, status: 'ACTIVE', activatedAt: new Date() },
     }),
     prisma.accountToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+  ]);
+
+  await notifyAccountActivated(record.user.name, record.user.email).catch((error) =>
+    logger.error({ err: error }, 'Gagal mengirim email aktivasi akun'),
+  );
+}
+
+export async function changePassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string,
+  currentRefreshToken: string | undefined,
+): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { passwordHash: true },
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'NOT_FOUND', 'Akun tidak ditemukan');
+  }
+
+  if (!user.passwordHash) {
+    throw new ApiError(
+      400,
+      'PASSWORD_NOT_SET',
+      'Akun ini belum memiliki password. Gunakan reset password melalui email',
+    );
+  }
+
+  const passwordValid = await argon2.verify(user.passwordHash, currentPassword);
+
+  if (!passwordValid) {
+    throw new ApiError(400, 'INVALID_PASSWORD', 'Password lama salah');
+  }
+
+  const passwordHash = await argon2.hash(newPassword, { type: argon2.argon2id });
+
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
+    prisma.refreshToken.deleteMany({
+      where: {
+        userId,
+        ...(currentRefreshToken && { tokenHash: { not: hashToken(currentRefreshToken) } }),
+      },
+    }),
   ]);
 }
 

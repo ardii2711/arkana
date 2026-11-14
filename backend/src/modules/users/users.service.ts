@@ -1,5 +1,10 @@
-import { env } from '../../config/env.js';
-import { sendMail } from '../../lib/mailer.js';
+import {
+  notifyAccountActivated,
+  notifyAccountDeactivated,
+  notifyEmailChanged,
+  sendInvitationEmail,
+} from '../../lib/account-mail.js';
+import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import { ApiError } from '../../utils/api-error.js';
@@ -17,15 +22,25 @@ const userSelect = {
   createdAt: true,
 } as const;
 
-async function sendInvitationEmail(name: string, email: string, token: string): Promise<void> {
-  const link = `${env.CORS_ORIGIN}/activate?token=${token}`;
+async function createInvitationToken(userId: string): Promise<string> {
+  const token = createToken();
+  const tokenHash = hashToken(token);
 
-  await sendMail({
-    to: email,
-    subject: 'Undangan akun ARKANA',
-    text: `Halo ${name},\n\nAkun ARKANA Anda telah dibuat. Aktifkan akun dan atur password melalui tautan berikut:\n${link}\n\nTautan berlaku 7 hari.`,
-    html: `<p>Halo ${name},</p><p>Akun ARKANA Anda telah dibuat. Aktifkan akun dan atur password melalui tautan berikut:</p><p><a href="${link}">Aktifkan akun</a></p><p>Tautan berlaku 7 hari.</p>`,
-  });
+  await prisma.$transaction([
+    prisma.accountToken.deleteMany({
+      where: { userId, type: 'INVITATION', usedAt: null },
+    }),
+    prisma.accountToken.create({
+      data: {
+        userId,
+        type: 'INVITATION',
+        tokenHash,
+        expiresAt: new Date(Date.now() + INVITATION_TTL_MS),
+      },
+    }),
+  ]);
+
+  return token;
 }
 
 export async function listUsers({ page, limit, search }: ListUsersQuery) {
@@ -88,6 +103,31 @@ export async function inviteUser({ name, email }: InviteUserInput) {
   return user;
 }
 
+export async function resendInvitation(id: string) {
+  const user = await prisma.user.findUnique({ where: { id } });
+
+  if (!user) {
+    throw new ApiError(404, 'NOT_FOUND', 'Akun tidak ditemukan');
+  }
+
+  if (user.role === 'ADMIN') {
+    throw new ApiError(403, 'FORBIDDEN', 'Akun Admin tidak dapat diundang');
+  }
+
+  if (user.status !== 'INVITED') {
+    throw new ApiError(400, 'INVALID_STATUS', 'Undangan hanya untuk akun yang belum diaktivasi');
+  }
+
+  const token = await createInvitationToken(user.id);
+
+  try {
+    await sendInvitationEmail(user.name, user.email, token);
+  } catch {
+    await prisma.accountToken.deleteMany({ where: { tokenHash: hashToken(token) } });
+    throw new ApiError(502, 'EMAIL_FAILED', 'Gagal mengirim email undangan');
+  }
+}
+
 export async function updateUser(id: string, input: UpdateUserInput) {
   const user = await prisma.user.findUnique({ where: { id } });
 
@@ -117,8 +157,21 @@ export async function updateUser(id: string, input: UpdateUserInput) {
     select: userSelect,
   });
 
-  if (input.status === 'INACTIVE') {
+  if (input.status === 'INACTIVE' && user.status !== 'INACTIVE') {
     await prisma.refreshToken.deleteMany({ where: { userId: id } });
+    await notifyAccountDeactivated(user.name, user.email).catch((error) =>
+      logger.error({ err: error }, 'Gagal mengirim email penonaktifan akun'),
+    );
+  } else if (input.status === 'ACTIVE' && user.status !== 'ACTIVE') {
+    await notifyAccountActivated(updated.name, updated.email).catch((error) =>
+      logger.error({ err: error }, 'Gagal mengirim email aktivasi akun'),
+    );
+  }
+
+  if (input.email && input.email !== user.email) {
+    await notifyEmailChanged(user.name, user.email, updated.email).catch((error) =>
+      logger.error({ err: error }, 'Gagal mengirim email perubahan alamat'),
+    );
   }
 
   return updated;

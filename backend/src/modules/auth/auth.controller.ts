@@ -16,12 +16,14 @@ import {
 import { createGoogleAuthRequest, exchangeGoogleCode } from './auth.google.js';
 import type {
   ActivateAccountInput,
+  ChangePasswordInput,
   ForgotPasswordInput,
   LoginInput,
   ResetPasswordInput,
 } from './auth.schema.js';
 import {
   activateAccount,
+  changePassword,
   getActivationInfo,
   login,
   loginWithGoogle,
@@ -124,4 +126,16 @@ export const resetPasswordHandler: RequestHandler = async (_req, res) => {
 
   await resetPassword(token, password);
   sendSuccess(res, { reset: true });
+};
+
+export const changePasswordHandler: RequestHandler = async (req, res) => {
+  if (!req.user) {
+    throw new ApiError(401, 'UNAUTHENTICATED', 'Silakan login terlebih dahulu');
+  }
+
+  const { currentPassword, newPassword } = res.locals.input.body as ChangePasswordInput;
+  const refreshToken = req.cookies?.[REFRESH_COOKIE] as string | undefined;
+
+  await changePassword(req.user.id, currentPassword, newPassword, refreshToken);
+  sendSuccess(res, { changed: true });
 };

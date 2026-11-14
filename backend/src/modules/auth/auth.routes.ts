@@ -7,6 +7,7 @@ import { validate } from '../../middlewares/validate.js';
 import {
   activateAccountHandler,
   activationInfoHandler,
+  changePasswordHandler,
   forgotPasswordHandler,
   googleCallbackHandler,
   googleStartHandler,
@@ -19,6 +20,7 @@ import {
 import {
   activateAccountSchema,
   activationTokenSchema,
+  changePasswordSchema,
   forgotPasswordSchema,
   loginSchema,
   resetPasswordSchema,
@@ -45,6 +47,7 @@ const activateLimiter = limiter(10);
 const googleLimiter = limiter(20);
 const forgotPasswordLimiter = limiter(5);
 const resetPasswordLimiter = limiter(10);
+const changePasswordLimiter = limiter(5);
 
 export const authRouter = Router();
 
@@ -77,4 +80,11 @@ authRouter.post(
   resetPasswordLimiter,
   validate({ body: resetPasswordSchema }),
   resetPasswordHandler,
+);
+authRouter.post(
+  '/password/change',
+  requireAuth,
+  changePasswordLimiter,
+  validate({ body: changePasswordSchema }),
+  changePasswordHandler,
 );

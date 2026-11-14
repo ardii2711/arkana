@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 2 — Backend Authentication & User Management
-- **Task aktif:** P2.4 — Authorization (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P2.5 — Self-Service Password & Account Notifications
+- **Task aktif:** P2.5 — Self-Service Password & Account Notifications (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P3.1 — Work Log
 - **Update terakhir:** 14 November 2026
 
 ## Kesiapan Proyek
@@ -25,6 +25,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P2.1 — Authentication:** `DONE` (commit `080bf9a`).
 - **P2.2 — Account Management:** `DONE` (commit `a2d815b`).
 - **P2.3 — Google OAuth & Password Recovery:** `DONE` (commit `f7c1ce1`).
+- **P2.4 — Authorization:** `DONE` (commit `58e3854`).
 
 ## Hasil Berjalan
 
@@ -59,9 +60,19 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Otorisasi tidak memakai klaim role dari JWT; `requireAuth` memuat ulang user dari database dan menolak akun non-`ACTIVE`.
 - Tidak ada perubahan kode; hanya `ARCHITECTURE.md` §7.4.
 
+### P2.5 — Self-Service Password & Account Notifications (menunggu commit)
+
+- `POST /api/auth/password/change` (login, rate limit 5/15 menit): wajib `currentPassword`, `newPassword` minimal 8 karakter; Argon2id; mencabut seluruh refresh token kecuali sesi saat ini. Akun tanpa password (Google-only) ditolak `PASSWORD_NOT_SET` dan diarahkan ke reset password.
+- `POST /api/users/:id/resend-invitation` (Admin): hanya untuk akun `INVITED`; token undangan lama yang belum terpakai dihapus, token baru berlaku 7 hari; kegagalan email membatalkan token baru dan membalas 502.
+- `src/lib/account-mail.ts`: template undangan, aktivasi, perubahan email (dikirim ke email lama dan baru), dan penonaktifan akun.
+- Email notifikasi aktivasi dan penonaktifan dikirim hanya saat status berubah; perubahan email hanya saat alamat benar-benar berubah. Semua notifikasi non-kritis bersifat fail-soft (kegagalan dicatat di log, operasi tetap berhasil).
+- Tidak ada perubahan schema/migration.
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
+
 ### Temuan Di Luar Scope
 
-- Endpoint ubah password user, kirim ulang undangan, dan email notifikasi status akun dipindahkan ke task baru **P2.5** yang sudah disetujui.
+- Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
+- Akun yang hanya login lewat Google belum dapat menetapkan password sendiri; harus lewat alur reset password.
 - Cookie sesi memakai `sameSite=lax`. Pada deployment frontend dan backend beda site (Vercel ↔ Render), cookie tidak terkirim pada request XHR lintas site. Perlu keputusan `sameSite=none` + `secure` atau domain induk bersama sebelum P12.
 
 ## Keputusan Teknis Kumulatif
@@ -83,9 +94,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Commit P2.4.
-2. Isi kredensial Google di `backend/.env` (client ID/secret + redirect URI yang terdaftar di Google Cloud Console) dan `SMTP_*` untuk uji email reset.
-3. Lanjut P2.5 — Self-Service Password & Account Notifications.
+1. Commit P2.5.
+2. Lanjut Phase 3 — P3.1 Work Log.
 
 ## Aturan Pembaruan
 
