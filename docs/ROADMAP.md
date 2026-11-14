@@ -97,8 +97,8 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 - Rancang model kegiatan dan kategori.
 - Implementasikan CRUD kegiatan.
-- Implementasikan kategori bawaan dan kategori khusus.
-- Terapkan aturan tanggal, kategori, dan kepemilikan data.
+- Terapkan tujuh kategori tetap (enum) sesuai kebutuhan produk.
+- Terapkan aturan tanggal, kategori, kepemilikan, serta pagination, filter, dan pencarian daftar kegiatan.
 
 **Kriteria penerimaan:** Seluruh operasi kegiatan berjalan sesuai kebutuhan produk.
 

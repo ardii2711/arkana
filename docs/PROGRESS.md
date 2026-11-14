@@ -5,9 +5,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 ## Status
 
 - **Tahap:** Implementasi Backend
-- **Fase aktif:** Phase 2 — Backend Authentication & User Management
-- **Task aktif:** P2.5 — Self-Service Password & Account Notifications (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P3.1 — Work Log
+- **Fase aktif:** Phase 3 — Backend Work Log & Evidence
+- **Task aktif:** P3.1 — Work Log (`IN_PROGRESS`, menunggu migration dan commit)
+- **Task berikutnya:** P3.2 — Evidence File Management
 - **Update terakhir:** 14 November 2026
 
 ## Kesiapan Proyek
@@ -26,6 +26,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P2.2 — Account Management:** `DONE` (commit `a2d815b`).
 - **P2.3 — Google OAuth & Password Recovery:** `DONE` (commit `f7c1ce1`).
 - **P2.4 — Authorization:** `DONE` (commit `58e3854`).
+- **P2.5 — Self-Service Password & Account Notifications:** `DONE` (commit `8dd04c7`).
 
 ## Hasil Berjalan
 
@@ -60,7 +61,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Otorisasi tidak memakai klaim role dari JWT; `requireAuth` memuat ulang user dari database dan menolak akun non-`ACTIVE`.
 - Tidak ada perubahan kode; hanya `ARCHITECTURE.md` §7.4.
 
-### P2.5 — Self-Service Password & Account Notifications (menunggu commit)
+### P2.5 — Self-Service Password & Account Notifications (DONE)
 
 - `POST /api/auth/password/change` (login, rate limit 5/15 menit): wajib `currentPassword`, `newPassword` minimal 8 karakter; Argon2id; mencabut seluruh refresh token kecuali sesi saat ini. Akun tanpa password (Google-only) ditolak `PASSWORD_NOT_SET` dan diarahkan ke reset password.
 - `POST /api/users/:id/resend-invitation` (Admin): hanya untuk akun `INVITED`; token undangan lama yang belum terpakai dihapus, token baru berlaku 7 hari; kegagalan email membatalkan token baru dan membalas 502.
@@ -68,6 +69,19 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Email notifikasi aktivasi dan penonaktifan dikirim hanya saat status berubah; perubahan email hanya saat alamat benar-benar berubah. Semua notifikasi non-kritis bersifat fail-soft (kegagalan dicatat di log, operasi tetap berhasil).
 - Tidak ada perubahan schema/migration.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
+
+### P3.1 — Work Log (menunggu migration dan commit)
+
+- Schema: enum `WorkCategory` (7 kategori tetap) dan model `WorkLog` (`activityDate @db.Date`, `name`, `description`, `output`, `category`, `userId`, index `[userId, activityDate]`). Kategori khusus dibatalkan atas persetujuan pengguna; `PROJECT.md` dan `ROADMAP.md` disesuaikan.
+- Kategori tidak punya tabel/endpoint sendiri; nilainya enum di API.
+- Endpoint `requireRole('USER')`:
+  - `GET /api/work-logs` — `page`, `limit` (maks 100), `category`, `from`, `to`, `search` (nama + uraian), urut tanggal terbaru.
+  - `POST /api/work-logs`, `GET/PATCH/DELETE /api/work-logs/:id`.
+- Validasi: `name` ≤200, `description` ≤10000, `output` ≤5000 wajib; `activityDate` opsional (default hari ini) dan tidak boleh melewati hari ini; `from <= to`.
+- `activityDate` dikembalikan sebagai `YYYY-MM-DD`; disimpan UTC tengah malam.
+- Ownership: query `where { id, userId }`; data pengguna lain → 404.
+- Migration belum dijalankan; perintah manual ada di bagian Pekerjaan Berikutnya.
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `prisma generate` sudah dijalankan.
 
 ### Temuan Di Luar Scope
 
@@ -83,6 +97,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Auth: access JWT 15 menit di cookie HTTP-only, refresh token opaque 30 hari (hash di DB, rotasi), `sameSite=lax`, `secure` di production.
 - Logger meredaksi `cookie`, `authorization`, dan `set-cookie`.
 - Env wajib fail-fast via Zod; `JWT_ACCESS_SECRET` minimal 32 karakter.
+- Kategori Work Log memakai enum tetap 7 nilai; kategori khusus dibatalkan.
+- Form Work Log tidak menampilkan `activityDate`; backend memakai tanggal hari ini dan menolak tanggal setelah hari ini.
 
 ## Urutan Pengembangan
 
@@ -94,8 +110,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Commit P2.5.
-2. Lanjut Phase 3 — P3.1 Work Log.
+1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_work_log`.
+2. Commit P3.1.
+3. Lanjut P3.2 — Evidence File Management.
+4. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan
 

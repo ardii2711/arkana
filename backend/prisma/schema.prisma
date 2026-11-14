@@ -25,6 +25,16 @@ enum AccountTokenType {
   PASSWORD_RESET
 }
 
+enum WorkCategory {
+  PELAKSANAAN_TUGAS
+  PENGEMBANGAN_PERBAIKAN
+  KOORDINASI_RAPAT
+  PELAYANAN_PENDAMPINGAN
+  ADMINISTRASI_PELAPORAN
+  PENGEMBANGAN_KOMPETENSI
+  PERJALANAN_DINAS
+}
+
 model User {
   id           String     @id @default(uuid())
   name         String
@@ -39,6 +49,7 @@ model User {
 
   refreshTokens RefreshToken[]
   accountTokens AccountToken[]
+  workLogs      WorkLog[]
 }
 
 model RefreshToken {
@@ -63,4 +74,19 @@ model AccountToken {
   createdAt DateTime         @default(now())
 
   @@index([userId])
+}
+
+model WorkLog {
+  id           String       @id @default(uuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityDate DateTime     @db.Date
+  name         String
+  description  String
+  output       String
+  category     WorkCategory
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([userId, activityDate])
 }

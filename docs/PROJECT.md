@@ -74,7 +74,7 @@ Informasi catatan:
 - Satu kategori utama.
 - Satu atau lebih file bukti dukung.
 
-Kategori bawaan:
+Kategori tetap:
 
 1. Pelaksanaan Tugas
 2. Pengembangan dan Perbaikan
@@ -84,7 +84,7 @@ Kategori bawaan:
 6. Pengembangan Kompetensi
 7. Perjalanan Dinas dan Kegiatan Lapangan
 
-Pengguna dapat menambahkan kategori khusus dan mengubah kategori pada catatan yang sudah dibuat.
+Pengguna dapat mengubah kategori pada catatan yang sudah dibuat.
 
 ### 5.3. Evidence & Archive
 
