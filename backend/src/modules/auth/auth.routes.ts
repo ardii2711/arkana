@@ -7,12 +7,22 @@ import { validate } from '../../middlewares/validate.js';
 import {
   activateAccountHandler,
   activationInfoHandler,
+  forgotPasswordHandler,
+  googleCallbackHandler,
+  googleStartHandler,
   loginHandler,
   logoutHandler,
   meHandler,
   refreshHandler,
+  resetPasswordHandler,
 } from './auth.controller.js';
-import { activateAccountSchema, activationTokenSchema, loginSchema } from './auth.schema.js';
+import {
+  activateAccountSchema,
+  activationTokenSchema,
+  forgotPasswordSchema,
+  loginSchema,
+  resetPasswordSchema,
+} from './auth.schema.js';
 
 const rateLimitHandler = (_req: Request, res: Response) => {
   res.status(429).json({
@@ -21,21 +31,20 @@ const rateLimitHandler = (_req: Request, res: Response) => {
   });
 };
 
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  handler: rateLimitHandler,
-});
+const limiter = (limit: number) =>
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    handler: rateLimitHandler,
+  });
 
-const activateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  handler: rateLimitHandler,
-});
+const loginLimiter = limiter(10);
+const activateLimiter = limiter(10);
+const googleLimiter = limiter(20);
+const forgotPasswordLimiter = limiter(5);
+const resetPasswordLimiter = limiter(10);
 
 export const authRouter = Router();
 
@@ -43,6 +52,8 @@ authRouter.post('/login', loginLimiter, validate({ body: loginSchema }), loginHa
 authRouter.post('/refresh', refreshHandler);
 authRouter.post('/logout', logoutHandler);
 authRouter.get('/me', requireAuth, meHandler);
+authRouter.get('/google', googleLimiter, googleStartHandler);
+authRouter.get('/google/callback', googleLimiter, googleCallbackHandler);
 authRouter.get(
   '/activation/:token',
   activateLimiter,
@@ -54,4 +65,16 @@ authRouter.post(
   activateLimiter,
   validate({ body: activateAccountSchema }),
   activateAccountHandler,
+);
+authRouter.post(
+  '/password/forgot',
+  forgotPasswordLimiter,
+  validate({ body: forgotPasswordSchema }),
+  forgotPasswordHandler,
+);
+authRouter.post(
+  '/password/reset',
+  resetPasswordLimiter,
+  validate({ body: resetPasswordSchema }),
+  resetPasswordHandler,
 );

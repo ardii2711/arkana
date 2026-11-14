@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 2 — Backend Authentication & User Management
-- **Task aktif:** P2.2 — Account Management (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P2.3 — Google OAuth & Password Recovery
+- **Task aktif:** P2.3 — Google OAuth & Password Recovery (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P2.4 — Authorization
 - **Update terakhir:** 14 November 2026
 
 ## Kesiapan Proyek
@@ -24,21 +24,33 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P1.3 — Infrastruktur Backend:** `DONE` (commit `875ff5c`).
 - **P2.1 — Authentication:** `DONE` (commit `080bf9a`).
 
-## Hasil Berjalan — P2.2
+## Hasil Berjalan
 
-- Schema: enum `AccountTokenType` (`INVITATION`, `PASSWORD_RESET`) dan model `AccountToken` (hash token, TTL, `usedAt`, cascade delete).
-- `src/lib/tokens.ts`: token acak 32 byte + hash SHA-256, dipakai bersama auth dan users.
-- `src/middlewares/require-role.ts`: `requireRole('ADMIN')`, akan dipakai ulang di P2.4.
-- Endpoint Admin: `POST /api/users/invite`, `GET /api/users` (page/limit/search), `PATCH /api/users/:id`.
-- Undangan: User `INVITED`, token 7 hari, email Resend berisi `${CORS_ORIGIN}/activate?token=...`; bila pengiriman gagal, user dihapus kembali.
-- Aktivasi publik: `GET /api/auth/activation/:token`, `POST /api/auth/activate` (Argon2id, token sekali pakai, rate limit).
-- Penonaktifan: `INACTIVE` + hapus semua refresh token; data user tetap. Akun `ADMIN` tidak dapat diubah lewat endpoint ini. Aktivasi manual tanpa password ditolak.
+### P2.2 — Account Management (menunggu commit)
+
+- Schema: enum `AccountTokenType` (`INVITATION`, `PASSWORD_RESET`), model `AccountToken` (hash token, TTL, `usedAt`, cascade delete).
+- `src/lib/tokens.ts`: token acak 32 byte + hash SHA-256; `src/middlewares/require-role.ts`: `requireRole('ADMIN')`.
+- Endpoint Admin: `POST /api/users/invite`, `GET /api/users`, `PATCH /api/users/:id`; aktivasi publik `GET /api/auth/activation/:token`, `POST /api/auth/activate`.
+- Penonaktifan: `INACTIVE` + hapus refresh token, data tetap. Akun `ADMIN` tidak dapat diubah lewat endpoint ini.
+
+### P2.3 — Google OAuth & Password Recovery (menunggu commit)
+
+- Dependency baru: `google-auth-library` 11.3.4.
+- Google: Authorization Code + PKCE (S256) + cookie `state`/verifier 10 menit (path `/api/auth/google`).
+  - `GET /api/auth/google` → redirect ke Google.
+  - `GET /api/auth/google/callback` → verifikasi `state`, tukar code, verifikasi ID token, set cookie sesi, redirect `${CORS_ORIGIN}/`.
+  - Gagal → redirect `${CORS_ORIGIN}/login?error=<kode>` (`oauth_cancelled`, `oauth_invalid_state`, `account_not_registered`, `account_inactive`, `google_account_mismatch`, `oauth_failed`).
+  - Email Google harus terdaftar dan `ACTIVE`; `googleId` di-link otomatis saat login pertama.
+- Reset password: `POST /api/auth/password/forgot` (respons selalu `{ sent: true }`, rate limit 5/15 menit) dan `POST /api/auth/password/reset` (token `PASSWORD_RESET`, TTL 60 menit, sekali pakai, cabut semua refresh token).
+- Tautan email reset: `${CORS_ORIGIN}/reset-password?token=...`.
+- Env opsional `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`; bila kosong endpoint Google membalas 503 `GOOGLE_NOT_CONFIGURED`.
+- `POST /api/auth/login` dan `POST /api/auth/refresh` memakai helper sesi bersama `createSession()`.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
-- Smoke end-to-end (data uji dihapus setelahnya): invite 201 (`INVITED`), list 200, activation info 200, activate 200, replay token 400, login user 200, deactivate 200 (`INACTIVE`), login setelah nonaktif 401, patch Admin 403, invite duplikat 409, list tanpa auth 401.
 
 ### Temuan Di Luar Scope
 
 - Endpoint ubah password user, kirim ulang undangan, dan email notifikasi status akun dipindahkan ke task baru **P2.5** yang sudah disetujui.
+- Cookie sesi memakai `sameSite=lax`. Pada deployment frontend dan backend beda site (Vercel ↔ Render), cookie tidak terkirim pada request XHR lintas site. Perlu keputusan `sameSite=none` + `secure` atau domain induk bersama sebelum P12.
 
 ## Keputusan Teknis Kumulatif
 
@@ -59,9 +71,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Commit P2.2.
-2. Lanjut P2.3 — Google OAuth & Password Recovery (`AccountToken` tipe `PASSWORD_RESET` sudah tersedia).
-3. P2.4 — Authorization, lalu P2.5 — Self-Service Password & Account Notifications (task baru disetujui).
+1. Commit P2.2 dan P2.3.
+2. Isi kredensial Google di `backend/.env` (client ID/secret + redirect URI yang terdaftar di Google Cloud Console) dan `SMTP_*` untuk uji email reset.
+3. Lanjut P2.4 — Authorization.
+4. P2.5 — Self-Service Password & Account Notifications.
 
 ## Aturan Pembaruan
 

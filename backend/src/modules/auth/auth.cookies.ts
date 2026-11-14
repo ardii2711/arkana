@@ -5,6 +5,8 @@ import { ACCESS_TOKEN_TTL_MS, REFRESH_TOKEN_TTL_MS } from './auth.tokens.js';
 
 export const ACCESS_COOKIE = 'arkana_access';
 export const REFRESH_COOKIE = 'arkana_refresh';
+export const OAUTH_STATE_COOKIE = 'arkana_oauth_state';
+export const OAUTH_VERIFIER_COOKIE = 'arkana_oauth_verifier';
 
 const baseOptions: CookieOptions = {
   httpOnly: true,
@@ -18,6 +20,11 @@ const refreshOptions: CookieOptions = {
   path: '/api/auth',
   maxAge: REFRESH_TOKEN_TTL_MS,
 };
+const oauthOptions: CookieOptions = {
+  ...baseOptions,
+  path: '/api/auth/google',
+  maxAge: 10 * 60 * 1000,
+};
 
 export function setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
   res.cookie(ACCESS_COOKIE, accessToken, accessOptions);
@@ -27,4 +34,14 @@ export function setAuthCookies(res: Response, accessToken: string, refreshToken:
 export function clearAuthCookies(res: Response): void {
   res.clearCookie(ACCESS_COOKIE, accessOptions);
   res.clearCookie(REFRESH_COOKIE, refreshOptions);
+}
+
+export function setOAuthCookies(res: Response, state: string, verifier: string): void {
+  res.cookie(OAUTH_STATE_COOKIE, state, oauthOptions);
+  res.cookie(OAUTH_VERIFIER_COOKIE, verifier, oauthOptions);
+}
+
+export function clearOAuthCookies(res: Response): void {
+  res.clearCookie(OAUTH_STATE_COOKIE, oauthOptions);
+  res.clearCookie(OAUTH_VERIFIER_COOKIE, oauthOptions);
 }

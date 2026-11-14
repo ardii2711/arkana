@@ -1,10 +1,16 @@
 import argon2 from 'argon2';
 
+import { env } from '../../config/env.js';
+import { logger } from '../../lib/logger.js';
+import { sendMail } from '../../lib/mailer.js';
 import { prisma } from '../../lib/prisma.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import type { AuthUser } from '../../types/auth.js';
 import { ApiError } from '../../utils/api-error.js';
+import type { GoogleProfile } from './auth.google.js';
 import { REFRESH_TOKEN_TTL_MS, signAccessToken } from './auth.tokens.js';
+
+const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
 
 export interface AuthResult {
   user: AuthUser;
@@ -12,13 +18,15 @@ export interface AuthResult {
   refreshToken: string;
 }
 
-function toAuthUser(user: {
+type SessionUser = {
   id: string;
   name: string;
   email: string;
   role: AuthUser['role'];
   status: AuthUser['status'];
-}): AuthUser {
+};
+
+function toAuthUser(user: SessionUser): AuthUser {
   return { id: user.id, name: user.name, email: user.email, role: user.role, status: user.status };
 }
 
@@ -36,6 +44,10 @@ async function issueTokens(userId: string): Promise<{ accessToken: string; refre
   return { accessToken: await signAccessToken(userId), refreshToken };
 }
 
+export async function createSession(user: SessionUser): Promise<AuthResult> {
+  return { user: toAuthUser(user), ...(await issueTokens(user.id)) };
+}
+
 export async function login(email: string, password: string): Promise<AuthResult> {
   const user = await prisma.user.findUnique({ where: { email } });
 
@@ -49,7 +61,7 @@ export async function login(email: string, password: string): Promise<AuthResult
     throw new ApiError(401, 'INVALID_CREDENTIALS', 'Email atau password salah');
   }
 
-  return { user: toAuthUser(user), ...(await issueTokens(user.id)) };
+  return createSession(user);
 }
 
 export async function rotateSession(refreshToken: string): Promise<AuthResult> {
@@ -72,7 +84,7 @@ export async function rotateSession(refreshToken: string): Promise<AuthResult> {
     throw new ApiError(401, 'INVALID_CREDENTIALS', 'Akun tidak aktif');
   }
 
-  return { user: toAuthUser(stored.user), ...(await issueTokens(stored.userId)) };
+  return createSession(stored.user);
 }
 
 export async function logout(refreshToken: string | undefined): Promise<void> {
@@ -117,5 +129,100 @@ export async function activateAccount(token: string, password: string): Promise<
       data: { passwordHash, status: 'ACTIVE', activatedAt: new Date() },
     }),
     prisma.accountToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+  ]);
+}
+
+export async function loginWithGoogle({ googleId, email }: GoogleProfile): Promise<AuthResult> {
+  const user = await prisma.user.findFirst({
+    where: { OR: [{ googleId }, { email }] },
+  });
+
+  if (!user) {
+    throw new ApiError(403, 'ACCOUNT_NOT_REGISTERED', 'Email belum terdaftar');
+  }
+
+  if (user.status !== 'ACTIVE') {
+    throw new ApiError(403, 'ACCOUNT_INACTIVE', 'Akun tidak aktif');
+  }
+
+  if (user.googleId && user.googleId !== googleId) {
+    throw new ApiError(403, 'GOOGLE_ACCOUNT_MISMATCH', 'Akun Google tidak sesuai');
+  }
+
+  if (!user.googleId) {
+    await prisma.user.update({ where: { id: user.id }, data: { googleId } });
+  }
+
+  return createSession(user);
+}
+
+async function sendPasswordResetEmail(name: string, email: string, token: string): Promise<void> {
+  const link = `${env.CORS_ORIGIN}/reset-password?token=${token}`;
+
+  await sendMail({
+    to: email,
+    subject: 'Reset password ARKANA',
+    text: `Halo ${name},\n\nKami menerima permintaan reset password akun ARKANA Anda. Atur password baru melalui tautan berikut:\n${link}\n\nTautan berlaku 60 menit. Abaikan email ini jika Anda tidak meminta reset password.`,
+    html: `<p>Halo ${name},</p><p>Kami menerima permintaan reset password akun ARKANA Anda. Atur password baru melalui tautan berikut:</p><p><a href="${link}">Atur password baru</a></p><p>Tautan berlaku 60 menit. Abaikan email ini jika Anda tidak meminta reset password.</p>`,
+  });
+}
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user || user.status !== 'ACTIVE') {
+    return;
+  }
+
+  const token = createToken();
+  const tokenHash = hashToken(token);
+
+  await prisma.$transaction([
+    prisma.accountToken.deleteMany({
+      where: { userId: user.id, type: 'PASSWORD_RESET', usedAt: null },
+    }),
+    prisma.accountToken.create({
+      data: {
+        userId: user.id,
+        type: 'PASSWORD_RESET',
+        tokenHash,
+        expiresAt: new Date(Date.now() + PASSWORD_RESET_TTL_MS),
+      },
+    }),
+  ]);
+
+  try {
+    await sendPasswordResetEmail(user.name, user.email, token);
+  } catch (error) {
+    await prisma.accountToken.deleteMany({ where: { tokenHash } });
+    logger.error({ err: error }, 'Gagal mengirim email reset password');
+  }
+}
+
+export async function resetPassword(token: string, password: string): Promise<void> {
+  const record = await prisma.accountToken.findUnique({
+    where: { tokenHash: hashToken(token) },
+    include: { user: true },
+  });
+
+  if (
+    !record ||
+    record.type !== 'PASSWORD_RESET' ||
+    record.usedAt ||
+    record.expiresAt.getTime() <= Date.now() ||
+    record.user.status !== 'ACTIVE'
+  ) {
+    throw new ApiError(400, 'INVALID_TOKEN', 'Tautan reset password tidak valid atau kedaluwarsa');
+  }
+
+  const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
+
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: record.userId }, data: { passwordHash } }),
+    prisma.accountToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+    prisma.accountToken.deleteMany({
+      where: { userId: record.userId, type: 'PASSWORD_RESET', usedAt: null },
+    }),
+    prisma.refreshToken.deleteMany({ where: { userId: record.userId } }),
   ]);
 }
