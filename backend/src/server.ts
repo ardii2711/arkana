@@ -1,6 +1,7 @@
 import { app } from './app.js';
 import { env } from './config/env.js';
 import { logger } from './lib/logger.js';
+import { prisma } from './lib/prisma.js';
 
 const server = app.listen(env.PORT, () => {
   logger.info(`ARKANA API listening on port ${env.PORT}`);
@@ -13,7 +14,8 @@ function shutdown(signal: NodeJS.Signals): void {
       logger.error({ err }, 'Failed to close server');
       process.exit(1);
     }
-    process.exit(0);
+
+    prisma.$disconnect().finally(() => process.exit(0));
   });
 }
 
