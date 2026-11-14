@@ -1,0 +1,14 @@
+{
+  "name": "arkana",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix backend run dev",
+    "build": "npm --prefix backend run build",
+    "start": "npm --prefix backend run start",
+    "lint": "npm --prefix backend run lint",
+    "typecheck": "npm --prefix backend run typecheck",
+    "format": "npm --prefix backend run format",
+    "format:check": "npm --prefix backend run format:check"
+  }
+}
