@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 4 — Backend Personal Document Archive
-- **Task aktif:** P4.1–P4.2 (`IN_PROGRESS`, menunggu migration dan commit)
-- **Task berikutnya:** P5.1 — Finalisasi Format Laporan
+- **Task aktif:** P5.1 — Finalisasi Format Laporan (`IN_PROGRESS`, dokumen, menunggu commit)
+- **Task berikutnya:** P5.2 — Report API
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -30,6 +30,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P3.1 — Work Log:** `DONE` (commit `5ebc9e3`).
 - **P3.2 — Evidence File Management:** `DONE` (commit `bf0cf66`).
 - **P3.3 — Public Evidence Sharing:** `DONE` (commit `41d6ab3`).
+- **P4.1 — Finalisasi Kebutuhan Arsip:** `DONE` (commit `5f3e9e2`).
+- **P4.2 — Archive API:** `DONE` (commit `5f3e9e2`).
 
 ## Hasil Berjalan
 
@@ -54,7 +56,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `POST /api/auth/login` dan `POST /api/auth/refresh` memakai helper sesi bersama `createSession()`.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
 
-### P2.4 — Authorization (menunggu commit)
+### P2.4 — Authorization (DONE)
 
 - Audit seluruh rute yang ada:
   - Publik: `GET /api/health`; `POST /api/auth/login`, `/refresh`, `/logout`, `/activate`, `/password/forgot`, `/password/reset`; `GET /api/auth/activation/:token`, `/google`, `/google/callback`.
@@ -111,7 +113,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `src/utils/file-response.ts`: `sendFileContent` dipakai handler file privat dan publik (`Content-Disposition`, `Content-Length`, `nosniff`, `Cache-Control: private`).
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
 
-### P4.1 — Finalisasi Kebutuhan Arsip (keputusan disetujui)
+### P4.1 — Finalisasi Kebutuhan Arsip (DONE)
 
 - Arsip memakai folder buatan pengguna (bukan enum kategori), maksimal 3 level.
 - Folder bawaan dibuat otomatis saat arsip masih kosong: `SK & Kepegawaian`, `Pendidikan`, `Diklat & Sertifikat`, `Data Pribadi & Keluarga`, `Lainnya`.
@@ -119,7 +121,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Kuota penyimpanan 1 GB per akun; batas 5 MB/file dan format file sama dengan bukti dukung.
 - `PROJECT.md` §5.3 dan `ROADMAP.md` P4.1–P4.2 disesuaikan.
 
-### P4.2 — Archive API (menunggu migration dan commit)
+### P4.2 — Archive API (DONE)
 
 - Schema: `ArchiveFolder` (`parentId` self-relation cascade, unique `[userId, parentId, name]`) dan `ArchiveFile` (`folderId` opsional cascade, metadata + key R2).
 - Refactor bersama: `src/lib/file-rules.ts`, `src/lib/multipart.ts`, `src/lib/file-content.ts`, `src/utils/current-user.ts`, `storageError` di `src/lib/storage.ts`; modul Work Log memakai ulang komponen tersebut.
@@ -131,7 +133,18 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `GET /api/archive/folders` mengembalikan `folders` + `usage { usedBytes, quotaBytes }`.
 - `GET /api/archive/files` mendukung `type=image|pdf|document`, `sort=recent|name|documentDate`, dan setiap item memuat `folderName`.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:file-rules` dan `check:archive-folders` lulus.
-- Migration belum dijalankan; perintah manual ada di bagian Pekerjaan Berikutnya.
+- Migration `20261115033123_add_archive` tersedia di `backend/prisma/migrations`.
+
+### P5.1 — Finalisasi Format Laporan (menunggu commit)
+
+- Satu baris rekap = satu Work Log; nama kegiatan dipakai sebagai Rencana Aksi.
+- `target` dan `realisasi` berupa teks bebas opsional (bukan angka + satuan), sesuai kebutuhan e-Kinerja.
+- Kolom ekspor: `No | Tanggal | Rencana Aksi | Target | Realisasi | Bukti Dukung | Link | Kategori`.
+- Nama bukti dukung: tanpa file `-`; satu file tanpa ekstensi; lebih dari satu digabung `;`, dipotong 255 karakter + `; +N file lainnya`.
+- Link memakai tautan publik permanen kegiatan (`WorkLog.publicToken`).
+- Periode: harian, mingguan Senin–Minggu, bulanan, tahunan, dan rentang khusus; batas dihitung WIB.
+- Ekspor XLSX dan PDF (A4 landscape); pengelompokan dan filter kategori didukung; baris tanpa bukti dukung tetap disertakan dan dapat disaring.
+- Hanya mengubah `PROJECT.md` §5.4 dan `ROADMAP.md` P5.1–P5.2; tidak ada perubahan kode.
 
 ### Temuan Di Luar Scope
 
@@ -166,10 +179,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_archive`.
-2. Commit P4.1–P4.2.
-3. Lanjut P5.1 — Finalisasi Format Laporan (perlu keputusan struktur, periode, format ekspor).
-4. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+1. Commit P5.1 (perubahan dokumen).
+2. Lanjut P5.2 — Report API: migration `add_work_log_target_realisasi`, env `PUBLIC_WEB_URL`, dependency `exceljs` dan `pdfmake`, modul `reports`.
+3. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan
 

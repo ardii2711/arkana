@@ -131,12 +131,23 @@ Mengelola bukti dukung pekerjaan dan arsip pribadi.
 Menyediakan rekap pekerjaan berdasarkan:
 
 - Harian.
-- Mingguan.
+- Mingguan (Senin–Minggu).
 - Bulanan.
 - Tahunan.
 - Rentang tanggal khusus.
 
-Mendukung pengelompokan berdasarkan kategori serta penyusunan informasi Rencana Aksi, target, dan realisasi dengan memanfaatkan data Work Log dan bukti dukung.
+Batas periode dihitung berdasarkan zona waktu Asia/Jakarta (WIB) atas tanggal kegiatan.
+
+Rekap disusun mengikuti kebutuhan pengisian e-Kinerja (myASN) dengan kolom: nomor, tanggal, Rencana Aksi, Target, Realisasi, Bukti Dukung, Link, dan Kategori.
+
+- Rencana Aksi menggunakan nama kegiatan pada Work Log.
+- Target dan Realisasi berupa teks bebas yang diisi pengguna dan bersifat opsional.
+- Bukti Dukung merupakan ringkasan nama file: tanpa file ditampilkan `-`; satu file ditampilkan tanpa ekstensi; lebih dari satu file digabung dengan pemisah `;` dan dipotong 255 karakter disertai jumlah file tersisa.
+- Link menggunakan tautan publik permanen kegiatan.
+- Pengelompokan berdasarkan kategori didukung dan kategori ditampilkan sebagai kolom.
+- Baris tanpa bukti dukung tetap disertakan dan dapat disaring.
+
+Ekspor tersedia dalam format XLSX dan PDF.
 
 ### 5.5. Schedule & Reminder
 

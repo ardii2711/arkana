@@ -145,16 +145,20 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 ### P5.1 — Finalisasi Format Laporan
 
-- Tentukan struktur, isi, periode, dan format ekspor.
+- Tetapkan periode rekap: harian, mingguan (Senin–Minggu), bulanan, tahunan, dan rentang khusus dengan batas WIB.
+- Tetapkan kolom rekap mengikuti kebutuhan e-Kinerja: Rencana Aksi, Target, Realisasi, Bukti Dukung, Link, dan Kategori.
+- Tetapkan field teks opsional `target` dan `realisasi` pada Work Log.
+- Tetapkan aturan ringkasan nama bukti dukung dan tautan publik.
+- Tetapkan format ekspor: XLSX dan PDF (A4 landscape).
 
-**Kriteria penerimaan:** Format dan aturan laporan disetujui.
+**Kriteria penerimaan:** Spesifikasi laporan dan ekspor disetujui serta tercatat di `PROJECT.md`.
 
 ### P5.2 — Report API
 
+- Tambahkan field `target` dan `realisasi` pada Work Log beserta validasi input.
 - Implementasikan rekap harian, mingguan, bulanan, tahunan, dan rentang khusus.
-- Implementasikan pengelompokan berdasarkan kategori.
-- Implementasikan penyusunan Rencana Aksi, target, dan realisasi berdasarkan data pekerjaan.
-- Implementasikan ekspor sesuai format yang disepakati.
+- Implementasikan pengelompokan dan filter kategori.
+- Implementasikan ekspor XLSX dan PDF sesuai kolom dan aturan yang disepakati.
 
 **Kriteria penerimaan:** Hasil laporan sesuai data sumber, periode, dan format yang disetujui.
 
