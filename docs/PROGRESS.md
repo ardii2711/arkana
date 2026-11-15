@@ -4,10 +4,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Status
 
-- **Tahap:** Implementasi Backend
-- **Fase aktif:** Phase 8 — Backend Dashboard & API Finalization
-- **Task aktif:** P8.4 — Backend Hardening Ringan (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P9.1 — Inisialisasi Frontend
+- **Tahap:** Implementasi Frontend
+- **Fase aktif:** Phase 9 — Frontend Foundation
+- **Task aktif:** P9.1 — Inisialisasi Frontend (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P9.2 — Frontend Infrastructure
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -41,6 +41,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P8.1 — Finalisasi Dashboard:** `DONE` (commit `9cab800`).
 - **P8.2 — Dashboard API:** `DONE` (commit `c645a50`).
 - **P8.3 — Backend Verification:** `DONE` (commit `77c454f`).
+- **P8.4 — Backend Hardening Ringan:** `DONE` (commit `0e671f8`).
 
 ## Hasil Berjalan
 
@@ -238,12 +239,24 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa perubahan schema/migration.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:dashboard`, `check:schedule-rules`, `check:report-format`, `check:file-rules`, `check:archive-folders` lulus.
 
-### P8.4 — Backend Hardening Ringan (menunggu commit)
+### P8.4 — Backend Hardening Ringan (DONE)
 
 - `POST /api/auth/refresh` dibatasi 60 permintaan/15 menit per IP dan `POST /api/auth/logout` 30 permintaan/15 menit per IP (`429 RATE_LIMITED`).
 - Pesan global `NOT_FOUND` menjadi "Endpoint tidak ditemukan" dan `VALIDATION_ERROR` menjadi "Permintaan tidak valid".
 - `docs/API.md` diperbarui pada bagian rate limit.
 - Tanpa perubahan schema/migration.
+
+### P9.1 — Inisialisasi Frontend (menunggu commit)
+
+- Scaffold `frontend/` memakai `create-next-app` 16.4.6: App Router, TypeScript, Tailwind CSS 4.3.3, ESLint, folder `src/`, alias `@/*`, template kosong (`--empty`), Cache Components dan React Compiler dimatikan.
+- TypeScript dipin `6.0.3` agar konsisten dengan backend.
+- shadcn/ui 4.23.0 diinisialisasi dengan base `radix` dan preset `nova`: `components.json`, `src/lib/utils.ts`, token CSS di `src/app/globals.css`, komponen `button` sebagai uji.
+- Prettier 3.10.1 + `eslint-config-prettier`; konfigurasi sama dengan backend (`singleQuote`, `printWidth 100`, `trailingComma all`, `endOfLine lf`); script `format`, `format:check`, dan `typecheck` ditambahkan.
+- Halaman awal: `lang="id"`, metadata `ARKANA`, halaman beranda memakai komponen `Button` shadcn.
+- `next.config.ts`: `turbopack.root` diarahkan ke folder `frontend` agar peringatan multi lockfile hilang.
+- Root `package.json`: script `dev:frontend`, `build:frontend`, `lint:frontend`, `typecheck:frontend`, `format:check:frontend`; `.gitignore` menambahkan `.next/`; `README.md` menambahkan struktur dan cara menjalankan frontend.
+- Prasyarat environment: npm 12.2.2 (npm 11.19.1 menolak flag `--allow-scripts` yang dipakai `create-next-app` dan shadcn CLI).
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Build menghasilkan route statis `/` dan `/_not-found`.
 
 ### Temuan Di Luar Scope
 
@@ -275,6 +288,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tautan bukti dukung pada laporan memakai `PUBLIC_WEB_URL` (fallback `CORS_ORIGIN`) + `/p/evidence/{publicToken}`.
 - Zona waktu acuan proyek: WITA (`Asia/Makassar`, UTC+8) untuk rekap laporan dan agenda.
 - Agenda: waktu disimpan UTC, batas hari/filter memakai offset `+08:00`; status default `NOT_STARTED`; tanpa pengulangan dan tanpa pengingat.
+- Frontend: Next.js 16.4.6, React 19.3.0, Tailwind CSS 4.3.3, shadcn/ui 4.23.0 (base `radix`, preset `nova`), TypeScript 6.0.3, npm 12.2.2.
+- Cache Components dan React Compiler dimatikan pada versi awal; data server ditangani TanStack Query, bukan cache server Next.js.
 
 ## Urutan Pengembangan
 
@@ -286,7 +301,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Lanjut P9.1 — Inisialisasi Frontend (backend Phase 1–8 selesai).
+1. Lanjut P9.2 — Frontend Infrastructure (Axios, TanStack Query, Zustand, React Hook Form + Zod, konfigurasi autentikasi dan komunikasi API).
 2. Putuskan topologi domain sebelum P9.2: subdomain satu domain induk (`sameSite=lax`, tanpa kode CSRF) atau lintas site (`sameSite=none` + token CSRF).
 3. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
