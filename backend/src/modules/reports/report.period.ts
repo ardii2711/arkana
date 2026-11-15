@@ -1,6 +1,6 @@
+import { WITA_TIME_ZONE, todayWita } from '../../lib/wita.js';
 import type { ReportPeriod } from './report.schema.js';
 
-const WITA_TIME_ZONE = 'Asia/Makassar';
 const MONTHS = [
   'Januari',
   'Februari',
@@ -20,10 +20,6 @@ export interface ReportRange {
   from: string;
   to: string;
   label: string;
-}
-
-export function todayWita(now: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: WITA_TIME_ZONE }).format(now);
 }
 
 export function formatDateLabel(value: string): string {

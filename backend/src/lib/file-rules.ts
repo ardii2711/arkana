@@ -1,4 +1,5 @@
 export const MAX_FILE_BYTES = 5 * 1024 * 1024;
+export const ARCHIVE_QUOTA_BYTES = 1024 * 1024 * 1024;
 
 const MIME_BY_EXTENSION: Record<string, string> = {
   jpg: 'image/jpeg',

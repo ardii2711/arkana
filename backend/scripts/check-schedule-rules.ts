@@ -5,7 +5,7 @@ import {
   listSchedulesQuerySchema,
   updateScheduleSchema,
 } from '../src/modules/schedules/schedule.schema.js';
-import { endOfDayWita, startOfDayWita } from '../src/modules/schedules/schedule.time.js';
+import { endOfDayWita, startOfDayWita } from '../src/lib/wita.js';
 
 // Batas hari WITA (UTC+8)
 assert.equal(startOfDayWita('2026-11-15').toISOString(), '2026-11-14T16:00:00.000Z');

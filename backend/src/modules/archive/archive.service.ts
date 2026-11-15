@@ -1,6 +1,6 @@
 import type { ArchiveFolder } from '../../generated/prisma/client.js';
 import { readFileContent } from '../../lib/file-content.js';
-import { MAX_FILE_BYTES, isPreviewable } from '../../lib/file-rules.js';
+import { MAX_FILE_BYTES, ARCHIVE_QUOTA_BYTES, isPreviewable } from '../../lib/file-rules.js';
 import { receiveMultipart } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
 import { deleteObjects, storageError } from '../../lib/storage.js';
@@ -23,7 +23,6 @@ import type {
 } from './archive.schema.js';
 import { createFileFieldsSchema } from './archive.schema.js';
 
-const ARCHIVE_QUOTA_BYTES = 1024 * 1024 * 1024;
 const DEFAULT_FOLDERS = [
   'SK & Kepegawaian',
   'Pendidikan',

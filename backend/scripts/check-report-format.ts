@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 
+import { todayWita } from '../src/lib/wita.js';
 import { createReportPdf } from '../src/modules/reports/report.pdf.js';
-import { formatDateLabel, resolveRange, todayWita } from '../src/modules/reports/report.period.js';
+import { formatDateLabel, resolveRange } from '../src/modules/reports/report.period.js';
 import { summarizeEvidence, type ReportData } from '../src/modules/reports/report.rows.js';
 import { buildReportXlsx } from '../src/modules/reports/report.xlsx.js';
 

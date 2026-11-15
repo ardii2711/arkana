@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 8 — Backend Dashboard & API Finalization
-- **Task aktif:** P8.1 — Finalisasi Dashboard (`NOT_STARTED`)
-- **Task berikutnya:** P8.1 — Finalisasi Dashboard
+- **Task aktif:** P8.2 — Dashboard API (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P8.3 — Backend Verification
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -38,6 +38,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P6.2 — Schedule API:** `DONE` (commit `1800e56`, migration `20261115054013_add_schedule`).
 - **P7.1 — Finalisasi Struktur Notes:** `DONE` (commit `752e8a2`).
 - **P7.2 — Notes API:** `DONE` (commit `38e4d1e`, migration `20261115054854_add_note`).
+- **P8.1 — Finalisasi Dashboard:** `DONE` (commit `9cab800`).
 
 ## Hasil Berjalan
 
@@ -210,6 +211,22 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
 - Migration `20261115054854_add_note` sudah dijalankan, di-commit, dan terverifikasi (`prisma migrate status`: database up to date).
 
+### P8.1 — Finalisasi Dashboard (DONE)
+
+- Dashboard User: kartu kegiatan bulan berjalan, kegiatan 7 hari terakhir, jumlah file bukti dukung, pemakaian kuota arsip; agenda hari ini dan maksimal 5 agenda terdekat; maksimal 5 catatan disematkan; grafik kegiatan per kategori bulan berjalan serta tren 7 dan 30 hari; aksi cepat.
+- Dashboard Admin: jumlah akun per status dan undangan yang belum diterima beserta aksi kirim ulang; tanpa data pribadi User.
+- Perhitungan periode memakai WITA; data User dibatasi pada kepemilikan.
+- Hanya mengubah `PROJECT.md` §5.7, §6, §8 dan `ROADMAP.md` P8.1; tidak ada perubahan kode.
+
+### P8.2 — Dashboard API (menunggu commit)
+
+- Endpoint `GET /api/dashboard` (`requireRole('USER')`): `summary { monthWorkLogs, weekWorkLogs, evidenceFiles, archive { usedBytes, quotaBytes } }`, `todaySchedules`, `upcomingSchedules` (maks 5, bukan `CANCELLED`, mulai hari esok), `pinnedNotes` (maks 5), `workLogCategories` (bulan berjalan), `workLogTrend` (30 hari terakhir, hari tanpa kegiatan bernilai 0).
+- Endpoint `GET /api/dashboard/admin` (`requireRole('ADMIN')`): `accounts { active, invited, inactive }` untuk role `USER` dan `pendingInvitations` (akun `INVITED`, terbaru dulu).
+- Refactor WITA: `src/lib/wita.ts` berisi `todayWita`, `startOfDayWita`, `endOfDayWita`, `addDaysWita`, `monthRange`, `dateRangeEndingAt`; `schedule.time.ts` dihapus dan `report.period.ts` memakai helper bersama.
+- `ARCHIVE_QUOTA_BYTES` dipindah ke `lib/file-rules.ts` dan dipakai ulang dashboard.
+- Tanpa perubahan schema/migration.
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:dashboard`, `check:schedule-rules`, `check:report-format`, `check:file-rules`, `check:archive-folders` lulus.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
@@ -249,7 +266,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Lanjut P8.1 — Finalisasi Dashboard (keputusan ringkasan dan statistik sudah disetujui, menunggu pencatatan ke dokumentasi).
+1. Lanjut P8.3 — Backend Verification (audit konsistensi endpoint, response, auth, validasi, error, dan dokumentasi API).
 2. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan

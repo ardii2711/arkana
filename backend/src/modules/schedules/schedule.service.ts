@@ -6,7 +6,7 @@ import type {
   ListSchedulesQuery,
   UpdateScheduleInput,
 } from './schedule.schema.js';
-import { endOfDayWita, startOfDayWita } from './schedule.time.js';
+import { endOfDayWita, startOfDayWita } from '../../lib/wita.js';
 
 function notFound(): ApiError {
   return new ApiError(404, 'NOT_FOUND', 'Agenda tidak ditemukan');

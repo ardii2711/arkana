@@ -21,7 +21,8 @@
     "check:file-rules": "tsx scripts/check-work-log-file-rules.ts",
     "check:archive-folders": "tsx scripts/check-archive-folders.ts",
     "check:report-format": "tsx scripts/check-report-format.ts",
-    "check:schedule-rules": "tsx scripts/check-schedule-rules.ts"
+    "check:schedule-rules": "tsx scripts/check-schedule-rules.ts",
+    "check:dashboard": "tsx scripts/check-dashboard.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1169.0",
