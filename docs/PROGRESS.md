@@ -5,8 +5,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 ## Status
 
 - **Tahap:** Implementasi Backend
-- **Fase aktif:** Phase 7 — Backend Notes
-- **Task aktif:** P7.2 — Notes API (`IN_PROGRESS`, menunggu migration dan commit)
+- **Fase aktif:** Phase 8 — Backend Dashboard & API Finalization
+- **Task aktif:** P8.1 — Finalisasi Dashboard (`NOT_STARTED`)
 - **Task berikutnya:** P8.1 — Finalisasi Dashboard
 - **Update terakhir:** 15 November 2026
 
@@ -37,6 +37,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P6.1 — Finalisasi Kebutuhan Agenda:** `DONE` (commit `a119635`).
 - **P6.2 — Schedule API:** `DONE` (commit `1800e56`, migration `20261115054013_add_schedule`).
 - **P7.1 — Finalisasi Struktur Notes:** `DONE` (commit `752e8a2`).
+- **P7.2 — Notes API:** `DONE` (commit `38e4d1e`, migration `20261115054854_add_note`).
 
 ## Hasil Berjalan
 
@@ -198,7 +199,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa tag, folder, checklist, dan lampiran pada versi awal.
 - Hanya mengubah `PROJECT.md` §5.6 dan `ROADMAP.md` P7.1–P7.2; tidak ada perubahan kode.
 
-### P7.2 — Notes API (menunggu migration dan commit)
+### P7.2 — Notes API (DONE)
 
 - Schema: model `Note` (`content`, `pinned` default `false`, timestamps, index `[userId, pinned, updatedAt]`).
 - Endpoint `requireRole('USER')`:
@@ -207,7 +208,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Validasi: `content` wajib, maks 20.000 karakter; `pinned` boolean; PATCH minimal satu field.
 - Ownership: `updateMany`/`deleteMany` dengan `where { id, userId }`; data pengguna lain → `404 NOT_FOUND`.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
-- Migration belum dijalankan; perintah manual ada di bagian Pekerjaan Berikutnya.
+- Migration `20261115054854_add_note` sudah dijalankan, di-commit, dan terverifikasi (`prisma migrate status`: database up to date).
 
 ### Temuan Di Luar Scope
 
@@ -248,10 +249,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_note`.
-2. Commit P7.2.
-3. Lanjut P8.1 — Finalisasi Dashboard (perlu keputusan ringkasan dan statistik).
-4. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+1. Lanjut P8.1 — Finalisasi Dashboard (keputusan ringkasan dan statistik sudah disetujui, menunggu pencatatan ke dokumentasi).
+2. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan
 
