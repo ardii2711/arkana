@@ -2,6 +2,7 @@ import type { Request, RequestHandler } from 'express';
 
 import { ApiError } from '../../utils/api-error.js';
 import { sendSuccess } from '../../utils/api-response.js';
+import { sendFileContent } from '../../utils/file-response.js';
 import {
   deleteWorkLogFile,
   getWorkLogFileContent,
@@ -73,38 +74,12 @@ export const deleteWorkLogFileHandler: RequestHandler = async (req, res) => {
   res.status(204).end();
 };
 
-function contentDisposition(type: 'inline' | 'attachment', filename: string): string {
-  const fallback = filename.replace(/[^\x20-\x7e]/g, '_').replace(/["\\]/g, '_');
-  return `${type}; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
-}
-
-function previewName(filename: string): string {
-  return filename.replace(/\.[a-z0-9]+$/i, '') + '.jpg';
-}
-
 export const getWorkLogFileContentHandler: RequestHandler = async (req, res) => {
   const { id, fileId } = res.locals.input.params as { id: string; fileId: string };
   const { inline } = res.locals.input.query as { inline?: 'true' | 'false' };
-  const content = await getWorkLogFileContent(currentUser(req).id, id, fileId, inline === 'true');
 
-  res.setHeader('Content-Type', content.contentType);
-  res.setHeader('Content-Length', String(content.size));
-  res.setHeader(
-    'Content-Disposition',
-    contentDisposition(
-      content.inline ? 'inline' : 'attachment',
-      content.converted ? previewName(content.originalName) : content.originalName,
-    ),
+  sendFileContent(
+    res,
+    await getWorkLogFileContent(currentUser(req).id, id, fileId, inline === 'true'),
   );
-  res.setHeader('Cache-Control', 'private, max-age=300');
-
-  if (Buffer.isBuffer(content.body)) {
-    res.end(content.body);
-    return;
-  }
-
-  content.body.on('error', () => {
-    res.destroy();
-  });
-  content.body.pipe(res);
 };

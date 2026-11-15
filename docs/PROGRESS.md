@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 3 — Backend Work Log & Evidence
-- **Task aktif:** P3.2 — Evidence File Management (`IN_PROGRESS`, menunggu migration dan commit)
-- **Task berikutnya:** P3.3 — Public Evidence Sharing
+- **Task aktif:** P3.3 — Public Evidence Sharing (`IN_PROGRESS`, menunggu migration dan commit)
+- **Task berikutnya:** P4.1 — Finalisasi Kebutuhan Arsip
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -28,6 +28,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P2.4 — Authorization:** `DONE` (commit `58e3854`).
 - **P2.5 — Self-Service Password & Account Notifications:** `DONE` (commit `8dd04c7`).
 - **P3.1 — Work Log:** `DONE` (commit `5ebc9e3`).
+- **P3.2 — Evidence File Management:** `DONE` (commit `bf0cf66`).
 
 ## Hasil Berjalan
 
@@ -83,7 +84,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Ownership: query `where { id, userId }`; data pengguna lain → 404.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
 
-### P3.2 — Evidence File Management (menunggu migration dan commit)
+### P3.2 — Evidence File Management (DONE)
 
 - Dependency baru: `busboy` 1.6.0, `@aws-sdk/lib-storage` 3.1169.0, `heic-convert` 2.1.0 (+ `@types`).
 - Schema: model `WorkLogFile` (`key` unik, `originalName`, `mimeType`, `size`, cascade delete, index `workLogId`).
@@ -97,6 +98,17 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `DELETE /api/work-logs/:id` kini menghapus seluruh objek R2 file terkait sebelum record.
 - Kode error: `INVALID_FILE_TYPE`, `FILE_TOO_LARGE`, `TOO_MANY_FILES`, `FILE_REQUIRED`, `INVALID_MULTIPART`, `STORAGE_ERROR` (502), `PREVIEW_UNAVAILABLE` (422).
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `npm run check:file-rules` (assert) lulus.
+
+### P3.3 — Public Evidence Sharing (menunggu migration dan commit)
+
+- Schema: `WorkLog.publicToken` unik, default DB `gen_random_uuid()` (122 bit entropi), baris lama terisi otomatis saat migration.
+- Endpoint publik tanpa auth (prefix `/api/public/work-logs`, rate limit 120/menit per IP):
+  - `GET /api/public/work-logs/:token` — nama kegiatan, tanggal, kategori, uraian, output, dan metadata file.
+  - `GET /api/public/work-logs/:token/files/:fileId/content` — attachment default, `?inline=true` untuk gambar/PDF, HEIC/HEIF dikonversi ke JPEG.
+- Token atau file tidak cocok → `404 NOT_FOUND`. Tidak ada endpoint untuk mengganti/menonaktifkan token.
+- `publicToken` ikut dikembalikan pada API privat Work Log agar frontend dapat menyusun tautan.
+- `src/utils/file-response.ts`: `sendFileContent` dipakai handler file privat dan publik (`Content-Disposition`, `Content-Length`, `nosniff`, `Cache-Control: private`).
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
 - Migration belum dijalankan; perintah manual ada di bagian Pekerjaan Berikutnya.
 
 ### Temuan Di Luar Scope
@@ -119,6 +131,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - File bukti dukung: multipart streaming (`busboy` + `@aws-sdk/lib-storage`) langsung ke R2, object key `work-logs/{userId}/{workLogId}/{uuid}.{ext}`, MIME disimpan dari whitelist ekstensi (bukan dari klien).
 - Penghapusan file dan kegiatan selalu menghapus objek R2 lebih dulu; kegagalan R2 → 502 dan metadata dipertahankan.
 - HEIC/HEIF dikonversi ke JPEG saat preview inline (`heic-convert`), file asli tidak diubah.
+- Tautan publik memakai `WorkLog.publicToken` (UUID v4, unik, permanen, tanpa endpoint penonaktifan); halaman publik tidak menampilkan identitas pemilik.
 
 ## Urutan Pengembangan
 
@@ -130,9 +143,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_work_log_file`.
-2. Commit P3.2.
-3. Lanjut P3.3 — Public Evidence Sharing.
+1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_work_log_public_token`.
+2. Commit P3.3.
+3. Lanjut P4.1 — Finalisasi Kebutuhan Arsip (perlu keputusan kategori, metadata, pencarian, filter).
 4. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan

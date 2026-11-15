@@ -54,6 +54,13 @@ export const workLogFileContentQuerySchema = z.object({
   inline: z.enum(['true', 'false']).optional(),
 });
 
+export const publicWorkLogParamSchema = z.object({ token: z.uuid() });
+
+export const publicWorkLogFileParamSchema = z.object({
+  token: z.uuid(),
+  fileId: z.uuid(),
+});
+
 export type CreateWorkLogInput = z.infer<typeof createWorkLogSchema>;
 export type UpdateWorkLogInput = z.infer<typeof updateWorkLogSchema>;
 export type ListWorkLogsQuery = z.infer<typeof listWorkLogsQuerySchema>;

@@ -78,6 +78,7 @@ model AccountToken {
 
 model WorkLog {
   id           String       @id @default(uuid())
+  publicToken  String       @unique @default(dbgenerated("gen_random_uuid()"))
   userId       String
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   activityDate DateTime     @db.Date

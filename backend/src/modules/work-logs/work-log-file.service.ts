@@ -10,6 +10,7 @@ import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
 import { deleteObjects, downloadObject, uploadObject } from '../../lib/storage.js';
 import { ApiError } from '../../utils/api-error.js';
+import type { FileContent } from '../../utils/file-response.js';
 import {
   MAX_FILE_BYTES,
   MAX_FILES_PER_WORK_LOG,
@@ -22,7 +23,7 @@ import {
 } from './work-log-file.rules.js';
 import { findOwnedWorkLog } from './work-log.service.js';
 
-const fileSelect = {
+export const fileSelect = {
   id: true,
   workLogId: true,
   originalName: true,
@@ -40,7 +41,7 @@ interface FileRow {
   createdAt: Date;
 }
 
-function toItem(file: FileRow) {
+export function toFileItem(file: FileRow) {
   return { ...file, previewable: isPreviewable(file.mimeType) };
 }
 
@@ -181,7 +182,7 @@ export async function listWorkLogFiles(userId: string, workLogId: string) {
     orderBy: { createdAt: 'asc' },
   });
 
-  return files.map(toItem);
+  return files.map(toFileItem);
 }
 
 export async function uploadWorkLogFile(userId: string, workLogId: string, req: Request) {
@@ -223,7 +224,7 @@ export async function uploadWorkLogFile(userId: string, workLogId: string, req: 
       select: fileSelect,
     });
 
-    return toItem(file);
+    return toFileItem(file);
   } catch (error) {
     await deleteObjects([received.key]).catch((cleanupError: unknown) => {
       logger.error({ err: cleanupError, key: received.key }, 'Gagal menghapus objek yatim');
@@ -250,23 +251,16 @@ export async function deleteWorkLogFile(
   await prisma.workLogFile.delete({ where: { id: file.id } });
 }
 
-interface FileContent {
-  body: Readable | Buffer;
-  contentType: string;
-  size: number;
-  originalName: string;
-  inline: boolean;
-  converted: boolean;
-}
+type FileScope =
+  { workLog: { userId: string; id?: string } } | { workLog: { publicToken: string } };
 
-export async function getWorkLogFileContent(
-  userId: string,
-  workLogId: string,
+async function loadFileContent(
   fileId: string,
+  scope: FileScope,
   wantsInline: boolean,
 ): Promise<FileContent> {
   const file = await prisma.workLogFile.findFirst({
-    where: { id: fileId, workLogId, workLog: { userId } },
+    where: { id: fileId, ...scope },
     select: { key: true, originalName: true, mimeType: true, size: true },
   });
 
@@ -308,4 +302,21 @@ export async function getWorkLogFileContent(
     inline,
     converted: false,
   };
+}
+
+export function getWorkLogFileContent(
+  userId: string,
+  workLogId: string,
+  fileId: string,
+  wantsInline: boolean,
+): Promise<FileContent> {
+  return loadFileContent(fileId, { workLog: { userId, id: workLogId } }, wantsInline);
+}
+
+export function getPublicWorkLogFileContent(
+  publicToken: string,
+  fileId: string,
+  wantsInline: boolean,
+): Promise<FileContent> {
+  return loadFileContent(fileId, { workLog: { publicToken } }, wantsInline);
 }

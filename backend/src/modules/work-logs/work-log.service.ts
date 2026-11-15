@@ -11,11 +11,20 @@ import type {
 
 type WorkLogRow = Pick<
   WorkLog,
-  'id' | 'activityDate' | 'name' | 'description' | 'output' | 'category' | 'createdAt' | 'updatedAt'
+  | 'id'
+  | 'publicToken'
+  | 'activityDate'
+  | 'name'
+  | 'description'
+  | 'output'
+  | 'category'
+  | 'createdAt'
+  | 'updatedAt'
 >;
 
 const workLogSelect = {
   id: true,
+  publicToken: true,
   activityDate: true,
   name: true,
   description: true,
