@@ -38,6 +38,8 @@ npm run dev:frontend
 
 Frontend berjalan di `http://localhost:3000` dan memanggil API backend di `http://localhost:4000`.
 
+Salin `frontend/.env.example` menjadi `frontend/.env.local`, lalu sesuaikan `NEXT_PUBLIC_API_URL` bila alamat API berbeda.
+
 ## Perintah Root
 
 | Perintah | Fungsi |

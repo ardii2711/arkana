@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 9 — Frontend Foundation
-- **Task aktif:** P9.1 — Inisialisasi Frontend (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P9.2 — Frontend Infrastructure
+- **Task aktif:** P9.2 — Frontend Infrastructure (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P10.1 — Authentication Interface
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -42,6 +42,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P8.2 — Dashboard API:** `DONE` (commit `c645a50`).
 - **P8.3 — Backend Verification:** `DONE` (commit `77c454f`).
 - **P8.4 — Backend Hardening Ringan:** `DONE` (commit `0e671f8`).
+- **P9.1 — Inisialisasi Frontend:** `DONE` (commit `d3ccab2`).
 
 ## Hasil Berjalan
 
@@ -246,7 +247,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `docs/API.md` diperbarui pada bagian rate limit.
 - Tanpa perubahan schema/migration.
 
-### P9.1 — Inisialisasi Frontend (menunggu commit)
+### P9.1 — Inisialisasi Frontend (DONE)
 
 - Scaffold `frontend/` memakai `create-next-app` 16.4.6: App Router, TypeScript, Tailwind CSS 4.3.3, ESLint, folder `src/`, alias `@/*`, template kosong (`--empty`), Cache Components dan React Compiler dimatikan.
 - TypeScript dipin `6.0.3` agar konsisten dengan backend.
@@ -258,14 +259,27 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Prasyarat environment: npm 12.2.2 (npm 11.19.1 menolak flag `--allow-scripts` yang dipakai `create-next-app` dan shadcn CLI).
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Build menghasilkan route statis `/` dan `/_not-found`.
 
+### P9.2 — Frontend Infrastructure (menunggu commit)
+
+- Dependency baru: `axios` 1.21.1, `@tanstack/react-query` 5.107.1, `zustand` 5.1.0, `react-hook-form` 7.92.0, `@hookform/resolvers` 7.0.6, `zod` 4.6.7 (sama dengan backend).
+- `src/config/env.ts`: `NEXT_PUBLIC_API_URL` divalidasi Zod (URL absolut), gagal → error jelas saat modul dimuat.
+- `src/lib/api.ts`: instance Axios terpusat (`baseURL` env, `withCredentials: true`). Interceptor 401 → `POST /auth/refresh` sekali dengan single-flight (request lain menunggu promise yang sama), lalu retry request asli satu kali (`_retry`). Refresh dilewati untuk `/auth/login`, `/auth/refresh`, `/auth/logout`, dan request yang sudah di-retry; bila refresh gagal, error 401 asli dilempar.
+- `src/lib/api-error.ts`: `ApiError` (`code`, `message`, `status`, `details`) + `toApiError` yang menormalkan envelope backend, kegagalan jaringan (`NETWORK_ERROR`/`TIMEOUT`), dan error tak dikenal.
+- `src/types/api.ts`: tipe `ApiSuccess<T>` dan `ApiFailure`.
+- `src/components/shared/query-provider.tsx`: `QueryClient` di `useState`, `retry: 1`, `staleTime: 30s`, `refetchOnWindowFocus: false`; `app/layout.tsx` membungkus children dengan provider.
+- `frontend/.env.example` + `README.md` (cara menyalin ke `.env.local`); `.gitignore` frontend menambahkan `!.env.example` agar file contoh tetap ter-commit.
+- Zustand hanya di-install; store pertama dibuat saat P10.2 membutuhkan state UI, agar tidak ada kode tanpa konsumen.
+- Belum ada check runner otomatis untuk frontend; logika interceptor diverifikasi lewat `typecheck`, `lint`, dan `build`, lalu pengujian fungsional P12.1.
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
 - Akun yang hanya login lewat Google belum dapat menetapkan password sendiri; harus lewat alur reset password.
-- Cookie sesi memakai `sameSite=lax`. Pada deployment frontend dan backend beda site (Vercel ↔ Render), cookie tidak terkirim pada request XHR lintas site. Perlu keputusan `sameSite=none` + `secure` atau domain induk bersama sebelum P12.
+- ~~Cookie sesi memakai `sameSite=lax`; pada deployment beda site cookie tidak terkirim.~~ Diputuskan: frontend dan backend memakai subdomain pada satu domain induk (same site), sehingga `sameSite=lax` tetap dipakai.
 - `busboy` mendekode nama file multipart sebagai latin1; nama file non-ASCII berpotensi tampil tidak sesuai. Perlu normalisasi bila diperlukan.
 - Pengingat dan notifikasi agenda ditangguhkan: perlu keputusan kanal (email/in-app), mekanisme penjadwalan, dan penanganan multi-instance sebelum dijadwalkan sebagai task roadmap baru.
-- Perlindungan CSRF belum diimplementasikan; mitigasi saat ini hanya `sameSite=lax`. Bila cookie harus `sameSite=none` untuk deployment lintas site, token CSRF wajib ditambahkan sebelum P12.
+- ~~Perlindungan CSRF belum diimplementasikan.~~ Mitigasi saat ini `sameSite=lax` dan topologi same-site (subdomain satu domain induk); token CSRF belum diperlukan selama topologi ini dipakai.
 - Health check belum memeriksa koneksi database maupun R2; relevan untuk verifikasi deployment di P12.
 
 ## Keputusan Teknis Kumulatif
@@ -290,6 +304,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Agenda: waktu disimpan UTC, batas hari/filter memakai offset `+08:00`; status default `NOT_STARTED`; tanpa pengulangan dan tanpa pengingat.
 - Frontend: Next.js 16.4.6, React 19.3.0, Tailwind CSS 4.3.3, shadcn/ui 4.23.0 (base `radix`, preset `nova`), TypeScript 6.0.3, npm 12.2.2.
 - Cache Components dan React Compiler dimatikan pada versi awal; data server ditangani TanStack Query, bukan cache server Next.js.
+- API client frontend: satu instance Axios terpusat dengan `withCredentials` dan interceptor refresh single-flight; server state hanya di TanStack Query, Zustand untuk state UI saat dibutuhkan.
+- Env publik frontend `NEXT_PUBLIC_API_URL` wajib dan divalidasi Zod; `.env.local` tidak di-commit, hanya `.env.example`.
+- Topologi domain: satu domain induk dengan subdomain terpisah untuk frontend dan backend (opsi A). Cookie `sameSite=lax` dipertahankan; token CSRF tidak diperlukan selama topologi ini dipakai.
 
 ## Urutan Pengembangan
 
@@ -301,9 +318,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Lanjut P9.2 — Frontend Infrastructure (Axios, TanStack Query, Zustand, React Hook Form + Zod, konfigurasi autentikasi dan komunikasi API).
-2. Putuskan topologi domain sebelum P9.2: subdomain satu domain induk (`sameSite=lax`, tanpa kode CSRF) atau lintas site (`sameSite=none` + token CSRF).
-3. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+1. Lanjut P10.1 — Authentication Interface (login email/password, login Google, aktivasi akun, reset password, pengelolaan sesi) di atas API client P9.2.
+2. Isi `frontend/.env.local` (`NEXT_PUBLIC_API_URL`) dan kredensial Google + `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+3. Sesuaikan env deployment dengan topologi subdomain satu domain induk: backend `CORS_ORIGIN` = URL frontend, `PUBLIC_WEB_URL` = URL frontend, `GOOGLE_REDIRECT_URI` = URL backend + `/api/auth/google/callback`; frontend `NEXT_PUBLIC_API_URL` = URL backend + `/api`.
 
 ## Aturan Pembaruan
 
