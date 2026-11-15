@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 
 import { createReportPdf } from '../src/modules/reports/report.pdf.js';
-import { formatDateLabel, resolveRange, todayWib } from '../src/modules/reports/report.period.js';
+import { formatDateLabel, resolveRange, todayWita } from '../src/modules/reports/report.period.js';
 import { summarizeEvidence, type ReportData } from '../src/modules/reports/report.rows.js';
 import { buildReportXlsx } from '../src/modules/reports/report.xlsx.js';
 
@@ -35,8 +35,9 @@ assert.match(summary, /; \+\d+ file lainnya$/);
 const longName = summarizeEvidence([`${'x'.repeat(400)}.pdf`]);
 assert.ok(longName.length <= 255, `nama panjang ${longName.length} karakter`);
 
-// Periode (WIB, minggu Senin–Minggu)
-assert.equal(todayWib(new Date('2026-11-14T18:00:00.000Z')), '2026-11-15');
+// Periode (WITA, minggu Senin–Minggu)
+assert.equal(todayWita(new Date('2026-11-14T16:30:00.000Z')), '2026-11-15');
+assert.equal(todayWita(new Date('2026-11-14T15:59:00.000Z')), '2026-11-14');
 assert.equal(formatDateLabel('2026-11-09'), '9 November 2026');
 
 assert.deepEqual(resolveRange({ period: 'daily', date: '2026-11-15' }), {
@@ -70,7 +71,7 @@ const report: ReportData = {
   periodLabel: '9 November 2026 – 15 November 2026',
   from: '2026-11-09',
   to: '2026-11-15',
-  generatedAt: '15 November 2026 20:00 WIB',
+  generatedAt: '15 November 2026 20:00 WITA',
   rows: [
     {
       no: 1,

@@ -1,6 +1,6 @@
 import type { ReportPeriod } from './report.schema.js';
 
-const WIB_TIME_ZONE = 'Asia/Jakarta';
+const WITA_TIME_ZONE = 'Asia/Makassar';
 const MONTHS = [
   'Januari',
   'Februari',
@@ -22,8 +22,8 @@ export interface ReportRange {
   label: string;
 }
 
-export function todayWib(now: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: WIB_TIME_ZONE }).format(now);
+export function todayWita(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: WITA_TIME_ZONE }).format(now);
 }
 
 export function formatDateLabel(value: string): string {
@@ -34,13 +34,13 @@ export function formatDateLabel(value: string): string {
   return `${day} ${MONTHS[month - 1]} ${year}`;
 }
 
-export function formatDateTimeWib(now: Date = new Date()): string {
-  return `${formatDateLabel(todayWib(now))} ${new Intl.DateTimeFormat('en-GB', {
-    timeZone: WIB_TIME_ZONE,
+export function formatDateTimeWita(now: Date = new Date()): string {
+  return `${formatDateLabel(todayWita(now))} ${new Intl.DateTimeFormat('en-GB', {
+    timeZone: WITA_TIME_ZONE,
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }).format(now)} WIB`;
+  }).format(now)} WITA`;
 }
 
 function parseDate(value: string): Date {
@@ -71,7 +71,7 @@ export function resolveRange(input: {
     return { from, to, label: rangeLabel(from, to) };
   }
 
-  const base = input.date ?? todayWib();
+  const base = input.date ?? todayWita();
   const year = base.slice(0, 4);
   const month = base.slice(5, 7);
 

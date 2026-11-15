@@ -6,7 +6,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 5 — Backend Performance Report
-- **Task aktif:** P5.2 — Report API (`IN_PROGRESS`, menunggu migration dan commit)
+- **Task aktif:** P6.1 — Finalisasi Kebutuhan Agenda (`NOT_STARTED`, menunggu keputusan)
 - **Task berikutnya:** P6.1 — Finalisasi Kebutuhan Agenda
 - **Update terakhir:** 15 November 2026
 
@@ -33,6 +33,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P4.1 — Finalisasi Kebutuhan Arsip:** `DONE` (commit `5f3e9e2`).
 - **P4.2 — Archive API:** `DONE` (commit `5f3e9e2`).
 - **P5.1 — Finalisasi Format Laporan:** `DONE` (commit `93b198c`).
+- **P5.2 — Report API:** `DONE` (commit `a1dcf6a`, migration `20261115042939_add_work_log_target_realisasi`).
 
 ## Hasil Berjalan
 
@@ -143,11 +144,11 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Kolom ekspor: `No | Tanggal | Rencana Aksi | Target | Realisasi | Bukti Dukung | Link | Kategori`.
 - Nama bukti dukung: tanpa file `-`; satu file tanpa ekstensi; lebih dari satu digabung `;`, dipotong 255 karakter + `; +N file lainnya`.
 - Link memakai tautan publik permanen kegiatan (`WorkLog.publicToken`).
-- Periode: harian, mingguan Senin–Minggu, bulanan, tahunan, dan rentang khusus; batas dihitung WIB.
+- Periode: harian, mingguan Senin–Minggu, bulanan, tahunan, dan rentang khusus; batas dihitung WITA.
 - Ekspor XLSX dan PDF (A4 landscape); pengelompokan dan filter kategori didukung; baris tanpa bukti dukung tetap disertakan dan dapat disaring.
 - Hanya mengubah `PROJECT.md` §5.4 dan `ROADMAP.md` P5.1–P5.2; tidak ada perubahan kode.
 
-### P5.2 — Report API (menunggu migration dan commit)
+### P5.2 — Report API (DONE)
 
 - Schema: `WorkLog.target` dan `WorkLog.realisasi` (`String?`, maks 100 karakter, teks bebas sesuai e-Kinerja).
 - API Work Log menerima `target` dan `realisasi` pada create/update; string kosong dinormalisasi menjadi `null`; keduanya ikut dikembalikan pada respons.
@@ -155,7 +156,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Dependency baru: `exceljs` 4.4.0 (XLSX), `pdfkit` 0.20.2 + `@types/pdfkit` 0.17.7 (PDF). `tsconfig` menambahkan `esModuleInterop` agar default import paket CommonJS valid.
 - Endpoint `GET /api/reports/work-logs/export` (`requireRole('USER')`, filter `userId`):
   - Query: `format=xlsx|pdf` (default `xlsx`), `period=daily|weekly|monthly|yearly|custom`, `date`, `from`+`to` (wajib dan hanya untuk `custom`), `category`, `groupBy=category`, `onlyWithEvidence=true`.
-  - Periode dihitung WIB (`Asia/Jakarta`); minggu Senin–Minggu; bulanan/tahunan memakai batas kalender.
+  - Periode dihitung WITA (`Asia/Makassar`); minggu Senin–Minggu; bulanan/tahunan memakai batas kalender.
   - Response stream dengan `Content-Disposition: attachment` dan nama `rekap-kinerja-<from>[_<to>].<ext>`.
 - `report.rows.ts`: label kategori Indonesia, ringkasan bukti dukung (0 file `-`, 1 file tanpa ekstensi, lebih dari satu digabung `;`, maks 255 karakter + `; +N file lainnya`).
 - `report.period.ts`: resolusi rentang periode + label tanggal Indonesia.
@@ -163,7 +164,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `report.pdf.ts`: A4 landscape, tabel dengan pengukuran tinggi baris, header berulang tiap halaman.
 - Error pembuatan XLSX → `500 EXPORT_FAILED`; kegagalan stream PDF memutus respons dan dicatat di log.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:report-format`, `check:file-rules`, `check:archive-folders` lulus.
-- Migration belum dijalankan; perintah manual ada di bagian Pekerjaan Berikutnya.
+- Migration `20261115042939_add_work_log_target_realisasi` sudah dijalankan dan di-commit.
 
 ### Temuan Di Luar Scope
 
@@ -190,6 +191,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Rekap kinerja memakai satu baris per Work Log; `target` dan `realisasi` berupa teks bebas opsional, bukan angka + satuan.
 - Ekspor laporan: `exceljs` untuk XLSX dan `pdfkit` (A4 landscape) untuk PDF; tanpa headless browser.
 - Tautan bukti dukung pada laporan memakai `PUBLIC_WEB_URL` (fallback `CORS_ORIGIN`) + `/p/evidence/{publicToken}`.
+- Zona waktu acuan proyek: WITA (`Asia/Makassar`, UTC+8) untuk rekap laporan dan agenda.
 
 ## Urutan Pengembangan
 
@@ -201,10 +203,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_work_log_target_realisasi`.
-2. Commit P5.2.
-3. Lanjut P6.1 — Finalisasi Kebutuhan Agenda (perlu keputusan jenis agenda, pengulangan, waktu, dan notifikasi).
-4. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+1. Lanjut P6.1 — Finalisasi Kebutuhan Agenda (perlu keputusan jenis agenda, pengulangan, waktu, dan notifikasi).
+2. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan
 

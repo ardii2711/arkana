@@ -136,7 +136,7 @@ Menyediakan rekap pekerjaan berdasarkan:
 - Tahunan.
 - Rentang tanggal khusus.
 
-Batas periode dihitung berdasarkan zona waktu Asia/Jakarta (WIB) atas tanggal kegiatan.
+Batas periode dihitung berdasarkan zona waktu Asia/Makassar (WITA) atas tanggal kegiatan.
 
 Rekap disusun mengikuti kebutuhan pengisian e-Kinerja (myASN) dengan kolom: nomor, tanggal, Rencana Aksi, Target, Realisasi, Bukti Dukung, Link, dan Kategori.
 

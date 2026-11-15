@@ -145,7 +145,7 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 ### P5.1 — Finalisasi Format Laporan
 
-- Tetapkan periode rekap: harian, mingguan (Senin–Minggu), bulanan, tahunan, dan rentang khusus dengan batas WIB.
+- Tetapkan periode rekap: harian, mingguan (Senin–Minggu), bulanan, tahunan, dan rentang khusus dengan batas WITA.
 - Tetapkan kolom rekap mengikuti kebutuhan e-Kinerja: Rencana Aksi, Target, Realisasi, Bukti Dukung, Link, dan Kategori.
 - Tetapkan field teks opsional `target` dan `realisasi` pada Work Log.
 - Tetapkan aturan ringkasan nama bukti dukung dan tautan publik.

@@ -1,7 +1,7 @@
 import { env } from '../../config/env.js';
 import { prisma } from '../../lib/prisma.js';
 import type { AuthUser } from '../../types/auth.js';
-import { formatDateTimeWib, resolveRange } from './report.period.js';
+import { formatDateTimeWita, resolveRange } from './report.period.js';
 import { CATEGORY_LABELS, summarizeEvidence, type ReportData } from './report.rows.js';
 import type { ReportExportQuery } from './report.schema.js';
 
@@ -46,7 +46,7 @@ export async function buildReport(user: AuthUser, query: ReportExportQuery): Pro
     periodLabel: range.label,
     from: range.from,
     to: range.to,
-    generatedAt: formatDateTimeWib(),
+    generatedAt: formatDateTimeWita(),
     rows: workLogs.map((workLog, index) => ({
       no: index + 1,
       date: workLog.activityDate.toISOString().slice(0, 10),
