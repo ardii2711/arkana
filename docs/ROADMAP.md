@@ -208,9 +208,14 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 ### P8.1 — Finalisasi Dashboard
 
-- Tentukan ringkasan, statistik, dan informasi yang ditampilkan.
+- Tetapkan kartu ringkasan User: kegiatan bulan berjalan, kegiatan 7 hari terakhir, jumlah file bukti dukung, dan pemakaian kuota arsip.
+- Tetapkan agenda hari ini, maksimal 5 agenda terdekat, dan maksimal 5 catatan disematkan.
+- Tetapkan grafik kegiatan per kategori bulan berjalan serta tren 7 hari dan 30 hari terakhir.
+- Tetapkan aksi cepat: catat kegiatan, tambah agenda, dan tambah catatan.
+- Tetapkan dashboard Admin: jumlah akun per status dan undangan yang belum diterima beserta aksi kirim ulang, tanpa data pribadi User.
+- Tetapkan perhitungan periode memakai WITA dan pembatasan data pada kepemilikan pengguna.
 
-**Kriteria penerimaan:** Kebutuhan dashboard disetujui.
+**Kriteria penerimaan:** Kebutuhan dashboard User dan Admin disetujui serta tercatat di `PROJECT.md`.
 
 ### P8.2 — Dashboard API
 

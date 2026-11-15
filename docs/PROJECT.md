@@ -193,6 +193,30 @@ Ketentuan:
 - Tidak tersedia tag, folder, checklist, maupun lampiran pada versi awal.
 - Catatan bersifat privat dan hanya dapat diakses pemiliknya.
 
+### 5.7. Dashboard
+
+Menampilkan ringkasan aktivitas dan akses cepat. Isi dashboard berbeda untuk User dan Admin.
+
+**Dashboard User:**
+
+- Kartu ringkasan: jumlah kegiatan bulan berjalan, jumlah kegiatan 7 hari terakhir, jumlah file bukti dukung yang tersimpan, dan pemakaian kuota arsip terhadap batas 1 GB.
+- Agenda hari ini dan maksimal 5 agenda terdekat berikutnya.
+- Maksimal 5 catatan yang disematkan, diurutkan berdasarkan pembaruan terbaru.
+- Grafik jumlah kegiatan per kategori pada bulan berjalan serta tren kegiatan 7 hari dan 30 hari terakhir.
+- Aksi cepat: catat kegiatan, tambah agenda, dan tambah catatan.
+
+**Dashboard Admin:**
+
+- Ringkasan jumlah akun per status: Aktif, Diundang, dan Nonaktif.
+- Daftar undangan yang belum diterima beserta aksi kirim ulang undangan.
+- Tidak menampilkan data pribadi User.
+
+**Ketentuan:**
+
+- Seluruh data User dibatasi pada data milik pengguna yang sedang login.
+- Perhitungan periode dan hari mengikuti zona waktu WITA (Asia/Makassar).
+- Grafik hanya bersifat ringkasan; tidak menyediakan analisis atau rekomendasi otomatis.
+
 ## 6. Business Rules
 
 - Setiap aktivitas pekerjaan dicatat sebagai satu record tersendiri.
@@ -206,6 +230,7 @@ Ketentuan:
 - Tautan bukti dukung hanya membuka informasi aktivitas yang secara khusus dibagikan oleh pemiliknya, bukan seluruh penyimpanan.
 - Tautan publik bersifat permanen selama aplikasi dan data terkait tersedia.
 - Penonaktifan akun tidak otomatis menghilangkan riwayat pekerjaan dan dokumen pengguna.
+- Dashboard hanya merangkum data milik pengguna yang sedang login; Admin tidak memperoleh ringkasan konten pribadi User.
 
 ## 7. Scope & Constraints
 
@@ -224,8 +249,8 @@ Batasan dapat ditinjau kembali jika terdapat kebutuhan dan persetujuan yang jela
 
 Hal-hal yang masih perlu dibahas:
 
-- Dashboard, statistik, pencarian, dan filter.
+- Pencarian dan filter lintas modul.
 
-Keputusan yang sudah ditetapkan untuk kategori arsip, format ekspor laporan, struktur Notes, serta backup dan pemulihan data dicatat pada `ROADMAP.md`. Kanal notifikasi belum ditetapkan dan ditangguhkan bersama fitur pengingat.
+Keputusan yang sudah ditetapkan untuk dashboard, kategori arsip, format ekspor laporan, struktur Notes, serta backup dan pemulihan data dicatat pada `ROADMAP.md`. Kanal notifikasi belum ditetapkan dan ditangguhkan bersama fitur pengingat.
 
 Detail teknologi, struktur database, API, autentikasi, otorisasi, penyimpanan file, dan deployment dibahas dalam `ARCHITECTURE.md`.
