@@ -18,7 +18,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "check:file-rules": "tsx scripts/check-work-log-file-rules.ts"
+    "check:file-rules": "tsx scripts/check-work-log-file-rules.ts",
+    "check:archive-folders": "tsx scripts/check-archive-folders.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1169.0",

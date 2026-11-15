@@ -1,7 +1,6 @@
 import type { WorkLog } from '../../generated/prisma/client.js';
-import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
-import { deleteObjects } from '../../lib/storage.js';
+import { deleteObjects, storageError } from '../../lib/storage.js';
 import { ApiError } from '../../utils/api-error.js';
 import type {
   CreateWorkLogInput,
@@ -146,9 +145,6 @@ export async function deleteWorkLog(userId: string, id: string): Promise<void> {
     throw notFound();
   }
 
-  await deleteObjects(workLog.files.map((file) => file.key)).catch((error: unknown) => {
-    logger.error({ err: error, workLogId: workLog.id }, 'Gagal menghapus file kegiatan dari R2');
-    throw new ApiError(502, 'STORAGE_ERROR', 'Penyimpanan file sedang bermasalah');
-  });
+  await deleteObjects(workLog.files.map((file) => file.key)).catch(storageError);
   await prisma.workLog.delete({ where: { id: workLog.id } });
 }

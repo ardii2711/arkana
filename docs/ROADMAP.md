@@ -127,16 +127,15 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 ### P4.1 — Finalisasi Kebutuhan Arsip
 
-- Tentukan kategori dan pengelompokan dokumen.
-- Tentukan metadata, pencarian, dan filter.
+- Tentukan struktur pengelompokan dokumen (folder), metadata, pencarian, dan filter.
 
 **Kriteria penerimaan:** Struktur dan aturan arsip disetujui.
 
 ### P4.2 — Archive API
 
-- Implementasikan model dan CRUD arsip.
-- Implementasikan upload, preview, download, dan penghapusan.
-- Terapkan validasi dan kepemilikan data.
+- Implementasikan model dan CRUD folder arsip beserta folder bawaan.
+- Implementasikan CRUD dokumen, upload, preview, download, dan penghapusan.
+- Terapkan batas kedalaman folder, kuota penyimpanan, validasi, dan kepemilikan data.
 
 **Kriteria penerimaan:** API arsip berjalan dan dokumen tetap privat.
 

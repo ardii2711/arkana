@@ -5,9 +5,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 ## Status
 
 - **Tahap:** Implementasi Backend
-- **Fase aktif:** Phase 3 — Backend Work Log & Evidence
-- **Task aktif:** P3.3 — Public Evidence Sharing (`IN_PROGRESS`, menunggu migration dan commit)
-- **Task berikutnya:** P4.1 — Finalisasi Kebutuhan Arsip
+- **Fase aktif:** Phase 4 — Backend Personal Document Archive
+- **Task aktif:** P4.1–P4.2 (`IN_PROGRESS`, menunggu migration dan commit)
+- **Task berikutnya:** P5.1 — Finalisasi Format Laporan
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -29,6 +29,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P2.5 — Self-Service Password & Account Notifications:** `DONE` (commit `8dd04c7`).
 - **P3.1 — Work Log:** `DONE` (commit `5ebc9e3`).
 - **P3.2 — Evidence File Management:** `DONE` (commit `bf0cf66`).
+- **P3.3 — Public Evidence Sharing:** `DONE` (commit `41d6ab3`).
 
 ## Hasil Berjalan
 
@@ -99,7 +100,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Kode error: `INVALID_FILE_TYPE`, `FILE_TOO_LARGE`, `TOO_MANY_FILES`, `FILE_REQUIRED`, `INVALID_MULTIPART`, `STORAGE_ERROR` (502), `PREVIEW_UNAVAILABLE` (422).
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `npm run check:file-rules` (assert) lulus.
 
-### P3.3 — Public Evidence Sharing (menunggu migration dan commit)
+### P3.3 — Public Evidence Sharing (DONE)
 
 - Schema: `WorkLog.publicToken` unik, default DB `gen_random_uuid()` (122 bit entropi), baris lama terisi otomatis saat migration.
 - Endpoint publik tanpa auth (prefix `/api/public/work-logs`, rate limit 120/menit per IP):
@@ -109,6 +110,27 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `publicToken` ikut dikembalikan pada API privat Work Log agar frontend dapat menyusun tautan.
 - `src/utils/file-response.ts`: `sendFileContent` dipakai handler file privat dan publik (`Content-Disposition`, `Content-Length`, `nosniff`, `Cache-Control: private`).
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
+
+### P4.1 — Finalisasi Kebutuhan Arsip (keputusan disetujui)
+
+- Arsip memakai folder buatan pengguna (bukan enum kategori), maksimal 3 level.
+- Folder bawaan dibuat otomatis saat arsip masih kosong: `SK & Kepegawaian`, `Pendidikan`, `Diklat & Sertifikat`, `Data Pribadi & Keluarga`, `Lainnya`.
+- Satu dokumen = satu file + metadata `name`, `description` opsional, `documentDate` opsional.
+- Kuota penyimpanan 1 GB per akun; batas 5 MB/file dan format file sama dengan bukti dukung.
+- `PROJECT.md` §5.3 dan `ROADMAP.md` P4.1–P4.2 disesuaikan.
+
+### P4.2 — Archive API (menunggu migration dan commit)
+
+- Schema: `ArchiveFolder` (`parentId` self-relation cascade, unique `[userId, parentId, name]`) dan `ArchiveFile` (`folderId` opsional cascade, metadata + key R2).
+- Refactor bersama: `src/lib/file-rules.ts`, `src/lib/multipart.ts`, `src/lib/file-content.ts`, `src/utils/current-user.ts`, `storageError` di `src/lib/storage.ts`; modul Work Log memakai ulang komponen tersebut.
+- Endpoint `requireRole('USER')`:
+  - `GET/POST /api/archive/folders`, `PATCH/DELETE /api/archive/folders/:id` (`?recursive=true`).
+  - `GET/POST /api/archive/files`, `GET/PATCH/DELETE /api/archive/files/:id`, `GET /api/archive/files/:id/content`.
+- Aturan folder: kedalaman maks 3, nama unik per induk (`409 FOLDER_NAME_TAKEN`), pindah folder cegah siklus (`INVALID_FOLDER_MOVE`) dan batas kedalaman, hapus folder berisi ditolak `409 FOLDER_NOT_EMPTY` kecuali rekursif.
+- Aturan file: kuota 1 GB (`STORAGE_QUOTA_EXCEEDED`), objek R2 dihapus sebelum metadata, `previewable` dihitung dari MIME, HEIC/HEIF dikonversi saat inline.
+- `GET /api/archive/folders` mengembalikan `folders` + `usage { usedBytes, quotaBytes }`.
+- `GET /api/archive/files` mendukung `type=image|pdf|document`, `sort=recent|name|documentDate`, dan setiap item memuat `folderName`.
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:file-rules` dan `check:archive-folders` lulus.
 - Migration belum dijalankan; perintah manual ada di bagian Pekerjaan Berikutnya.
 
 ### Temuan Di Luar Scope
@@ -132,6 +154,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Penghapusan file dan kegiatan selalu menghapus objek R2 lebih dulu; kegagalan R2 → 502 dan metadata dipertahankan.
 - HEIC/HEIF dikonversi ke JPEG saat preview inline (`heic-convert`), file asli tidak diubah.
 - Tautan publik memakai `WorkLog.publicToken` (UUID v4, unik, permanen, tanpa endpoint penonaktifan); halaman publik tidak menampilkan identitas pemilik.
+- Arsip memakai folder user-created maksimal 3 level, folder bawaan saat arsip kosong, satu file per dokumen, kuota 1 GB per akun.
 
 ## Urutan Pengembangan
 
@@ -143,9 +166,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_work_log_public_token`.
-2. Commit P3.3.
-3. Lanjut P4.1 — Finalisasi Kebutuhan Arsip (perlu keputusan kategori, metadata, pencarian, filter).
+1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_archive`.
+2. Commit P4.1–P4.2.
+3. Lanjut P5.1 — Finalisasi Format Laporan (perlu keputusan struktur, periode, format ekspor).
 4. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan

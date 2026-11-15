@@ -3,6 +3,8 @@ import { Upload } from '@aws-sdk/lib-storage';
 import type { Readable } from 'node:stream';
 
 import { env } from '../config/env.js';
+import { ApiError } from '../utils/api-error.js';
+import { logger } from './logger.js';
 
 export const storage = new S3Client({
   region: 'auto',
@@ -47,4 +49,9 @@ export async function deleteObjects(keys: string[]): Promise<void> {
       Delete: { Objects: keys.map((key) => ({ Key: key })), Quiet: true },
     }),
   );
+}
+
+export function storageError(error: unknown): never {
+  logger.error({ err: error }, 'Operasi R2 gagal');
+  throw new ApiError(502, 'STORAGE_ERROR', 'Penyimpanan file sedang bermasalah');
 }

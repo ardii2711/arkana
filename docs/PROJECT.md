@@ -117,6 +117,12 @@ Mengelola bukti dukung pekerjaan dan arsip pribadi.
 **Arsip pribadi:**
 
 - Menyimpan SK CPNS/PNS, sertifikat pelatihan, dokumen kepegawaian, dan dokumen pribadi lainnya.
+- Dokumen dikelompokkan menggunakan folder yang dibuat pengguna, maksimal 3 level.
+- Folder bawaan disiapkan saat arsip pertama kali digunakan dan dapat diubah atau dihapus pengguna.
+- Setiap dokumen menyimpan nama, deskripsi opsional, tanggal dokumen opsional, serta satu file.
+- Mendukung pencarian berdasarkan nama atau deskripsi, filter jenis berkas, serta pengurutan berdasarkan waktu unggah, nama, atau tanggal dokumen.
+- Format dan batas ukuran file mengikuti ketentuan bukti dukung pekerjaan.
+- Kuota penyimpanan arsip maksimal 1 GB per akun.
 - Bersifat privat dan hanya dapat diakses pemilik akun.
 - Tidak otomatis memiliki tautan publik.
 

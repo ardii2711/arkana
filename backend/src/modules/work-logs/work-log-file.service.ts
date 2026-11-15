@@ -1,24 +1,14 @@
-import { randomUUID } from 'node:crypto';
-import type { Readable } from 'node:stream';
-import { Transform } from 'node:stream';
-
-import Busboy from 'busboy';
-import type { Request } from 'express';
-import heicConvert from 'heic-convert';
-
-import { logger } from '../../lib/logger.js';
+import { readFileContent } from '../../lib/file-content.js';
+import { receiveMultipart } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
-import { deleteObjects, downloadObject, uploadObject } from '../../lib/storage.js';
+import { deleteObjects, storageError } from '../../lib/storage.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
+import type { Request } from 'express';
 import {
   MAX_FILE_BYTES,
   MAX_FILES_PER_WORK_LOG,
   MAX_TOTAL_BYTES_PER_WORK_LOG,
-  canonicalMimeType,
-  extensionOf,
-  isAllowedUpload,
-  isHeic,
   isPreviewable,
 } from './work-log-file.rules.js';
 import { findOwnedWorkLog } from './work-log.service.js';
@@ -49,128 +39,12 @@ function fileNotFound(): ApiError {
   return new ApiError(404, 'NOT_FOUND', 'File tidak ditemukan');
 }
 
-function fileTooLarge(): ApiError {
-  return new ApiError(
-    400,
-    'FILE_TOO_LARGE',
-    'Ukuran file melebihi batas 5 MB atau sisa kapasitas kegiatan',
-  );
-}
-
-async function storageFailed(error: unknown): Promise<never> {
-  logger.error({ err: error }, 'Operasi R2 gagal');
-  throw new ApiError(502, 'STORAGE_ERROR', 'Penyimpanan file sedang bermasalah');
-}
-
-async function toBuffer(stream: Readable): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-
-  for await (const chunk of stream) {
-    chunks.push(Buffer.from(chunk));
+function requoteStorageError(error: unknown): never {
+  if (error instanceof ApiError) {
+    throw error;
   }
 
-  return Buffer.concat(chunks);
-}
-
-interface ReceivedFile {
-  key: string;
-  size: number;
-  originalName: string;
-  mimeType: string;
-}
-
-function receiveFile(req: Request, maxBytes: number, prefix: string): Promise<ReceivedFile> {
-  return new Promise<ReceivedFile>((resolve, reject) => {
-    let settled = false;
-    const settle = (action: () => void) => {
-      if (!settled) {
-        settled = true;
-        action();
-      }
-    };
-
-    let busboy: ReturnType<typeof Busboy>;
-
-    try {
-      busboy = Busboy({ headers: req.headers, limits: { fileSize: maxBytes, files: 1 } });
-    } catch {
-      reject(new ApiError(400, 'INVALID_MULTIPART', 'Permintaan upload tidak valid'));
-      return;
-    }
-
-    let sawFile = false;
-
-    busboy.on('file', (_field, stream, info) => {
-      sawFile = true;
-
-      const filename = info.filename ?? '';
-      const extension = extensionOf(filename);
-
-      if (!extension || !isAllowedUpload(extension, info.mimeType)) {
-        stream.resume();
-        settle(() =>
-          reject(
-            new ApiError(
-              400,
-              'INVALID_FILE_TYPE',
-              'Format file tidak didukung. Gunakan JPG, JPEG, PNG, WEBP, HEIC, HEIF, PDF, DOC, DOCX, XLS, atau XLSX',
-            ),
-          ),
-        );
-        return;
-      }
-
-      const key = `${prefix}/${randomUUID()}.${extension}`;
-      const mimeType = canonicalMimeType(extension) as string;
-      let size = 0;
-      let truncated = false;
-
-      const counter = new Transform({
-        transform(chunk: Buffer, _encoding, callback) {
-          size += chunk.length;
-          callback(null, chunk);
-        },
-      });
-
-      stream.pipe(counter);
-      const upload = uploadObject(key, counter, mimeType);
-
-      stream.on('limit', () => {
-        truncated = true;
-        void upload.abort();
-      });
-
-      upload
-        .done()
-        .then(() => {
-          if (truncated) {
-            settle(() => reject(fileTooLarge()));
-            return;
-          }
-
-          settle(() => resolve({ key, size, originalName: filename, mimeType }));
-        })
-        .catch((error: unknown) => {
-          settle(() => reject(truncated ? fileTooLarge() : error));
-        });
-    });
-
-    busboy.on('error', (error) => {
-      settle(() => reject(error));
-    });
-
-    req.on('error', (error) => {
-      settle(() => reject(error));
-    });
-
-    busboy.on('close', () => {
-      if (!sawFile) {
-        settle(() => reject(new ApiError(400, 'FILE_REQUIRED', 'File wajib diunggah')));
-      }
-    });
-
-    req.pipe(busboy);
-  });
+  return storageError(error);
 }
 
 export async function listWorkLogFiles(userId: string, workLogId: string) {
@@ -206,29 +80,25 @@ export async function uploadWorkLogFile(userId: string, workLogId: string, req: 
 
   // ponytail: batas dihitung sebelum upload; cukup untuk satu pengguna. Ganti ke
   // penghitungan transaksional bila upload paralel menjadi masalah.
-  const received = await receiveFile(
-    req,
-    Math.min(MAX_FILE_BYTES, remaining),
-    `work-logs/${userId}/${workLogId}`,
-  ).catch(async (error: unknown) => {
-    if (error instanceof ApiError) {
-      throw error;
-    }
+  const { file } = await receiveMultipart(req, {
+    maxBytes: Math.min(MAX_FILE_BYTES, remaining),
+    prefix: `work-logs/${userId}/${workLogId}`,
+    fileRequired: true,
+  }).catch(requoteStorageError);
 
-    return storageFailed(error);
-  });
+  if (!file) {
+    throw new ApiError(400, 'FILE_REQUIRED', 'File wajib diunggah');
+  }
 
   try {
-    const file = await prisma.workLogFile.create({
-      data: { workLogId, ...received },
+    const created = await prisma.workLogFile.create({
+      data: { workLogId, ...file },
       select: fileSelect,
     });
 
-    return toFileItem(file);
+    return toFileItem(created);
   } catch (error) {
-    await deleteObjects([received.key]).catch((cleanupError: unknown) => {
-      logger.error({ err: cleanupError, key: received.key }, 'Gagal menghapus objek yatim');
-    });
+    await deleteObjects([file.key]).catch(storageError);
     throw error;
   }
 }
@@ -247,7 +117,7 @@ export async function deleteWorkLogFile(
     throw fileNotFound();
   }
 
-  await deleteObjects([file.key]).catch(storageFailed);
+  await deleteObjects([file.key]).catch(storageError);
   await prisma.workLogFile.delete({ where: { id: file.id } });
 }
 
@@ -268,40 +138,7 @@ async function loadFileContent(
     throw fileNotFound();
   }
 
-  const inline = wantsInline && isPreviewable(file.mimeType);
-
-  const body = await downloadObject(file.key).catch(storageFailed);
-
-  if (inline && isHeic(file.mimeType)) {
-    // ponytail: konversi setiap kali preview, tanpa cache. Simpan turunan JPEG
-    // bila latensi preview mulai terasa.
-    const jpeg = await heicConvert({
-      buffer: await toBuffer(body),
-      format: 'JPEG',
-      quality: 0.85,
-    }).catch(async (error: unknown) => {
-      logger.error({ err: error, fileId }, 'Konversi HEIC gagal');
-      throw new ApiError(422, 'PREVIEW_UNAVAILABLE', 'File tidak dapat ditampilkan');
-    });
-
-    return {
-      body: Buffer.from(jpeg),
-      contentType: 'image/jpeg',
-      size: jpeg.length,
-      originalName: file.originalName,
-      inline: true,
-      converted: true,
-    };
-  }
-
-  return {
-    body,
-    contentType: file.mimeType,
-    size: file.size,
-    originalName: file.originalName,
-    inline,
-    converted: false,
-  };
+  return readFileContent(file, wantsInline).catch(requoteStorageError);
 }
 
 export function getWorkLogFileContent(

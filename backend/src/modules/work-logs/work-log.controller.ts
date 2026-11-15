@@ -1,6 +1,6 @@
-import type { Request, RequestHandler } from 'express';
+import type { RequestHandler } from 'express';
 
-import { ApiError } from '../../utils/api-error.js';
+import { currentUser } from '../../utils/current-user.js';
 import { sendSuccess } from '../../utils/api-response.js';
 import { sendFileContent } from '../../utils/file-response.js';
 import {
@@ -21,14 +21,6 @@ import {
   listWorkLogs,
   updateWorkLog,
 } from './work-log.service.js';
-
-function currentUser(req: Request) {
-  if (!req.user) {
-    throw new ApiError(401, 'UNAUTHENTICATED', 'Silakan login terlebih dahulu');
-  }
-
-  return req.user;
-}
 
 export const listWorkLogsHandler: RequestHandler = async (req, res) => {
   const query = res.locals.input.query as ListWorkLogsQuery;

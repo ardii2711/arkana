@@ -47,9 +47,11 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  refreshTokens RefreshToken[]
-  accountTokens AccountToken[]
-  workLogs      WorkLog[]
+  refreshTokens  RefreshToken[]
+  accountTokens  AccountToken[]
+  workLogs       WorkLog[]
+  archiveFolders ArchiveFolder[]
+  archiveFiles   ArchiveFile[]
 }
 
 model RefreshToken {
@@ -105,4 +107,39 @@ model WorkLogFile {
   createdAt    DateTime @default(now())
 
   @@index([workLogId])
+}
+
+model ArchiveFolder {
+  id        String          @id @default(uuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  parentId  String?
+  parent    ArchiveFolder?  @relation("ArchiveFolderChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children  ArchiveFolder[] @relation("ArchiveFolderChildren")
+  files     ArchiveFile[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@unique([userId, parentId, name])
+  @@index([userId, parentId])
+}
+
+model ArchiveFile {
+  id           String         @id @default(uuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderId     String?
+  folder       ArchiveFolder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  documentDate DateTime?      @db.Date
+  key          String         @unique
+  originalName String
+  mimeType     String
+  size         Int
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([userId, folderId])
 }
