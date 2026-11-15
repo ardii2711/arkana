@@ -5,9 +5,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 ## Status
 
 - **Tahap:** Implementasi Frontend
-- **Fase aktif:** Phase 9 — Frontend Foundation
-- **Task aktif:** P10.1 — Authentication Interface (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P10.2 — Application Layout
+- **Fase aktif:** Phase 10 — Frontend Authentication & Layout
+- **Task aktif:** P10.2 — Application Layout (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P11.1 — Work Log & Evidence
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -44,6 +44,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P8.4 — Backend Hardening Ringan:** `DONE` (commit `0e671f8`).
 - **P9.1 — Inisialisasi Frontend:** `DONE` (commit `d3ccab2`).
 - **P9.2 — Frontend Infrastructure:** `DONE` (commit `c971a38`).
+- **P10.1 — Authentication Interface:** `DONE` (commit `9408b58`).
 
 ## Hasil Berjalan
 
@@ -273,7 +274,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Belum ada check runner otomatis untuk frontend; logika interceptor diverifikasi lewat `typecheck`, `lint`, dan `build`, lalu pengujian fungsional P12.1.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus.
 
-### P10.1 — Authentication Interface (menunggu commit)
+### P10.1 — Authentication Interface (DONE)
 
 - Halaman di route group `(auth)` dengan layout terpusat: `/login`, `/activate`, `/lupa-password`, `/reset-password`. Route `/activate` mengikuti tautan undangan backend (`/activate?token=...`).
 - `src/features/auth/`: `auth.api.ts` (login, me, logout, activation info, activate, forgot, reset), `auth.schemas.ts` (Zod), `use-auth.ts` (`useSession`, `useLogin`, `useLogout`, `useActivationInfo`, `useActivateAccount`, `useRequestPasswordReset`, `useResetPassword`), `auth-card.tsx`, dan empat form.
@@ -288,10 +289,27 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `/lupa-password`: respons selalu dinetralkan ("jika email terdaftar…").
 - `/reset-password`: token dari query, password + konfirmasi, status sukses.
 - Sesi tetap di TanStack Query (`/auth/me`, 401 → `null`); login mengisi cache, logout membersihkan cache lalu redirect `/login`. Tidak ada duplikasi di Zustand.
-- Halaman beranda sementara menampilkan sesi aktif (nama, email, role) + tombol keluar, dan mengarahkan ke `/login` bila tanpa sesi; akan diganti pada P10.2.
+- Halaman beranda sementara menampilkan sesi aktif (nama, email, role) + tombol keluar, dan mengarahkan ke `/login` bila tanpa sesi; digantikan pada P10.2.
 - Halaman yang memakai `useSearchParams` dibungkus `<Suspense>` sesuai Next 16.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/`, `/login`, `/activate`, `/lupa-password`, `/reset-password`.
-- Uji manual alur auth belum dilakukan (kredensial Google dan `SMTP_*` di `backend/.env` sudah diisi). Verifikasi visual akhir dan testing alur auth menunggu sesi testing final.
+- Pengujian UI alur auth dilakukan pengguna; agent hanya menjalankan pemeriksaan statis.
+
+### P10.2 — Application Layout (menunggu commit)
+
+- Route group `(app)` dengan `AppShell`: memuat sesi `/auth/me`, redirect ke `/login` bila tanpa sesi, serta state loading dan error dengan aksi coba lagi.
+- Sidebar memakai komponen shadcn/ui varian Radix (`sidebar`, `sheet`, `tooltip`, `skeleton`, `hooks/use-mobile.ts`) dengan `SidebarProvider`, `SidebarInset`, `SidebarTrigger`, `SidebarRail`, dan `TooltipProvider`.
+- Header atas hanya menampilkan `SidebarTrigger`; teks ARKANA dan `Separator` vertikal di header dihapus.
+- Footer sidebar memakai `Avatar` bulat + nama + email; klik membuka `DropdownMenu` berisi ringkasan profil dan tombol keluar. Komponen shadcn baru: `avatar`, `dropdown-menu`.
+- Sesi belum menyediakan URL foto profil; `Avatar` memakai inisial nama sebagai fallback.
+- Navigasi berdasarkan role:
+  - User: Dashboard, Kegiatan, Arsip, Laporan, Agenda, Catatan.
+  - Admin: Dashboard, Akun.
+- Menu aktif dihitung dari `usePathname`; klik menu di mobile menutup sheet; profil dan tombol keluar berada di `SidebarFooter`.
+- Placeholder route memakai `ModulePlaceholder`: `/`, `/kegiatan`, `/arsip`, `/laporan`, `/agenda`, `/catatan`, `/akun`. Halaman sementara `src/app/page.tsx` dihapus.
+- `use-mobile` diubah ke `useSyncExternalStore` agar sesuai aturan ESLint React 19 (`set-state-in-effect`).
+- Tidak menambah store Zustand; state buka/tutup sidebar ditangani `SidebarProvider`.
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Build mencakup route `(app)` dan `(auth)`.
+- Pengujian UI layout dilakukan pengguna; agent tidak menjalankan UI test.
 
 ### Temuan Di Luar Scope
 
@@ -344,8 +362,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Lanjut P10.2 — Application Layout (layout utama, navigasi, pembatasan tampilan berdasarkan role, komponen bersama).
-2. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth (env frontend sudah diisi).
+1. Lakukan pemeriksaan UI dan commit P10.2.
+2. Lanjut P11.1 — Work Log & Evidence.
 3. Sesuaikan env deployment dengan topologi subdomain satu domain induk: backend `CORS_ORIGIN` = URL frontend, `PUBLIC_WEB_URL` = URL frontend, `GOOGLE_REDIRECT_URI` = URL backend + `/api/auth/google/callback`; frontend `NEXT_PUBLIC_API_URL` = URL backend + `/api`.
 
 ## Aturan Pembaruan
