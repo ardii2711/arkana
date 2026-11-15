@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 import { WorkCategory } from '../../generated/prisma/enums.js';
-
-const today = () => new Date().toISOString().slice(0, 10);
+import { todayWita } from '../../lib/wita.js';
 
 const name = z.string().trim().min(1).max(200);
 const description = z.string().trim().min(1).max(10_000);
@@ -17,7 +16,7 @@ const shortText = z
   .transform((value) => (value === '' ? null : value));
 const activityDate = z.iso
   .date()
-  .refine((value) => value <= today(), { message: 'Tanggal tidak boleh melewati hari ini' });
+  .refine((value) => value <= todayWita(), { message: 'Tanggal tidak boleh melewati hari ini' });
 
 export const createWorkLogSchema = z.object({
   name,

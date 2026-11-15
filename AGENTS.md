@@ -8,6 +8,7 @@ Gunakan dokumen berikut sebagai referensi utama untuk memahami proyek:
 
 - `docs/PROJECT.md`: Tujuan, kebutuhan, ruang lingkup, fitur, dan teknologi proyek.
 - `docs/ARCHITECTURE.md`: Arsitektur sistem, struktur komponen, dan alur kerja aplikasi jika tersedia.
+- `docs/API.md`: Referensi endpoint REST API backend untuk integrasi frontend.
 - `docs/ROADMAP.md`: Rencana dan urutan seluruh pekerjaan proyek.
 - `docs/PROGRESS.md`: Status pekerjaan dan checkpoint terakhir.
 

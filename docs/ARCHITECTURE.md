@@ -56,6 +56,7 @@ Root package digunakan untuk orkestrasi perintah proyek. Frontend dan backend me
 - Format komunikasi utama menggunakan JSON.
 - Upload file menggunakan mekanisme HTTP yang sesuai.
 - Backend menjadi satu-satunya pintu akses database dan file storage.
+- Daftar endpoint yang siap dipakai frontend: `docs/API.md`.
 
 ## 3. Frontend Architecture
 

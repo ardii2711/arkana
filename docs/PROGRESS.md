@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 8 — Backend Dashboard & API Finalization
-- **Task aktif:** P8.2 — Dashboard API (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P8.3 — Backend Verification
+- **Task aktif:** P8.3 — Backend Verification (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P9.1 — Inisialisasi Frontend
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -39,6 +39,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P7.1 — Finalisasi Struktur Notes:** `DONE` (commit `752e8a2`).
 - **P7.2 — Notes API:** `DONE` (commit `38e4d1e`, migration `20261115054854_add_note`).
 - **P8.1 — Finalisasi Dashboard:** `DONE` (commit `9cab800`).
+- **P8.2 — Dashboard API:** `DONE` (commit `c645a50`).
 
 ## Hasil Berjalan
 
@@ -218,12 +219,21 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Perhitungan periode memakai WITA; data User dibatasi pada kepemilikan.
 - Hanya mengubah `PROJECT.md` §5.7, §6, §8 dan `ROADMAP.md` P8.1; tidak ada perubahan kode.
 
-### P8.2 — Dashboard API (menunggu commit)
+### P8.2 — Dashboard API (DONE)
 
 - Endpoint `GET /api/dashboard` (`requireRole('USER')`): `summary { monthWorkLogs, weekWorkLogs, evidenceFiles, archive { usedBytes, quotaBytes } }`, `todaySchedules`, `upcomingSchedules` (maks 5, bukan `CANCELLED`, mulai hari esok), `pinnedNotes` (maks 5), `workLogCategories` (bulan berjalan), `workLogTrend` (30 hari terakhir, hari tanpa kegiatan bernilai 0).
 - Endpoint `GET /api/dashboard/admin` (`requireRole('ADMIN')`): `accounts { active, invited, inactive }` untuk role `USER` dan `pendingInvitations` (akun `INVITED`, terbaru dulu).
 - Refactor WITA: `src/lib/wita.ts` berisi `todayWita`, `startOfDayWita`, `endOfDayWita`, `addDaysWita`, `monthRange`, `dateRangeEndingAt`; `schedule.time.ts` dihapus dan `report.period.ts` memakai helper bersama.
 - `ARCHIVE_QUOTA_BYTES` dipindah ke `lib/file-rules.ts` dan dipakai ulang dashboard.
+- Tanpa perubahan schema/migration.
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:dashboard`, `check:schedule-rules`, `check:report-format`, `check:file-rules`, `check:archive-folders` lulus.
+
+### P8.3 — Backend Verification (menunggu commit)
+
+- Audit seluruh rute: publik (health, auth, aktivasi, reset password, Google, bukti dukung publik), login (`/auth/me`, change password), Admin (`/users`, `/dashboard/admin`), User (dashboard, work log, arsip, laporan, agenda, notes).
+- Konsistensi terverifikasi: envelope `{ success, data }` / `{ success, error }`, `204` tanpa body, ownership `where { id, userId }` pada seluruh data pribadi, `404 NOT_FOUND` untuk resource pengguna lain, validasi Zod di semua endpoint ber-body/query/params.
+- Perbaikan: validasi tanggal kegiatan Work Log memakai `todayWita()` (sebelumnya tanggal UTC, sehingga tanggal hari ini ditolak pada 00:00–07:59 WITA).
+- Dokumentasi API baru: `docs/API.md` (endpoint, akses, query, batas unggahan, kode error, rate limit). `AGENTS.md` dan `ARCHITECTURE.md` §2.3 merujuk dokumen tersebut.
 - Tanpa perubahan schema/migration.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:dashboard`, `check:schedule-rules`, `check:report-format`, `check:file-rules`, `check:archive-folders` lulus.
 
@@ -234,6 +244,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Cookie sesi memakai `sameSite=lax`. Pada deployment frontend dan backend beda site (Vercel ↔ Render), cookie tidak terkirim pada request XHR lintas site. Perlu keputusan `sameSite=none` + `secure` atau domain induk bersama sebelum P12.
 - `busboy` mendekode nama file multipart sebagai latin1; nama file non-ASCII berpotensi tampil tidak sesuai. Perlu normalisasi bila diperlukan.
 - Pengingat dan notifikasi agenda ditangguhkan: perlu keputusan kanal (email/in-app), mekanisme penjadwalan, dan penanganan multi-instance sebelum dijadwalkan sebagai task roadmap baru.
+- Perlindungan CSRF belum diimplementasikan; mitigasi saat ini hanya `sameSite=lax`. Bila cookie harus `sameSite=none` untuk deployment lintas site, token CSRF wajib ditambahkan sebelum P12.
+- `POST /api/auth/refresh` dan `POST /api/auth/logout` belum memiliki rate limit.
+- Health check belum memeriksa koneksi database maupun R2; relevan untuk verifikasi deployment di P12.
+- Pesan `404` global masih berbahasa Inggris, berbeda dari pesan error lain yang berbahasa Indonesia.
 
 ## Keputusan Teknis Kumulatif
 
@@ -266,7 +280,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Lanjut P8.3 — Backend Verification (audit konsistensi endpoint, response, auth, validasi, error, dan dokumentasi API).
+1. Lanjut P9.1 — Inisialisasi Frontend (backend Phase 1–8 selesai).
 2. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan
