@@ -67,3 +67,31 @@ export async function fetchWorkLogs(params: WorkLogListParams): Promise<WorkLogL
 
   return data.data;
 }
+
+export type WorkLogInput = {
+  name: string;
+  description: string;
+  output: string;
+  category: WorkCategory;
+  target: string | null;
+  realisasi: string | null;
+};
+
+export async function fetchWorkLog(id: string): Promise<WorkLog> {
+  const { data } = await api.get<ApiSuccess<{ workLog: WorkLog }>>(`/work-logs/${id}`);
+  return data.data.workLog;
+}
+
+export async function createWorkLog(input: WorkLogInput): Promise<WorkLog> {
+  const { data } = await api.post<ApiSuccess<{ workLog: WorkLog }>>('/work-logs', input);
+  return data.data.workLog;
+}
+
+export async function updateWorkLog(id: string, input: WorkLogInput): Promise<WorkLog> {
+  const { data } = await api.patch<ApiSuccess<{ workLog: WorkLog }>>(`/work-logs/${id}`, input);
+  return data.data.workLog;
+}
+
+export async function deleteWorkLog(id: string): Promise<void> {
+  await api.delete(`/work-logs/${id}`);
+}

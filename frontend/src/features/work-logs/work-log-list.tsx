@@ -4,8 +4,10 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ClipboardListIcon,
+  PlusIcon,
   TriangleAlertIcon,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -20,24 +22,17 @@ import {
   WorkLogFilterBar,
   type WorkLogFilters,
 } from './work-log-filter-bar';
+import { WorkLogFormDialog } from './work-log-form-dialog';
+import { formatActivityDate } from './work-log.format';
 import { useWorkLogs } from './use-work-logs';
 
 const PAGE_SIZE = 20;
-
-const activityDateFormatter = new Intl.DateTimeFormat('id-ID', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
-
-function formatActivityDate(value: string) {
-  return activityDateFormatter.format(new Date(`${value}T00:00:00`));
-}
 
 export function WorkLogList() {
   const [filters, setFilters] = useState<WorkLogFilters>(EMPTY_WORK_LOG_FILTERS);
   const [searchDraft, setSearchDraft] = useState('');
   const [page, setPage] = useState(1);
+  const [formOpen, setFormOpen] = useState(false);
 
   const query = useWorkLogs({
     page,
@@ -66,13 +61,23 @@ export function WorkLogList() {
     setPage(1);
   }
 
+  function openForm() {
+    setFormOpen(true);
+  }
+
   return (
     <div className="w-full space-y-6">
-      <div className="space-y-1">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">Kegiatan</h1>
-        <p className="text-muted-foreground text-sm">
-          Catatan pekerjaan harian beserta bukti dukungnya.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">Kegiatan</h1>
+          <p className="text-muted-foreground text-sm">
+            Catatan pekerjaan harian beserta bukti dukungnya.
+          </p>
+        </div>
+        <Button onClick={() => openForm()}>
+          <PlusIcon />
+          Catat kegiatan
+        </Button>
       </div>
 
       <WorkLogFilterBar
@@ -125,25 +130,27 @@ export function WorkLogList() {
         <>
           <ul className="divide-y rounded-xl border">
             {query.data.items.map((workLog) => (
-              <li
-                key={workLog.id}
-                className="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
-              >
-                <div className="min-w-0 space-y-1.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-medium">{workLog.name}</span>
-                    <Badge variant="secondary">{WORK_CATEGORY_LABELS[workLog.category]}</Badge>
-                  </div>
-                  <p className="text-muted-foreground line-clamp-2 text-sm">
-                    {workLog.description}
-                  </p>
-                </div>
-                <time
-                  dateTime={workLog.activityDate}
-                  className="text-muted-foreground shrink-0 text-xs sm:text-sm"
+              <li key={workLog.id}>
+                <Link
+                  href={`/kegiatan/${workLog.id}`}
+                  className="hover:bg-muted/50 focus-visible:bg-muted/50 flex flex-col gap-2 p-4 outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
                 >
-                  {formatActivityDate(workLog.activityDate)}
-                </time>
+                  <div className="min-w-0 space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-medium">{workLog.name}</span>
+                      <Badge variant="secondary">{WORK_CATEGORY_LABELS[workLog.category]}</Badge>
+                    </div>
+                    <p className="text-muted-foreground line-clamp-2 text-sm">
+                      {workLog.description}
+                    </p>
+                  </div>
+                  <time
+                    dateTime={workLog.activityDate}
+                    className="text-muted-foreground shrink-0 text-xs sm:text-sm"
+                  >
+                    {formatActivityDate(workLog.activityDate)}
+                  </time>
+                </Link>
               </li>
             ))}
           </ul>
@@ -178,6 +185,8 @@ export function WorkLogList() {
           </div>
         </>
       )}
+
+      {formOpen ? <WorkLogFormDialog workLog={null} onOpenChange={setFormOpen} /> : null}
     </div>
   );
 }

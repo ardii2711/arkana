@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.1a — Data Layer & Daftar Kegiatan (menunggu commit)
-- **Task berikutnya:** P11.1b, P11.1c, P11.1d
+- **Task aktif:** P11.1b — Form dan Penghapusan Kegiatan (menunggu commit)
+- **Task berikutnya:** P11.1c, P11.1d
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -46,6 +46,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P9.2 — Frontend Infrastructure:** `DONE` (commit `c971a38`).
 - **P10.1 — Authentication Interface:** `DONE` (commit `9408b58`).
 - **P10.2 — Application Layout:** `DONE` (commit `fa44cec`, penyempurnaan `bb44c0b`).
+- **P11.1a — Data Layer & Daftar Kegiatan:** `DONE` (commit `5d12d87`).
 
 ## Hasil Berjalan
 
@@ -324,7 +325,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Task baru P11.8 — Profil Pengguna (backend endpoint profil sendiri + form `/profil`), menunggu keputusan field yang boleh diubah.
 - P10.2 ditandai final setelah penyempurnaan ter-commit pada `bb44c0b`.
 
-### P11.1a — Data Layer & Daftar Kegiatan (menunggu commit)
+### P11.1a — Data Layer & Daftar Kegiatan (DONE, commit `5d12d87`)
 
 - Feature `frontend/src/features/work-logs/`: `work-log.api.ts` (tipe `WorkLog`, `WorkCategory`, label kategori Indonesia, `fetchWorkLogs`), `use-work-logs.ts` (`useWorkLogs` dengan `keepPreviousData`), `work-log-filter-bar.tsx`, `work-log-list.tsx`.
 - Halaman `/kegiatan` memakai `WorkLogList`; placeholder `ModulePlaceholder` dihapus dari route ini.
@@ -334,6 +335,19 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - State filter ada di komponen halaman; server state di TanStack Query. Belum ada form, detail, bukti dukung, atau tautan publik (P11.1b–d).
 - Komponen shadcn baru: `badge`, `select`, `calendar`, `popover`. Dependency baru: `date-fns` 4.4.0, `react-day-picker` 10.0.2. Komponen bersama: `src/components/shared/date-range-picker.tsx` (nilai `from`/`to` berupa `YYYY-MM-DD`).
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Pengujian UI dilakukan pengguna.
+
+### P11.1b — Form dan Penghapusan Kegiatan (menunggu commit)
+
+- API client menambah `fetchWorkLog`, `createWorkLog`, `updateWorkLog`, `deleteWorkLog`, dan tipe `WorkLogInput`.
+- Hook: `useWorkLog` (detail), `useCreateWorkLog`, `useUpdateWorkLog` (memperbarui cache detail + invalidasi daftar), `useDeleteWorkLog` (menghapus cache detail + invalidasi daftar).
+- `work-log.schemas.ts`: schema Zod form sesuai batas backend; `target`/`realisasi` kosong dikirim sebagai `null`.
+- `work-log-form-dialog.tsx`: dialog tambah/ubah memakai RHF + `zodResolver` + `Controller` + `Field`; kategori memakai `Select`; error server tampil pada `Alert`; sukses memunculkan toast dan menutup dialog.
+- `work-log-detail.tsx` + route `/kegiatan/[id]`: menampilkan kategori, tanggal, uraian, output, target, dan realisasi; aksi ubah (dialog) dan hapus (konfirmasi `AlertDialog`) dengan toast lalu kembali ke daftar.
+- Daftar kegiatan: tombol `Catat kegiatan` membuka dialog, dan setiap baris menjadi tautan ke halaman detail.
+- `activityDate` tidak diubah dari UI sesuai keputusan backend (tanggal hari ini saat dibuat).
+- Komponen shadcn baru: `dialog`, `alert-dialog`, `sonner` (+ dependency `sonner`). `Toaster` dipasang di root layout; `next-themes` tidak dipakai sehingga `sonner.tsx` tidak memanggil `useTheme`.
+- Script frontend `typecheck` menjadi `next typegen && tsc --noEmit` agar tipe route baru tersedia sebelum `tsc`.
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/kegiatan` dan `/kegiatan/[id]`. Pengujian UI dilakukan pengguna.
 
 ### Temuan Di Luar Scope
 
@@ -387,7 +401,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Tinjau dan commit P11.1a, lalu lanjut P11.1b, P11.1c, dan P11.1d sesuai urutan dependensi.
+1. Tinjau dan commit P11.1b, lalu lanjut P11.1c (bukti dukung) dan P11.1d (halaman publik).
 3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 
 ## Aturan Pembaruan
