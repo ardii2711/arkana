@@ -289,15 +289,49 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 ### P11.1 — Work Log & Evidence
 
-- Implementasikan daftar, detail, form, pencarian, dan filter kegiatan.
-- Implementasikan upload dan pengelolaan bukti dukung.
-- Implementasikan tampilan tautan publik.
+**Tujuan:** Menyediakan antarmuka pencatatan pekerjaan beserta bukti dukung dan tautan publiknya.
 
-**Kriteria penerimaan:** Seluruh alur pencatatan pekerjaan dan bukti dukung berjalan.
+Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
+
+#### P11.1a — Data Layer & Daftar Kegiatan
+
+- Implementasikan feature `work-logs`: tipe, schema Zod, API client, dan hook TanStack Query.
+- Implementasikan halaman `/kegiatan`: daftar kegiatan dengan pagination, filter kategori dan rentang tanggal, serta pencarian.
+
+**Kriteria penerimaan:** Daftar kegiatan menampilkan data sesuai API beserta filter dan pagination yang berfungsi.
+
+**Dependensi:** P10.2.
+
+#### P11.1b — Form dan Penghapusan Kegiatan
+
+- Implementasikan form tambah dan ubah kegiatan (nama, uraian, hasil/output, kategori, target, realisasi).
+- Implementasikan detail kegiatan dan konfirmasi penghapusan beserta feedback hasil operasi.
+
+**Kriteria penerimaan:** Kegiatan dapat dibuat, diubah, dilihat, dan dihapus dengan validasi yang sesuai backend.
+
+**Dependensi:** P11.1a.
+
+#### P11.1c — Bukti Dukung Kegiatan
+
+- Implementasikan upload multipart beserta batas format, 5 MB per file, 10 file, dan 50 MB per kegiatan.
+- Implementasikan daftar file, preview inline, unduh, dan penghapusan bukti dukung.
+
+**Kriteria penerimaan:** Bukti dukung dapat diunggah, dipratinjau, diunduh, dan dihapus sesuai batasan produk.
+
+**Dependensi:** P11.1b.
+
+#### P11.1d — Detail Kegiatan & Halaman Publik
+
+- Implementasikan tautan publik permanen per kegiatan beserta aksi salin tautan.
+- Implementasikan halaman publik `/p/evidence/[token]` tanpa sesi, memuat nama kegiatan, tanggal, kategori, uraian, output, dan seluruh bukti dukung.
+
+**Kriteria penerimaan:** Tautan publik menampilkan kegiatan dan bukti dukung terkait tanpa login serta mengikuti rute yang dipakai backend pada laporan.
+
+**Dependensi:** P11.1c.
 
 ### P11.2 — Personal Document Archive
 
-- Implementasikan daftar, detail, kategori, dan form arsip.
+- Implementasikan daftar, detail, folder, dan form arsip.
 - Implementasikan preview, download, dan pengelolaan dokumen.
 
 **Kriteria penerimaan:** Pengelolaan arsip berjalan sesuai API backend.
@@ -309,12 +343,12 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 **Kriteria penerimaan:** Laporan dapat dilihat dan diekspor sesuai ketentuan.
 
-### P11.4 — Schedule & Reminder
+### P11.4 — Schedule
 
-- Implementasikan kalender, daftar agenda, dan form.
-- Implementasikan tampilan serta feedback pengingat.
+- Implementasikan kalender, daftar agenda, dan form agenda.
+- Pengingat dan notifikasi tidak termasuk dalam task ini (ditangguhkan).
 
-**Kriteria penerimaan:** Agenda dan pengingat dapat dikelola melalui antarmuka.
+**Kriteria penerimaan:** Agenda dapat dikelola melalui antarmuka sesuai API backend.
 
 ### P11.5 — Notes
 
@@ -335,6 +369,21 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 - Implementasikan undangan, perubahan informasi, dan penonaktifan akun.
 
 **Kriteria penerimaan:** Admin dapat mengelola akun tanpa akses ke konten pribadi User.
+
+### P11.8 — Profil Pengguna
+
+**Tujuan:** Memungkinkan User mengubah informasi profilnya sendiri.
+
+**Ruang lingkup:**
+
+- Backend: endpoint pembaruan profil milik sendiri (`requireRole('USER')`), validasi input, dan notifikasi email bila alamat email berubah sesuai pola `P2.5`.
+- Frontend: form edit profil pada `/profil` beserta feedback hasil operasi, memakai kembali komponen form yang sudah ada.
+
+**Keputusan yang diperlukan sebelum implementasi:** field yang boleh diubah (nama, email, atau keduanya) dan syarat verifikasi email baru.
+
+**Kriteria penerimaan:** User dapat mengubah profilnya sendiri dan perubahan terekam pada sesi yang aktif.
+
+**Dependensi:** P10.2; P11.1a untuk pola feature frontend.
 
 ## Phase 12 — Final Integration & Production Release
 

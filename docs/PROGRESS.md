@@ -5,9 +5,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 ## Status
 
 - **Tahap:** Implementasi Frontend
-- **Fase aktif:** Phase 10 — Frontend Authentication & Layout
-- **Task aktif:** Penyempurnaan UI P10.2 (dropdown profil, konten rata kiri, halaman profil) — menunggu commit
-- **Task berikutnya:** P11.1 — Work Log & Evidence
+- **Fase aktif:** Phase 11 — Frontend Core Modules
+- **Task aktif:** P11.1a — Data Layer & Daftar Kegiatan (menunggu commit)
+- **Task berikutnya:** P11.1b, P11.1c, P11.1d
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -45,7 +45,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P9.1 — Inisialisasi Frontend:** `DONE` (commit `d3ccab2`).
 - **P9.2 — Frontend Infrastructure:** `DONE` (commit `c971a38`).
 - **P10.1 — Authentication Interface:** `DONE` (commit `9408b58`).
-- **P10.2 — Application Layout:** `DONE` (commit `fa44cec`).
+- **P10.2 — Application Layout:** `DONE` (commit `fa44cec`, penyempurnaan `bb44c0b`).
 
 ## Hasil Berjalan
 
@@ -295,7 +295,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/`, `/login`, `/activate`, `/lupa-password`, `/reset-password`.
 - Pengujian UI alur auth dilakukan pengguna; agent hanya menjalankan pemeriksaan statis.
 
-### P10.2 — Application Layout (DONE, commit `fa44cec`)
+### P10.2 — Application Layout (DONE, commit `fa44cec` + `bb44c0b`)
 
 - Route group `(app)` dengan `AppShell`: memuat sesi `/auth/me`, redirect ke `/login` bila tanpa sesi, serta state loading dan error dengan aksi coba lagi.
 - Sidebar memakai komponen shadcn/ui varian Radix (`sidebar`, `sheet`, `tooltip`, `skeleton`, `hooks/use-mobile.ts`) dengan `SidebarProvider`, `SidebarInset`, `SidebarTrigger`, `SidebarRail`, dan `TooltipProvider`.
@@ -316,11 +316,30 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus setelah penyempurnaan. Build mencakup route `(app)`, `(auth)`, dan `/profil`.
 - Pengujian UI layout dilakukan pengguna; agent tidak menjalankan UI test.
 
+### Penyelerasan Roadmap Phase 11 (DONE, tanpa kode)
+
+- P11.1 dipecah menjadi P11.1a (data layer dan daftar kegiatan), P11.1b (form dan penghapusan), P11.1c (bukti dukung), P11.1d (detail kegiatan dan halaman publik `/p/evidence/[token]`) dengan dependensi berurutan.
+- P11.2 memakai istilah folder (bukan kategori) sesuai implementasi arsip.
+- P11.4 menjadi Schedule; pengingat dan notifikasi tetap ditangguhkan.
+- Task baru P11.8 — Profil Pengguna (backend endpoint profil sendiri + form `/profil`), menunggu keputusan field yang boleh diubah.
+- P10.2 ditandai final setelah penyempurnaan ter-commit pada `bb44c0b`.
+
+### P11.1a — Data Layer & Daftar Kegiatan (menunggu commit)
+
+- Feature `frontend/src/features/work-logs/`: `work-log.api.ts` (tipe `WorkLog`, `WorkCategory`, label kategori Indonesia, `fetchWorkLogs`), `use-work-logs.ts` (`useWorkLogs` dengan `keepPreviousData`), `work-log-filter-bar.tsx`, `work-log-list.tsx`.
+- Halaman `/kegiatan` memakai `WorkLogList`; placeholder `ModulePlaceholder` dihapus dari route ini.
+- Daftar kegiatan: tanggal, nama, kategori (`Badge`), ringkasan uraian; urutan mengikuti API (tanggal terbaru).
+- Filter: pencarian nama/uraian (submit Enter atau tombol cari), kategori, dan rentang tanggal memakai `DateRangePicker` shadcn/ui (`Popover` + `Calendar` mode `range`, 2 bulan di desktop dan 1 bulan di mobile, locale `id`), serta reset filter.
+- Pagination 20 per halaman dengan tombol sebelumnya/berikutnya serta ringkasan "Menampilkan X–Y dari N".
+- State filter ada di komponen halaman; server state di TanStack Query. Belum ada form, detail, bukti dukung, atau tautan publik (P11.1b–d).
+- Komponen shadcn baru: `badge`, `select`, `calendar`, `popover`. Dependency baru: `date-fns` 4.4.0, `react-day-picker` 10.0.2. Komponen bersama: `src/components/shared/date-range-picker.tsx` (nilai `from`/`to` berupa `YYYY-MM-DD`).
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Pengujian UI dilakukan pengguna.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
 - Akun yang hanya login lewat Google belum dapat menetapkan password sendiri; harus lewat alur reset password.
-- Edit profil sendiri belum tersedia: backend belum memiliki endpoint pembaruan profil untuk User. Perlu task lanjutan dan keputusan field yang boleh diubah.
+- Edit profil sendiri belum tersedia: backend belum memiliki endpoint pembaruan profil untuk User. Dijadwalkan sebagai task P11.8 — Profil Pengguna.
 - ~~Cookie sesi memakai `sameSite=lax`; pada deployment beda site cookie tidak terkirim.~~ Diputuskan: frontend dan backend memakai subdomain pada satu domain induk (same site), sehingga `sameSite=lax` tetap dipakai.
 - `busboy` mendekode nama file multipart sebagai latin1; nama file non-ASCII berpotensi tampil tidak sesuai. Perlu normalisasi bila diperlukan.
 - Pengingat dan notifikasi agenda ditangguhkan: perlu keputusan kanal (email/in-app), mekanisme penjadwalan, dan penanganan multi-instance sebelum dijadwalkan sebagai task roadmap baru.
@@ -368,9 +387,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Lakukan pemeriksaan UI dan commit penyempurnaan P10.2.
-2. Lanjut P11.1 — Work Log & Evidence.
-3. Sesuaikan env deployment dengan topologi subdomain satu domain induk: backend `CORS_ORIGIN` = URL frontend, `PUBLIC_WEB_URL` = URL frontend, `GOOGLE_REDIRECT_URI` = URL backend + `/api/auth/google/callback`; frontend `NEXT_PUBLIC_API_URL` = URL backend + `/api`.
+1. Tinjau dan commit P11.1a, lalu lanjut P11.1b, P11.1c, dan P11.1d sesuai urutan dependensi.
+3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 
 ## Aturan Pembaruan
 
