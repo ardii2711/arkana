@@ -9,6 +9,7 @@ import {
   LayoutDashboardIcon,
   LogOutIcon,
   StickyNoteIcon,
+  UserRoundIcon,
   UsersIcon,
   type LucideIcon,
 } from 'lucide-react';
@@ -40,6 +41,7 @@ import {
 } from '@/components/ui/sidebar';
 import type { SessionUser } from '@/features/auth/auth.api';
 import { useLogout } from '@/features/auth/use-auth';
+import { getInitials } from '@/lib/initials';
 
 type NavItem = {
   href: string;
@@ -64,18 +66,6 @@ const adminNav: NavItem[] = [
 function isActivePath(pathname: string, href: string) {
   if (href === '/') return pathname === '/';
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-function getInitials(name: string) {
-  return (
-    name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((part) => part[0])
-      .join('')
-      .toUpperCase() || 'A'
-  );
 }
 
 export function AppSidebar({ user }: { user: SessionUser }) {
@@ -156,7 +146,7 @@ export function AppSidebar({ user }: { user: SessionUser }) {
                   <ChevronsUpDownIcon className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="right" align="end" sideOffset={8} className="min-w-56">
+              <DropdownMenuContent side="top" align="start" sideOffset={8} className="min-w-56">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex items-center gap-3 py-1">
                     <Avatar size="lg">
@@ -170,6 +160,13 @@ export function AppSidebar({ user }: { user: SessionUser }) {
                     </div>
                   </div>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profil">
+                    <UserRoundIcon />
+                    Profil
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem disabled={logout.isPending} onSelect={() => logout.mutate()}>
                   <LogOutIcon />

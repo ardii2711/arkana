@@ -10,7 +10,7 @@ type ModulePlaceholderProps = {
 
 export function ModulePlaceholder({ title, description, icon: Icon }: ModulePlaceholderProps) {
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="w-full space-y-6">
       <div className="space-y-1">
         <h1 className="font-heading text-2xl font-semibold tracking-tight">{title}</h1>
         <p className="text-muted-foreground text-sm">{description}</p>

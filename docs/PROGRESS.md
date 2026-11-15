@@ -6,7 +6,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 10 — Frontend Authentication & Layout
-- **Task aktif:** P10.2 — Application Layout (`IN_PROGRESS`, menunggu commit)
+- **Task aktif:** Penyempurnaan UI P10.2 (dropdown profil, konten rata kiri, halaman profil) — menunggu commit
 - **Task berikutnya:** P11.1 — Work Log & Evidence
 - **Update terakhir:** 15 November 2026
 
@@ -45,6 +45,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P9.1 — Inisialisasi Frontend:** `DONE` (commit `d3ccab2`).
 - **P9.2 — Frontend Infrastructure:** `DONE` (commit `c971a38`).
 - **P10.1 — Authentication Interface:** `DONE` (commit `9408b58`).
+- **P10.2 — Application Layout:** `DONE` (commit `fa44cec`).
 
 ## Hasil Berjalan
 
@@ -294,7 +295,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/`, `/login`, `/activate`, `/lupa-password`, `/reset-password`.
 - Pengujian UI alur auth dilakukan pengguna; agent hanya menjalankan pemeriksaan statis.
 
-### P10.2 — Application Layout (menunggu commit)
+### P10.2 — Application Layout (DONE, commit `fa44cec`)
 
 - Route group `(app)` dengan `AppShell`: memuat sesi `/auth/me`, redirect ke `/login` bila tanpa sesi, serta state loading dan error dengan aksi coba lagi.
 - Sidebar memakai komponen shadcn/ui varian Radix (`sidebar`, `sheet`, `tooltip`, `skeleton`, `hooks/use-mobile.ts`) dengan `SidebarProvider`, `SidebarInset`, `SidebarTrigger`, `SidebarRail`, dan `TooltipProvider`.
@@ -308,13 +309,18 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Placeholder route memakai `ModulePlaceholder`: `/`, `/kegiatan`, `/arsip`, `/laporan`, `/agenda`, `/catatan`, `/akun`. Halaman sementara `src/app/page.tsx` dihapus.
 - `use-mobile` diubah ke `useSyncExternalStore` agar sesuai aturan ESLint React 19 (`set-state-in-effect`).
 - Tidak menambah store Zustand; state buka/tutup sidebar ditangani `SidebarProvider`.
-- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Build mencakup route `(app)` dan `(auth)`.
+- Penyempurnaan pasca-commit: dropdown profil dibuka ke atas (`side="top"`) dan konten halaman dibuat rata kiri tanpa pembungkus `mx-auto`/`max-w-5xl`.
+- Menu `Profil` ditambahkan sebelum tombol `Keluar` pada dropdown akun; route `/profil` menampilkan avatar, nama, email, role, dan status dari sesi.
+- Tombol `Edit profil` masih nonaktif sampai endpoint pembaruan profil tersedia.
+- `getInitials` dipindahkan ke `src/lib/initials.ts` dan dipakai bersama sidebar serta halaman profil.
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus setelah penyempurnaan. Build mencakup route `(app)`, `(auth)`, dan `/profil`.
 - Pengujian UI layout dilakukan pengguna; agent tidak menjalankan UI test.
 
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
 - Akun yang hanya login lewat Google belum dapat menetapkan password sendiri; harus lewat alur reset password.
+- Edit profil sendiri belum tersedia: backend belum memiliki endpoint pembaruan profil untuk User. Perlu task lanjutan dan keputusan field yang boleh diubah.
 - ~~Cookie sesi memakai `sameSite=lax`; pada deployment beda site cookie tidak terkirim.~~ Diputuskan: frontend dan backend memakai subdomain pada satu domain induk (same site), sehingga `sameSite=lax` tetap dipakai.
 - `busboy` mendekode nama file multipart sebagai latin1; nama file non-ASCII berpotensi tampil tidak sesuai. Perlu normalisasi bila diperlukan.
 - Pengingat dan notifikasi agenda ditangguhkan: perlu keputusan kanal (email/in-app), mekanisme penjadwalan, dan penanganan multi-instance sebelum dijadwalkan sebagai task roadmap baru.
@@ -362,7 +368,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Lakukan pemeriksaan UI dan commit P10.2.
+1. Lakukan pemeriksaan UI dan commit penyempurnaan P10.2.
 2. Lanjut P11.1 — Work Log & Evidence.
 3. Sesuaikan env deployment dengan topologi subdomain satu domain induk: backend `CORS_ORIGIN` = URL frontend, `PUBLIC_WEB_URL` = URL frontend, `GOOGLE_REDIRECT_URI` = URL backend + `/api/auth/google/callback`; frontend `NEXT_PUBLIC_API_URL` = URL backend + `/api`.
 
