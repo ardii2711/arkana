@@ -153,6 +153,34 @@ Ekspor tersedia dalam format XLSX dan PDF.
 
 Mengelola agenda, jadwal kegiatan, tenggat waktu, dan pengingat pribadi.
 
+Informasi agenda:
+
+- Judul agenda.
+- Deskripsi opsional.
+- Tanggal dan waktu mulai.
+- Tanggal dan waktu selesai opsional.
+- Penanda agenda sepanjang hari.
+- Tempat atau lokasi opsional.
+- Satu kategori.
+- Status: Belum Dimulai, Selesai, Dibatalkan.
+
+Kategori tetap:
+
+1. Rapat dan Koordinasi
+2. Pekerjaan dan Tugas
+3. Pelatihan dan Pengembangan Kompetensi
+4. Perjalanan Dinas
+5. Kegiatan Pribadi
+6. Tenggat Waktu (Deadline)
+7. Lainnya
+
+Ketentuan:
+
+- Agenda bersifat privat dan hanya dapat diakses pemiliknya.
+- Pengulangan agenda tidak tersedia pada versi awal.
+- Pengingat dan notifikasi ditangguhkan ke pengembangan berikutnya.
+- Waktu mengikuti zona waktu WITA (Asia/Makassar).
+
 ### 5.6. Notes
 
 Menyediakan tempat untuk menyimpan catatan, ide, informasi, dan hal-hal yang perlu ditindaklanjuti.
@@ -190,6 +218,6 @@ Hal-hal yang masih perlu dibahas:
 
 - Dashboard, statistik, pencarian, dan filter.
 
-Keputusan yang sudah ditetapkan untuk kategori arsip, format ekspor laporan, kanal notifikasi, struktur Notes, serta backup dan pemulihan data dicatat pada `ROADMAP.md`.
+Keputusan yang sudah ditetapkan untuk kategori arsip, format ekspor laporan, struktur Notes, serta backup dan pemulihan data dicatat pada `ROADMAP.md`. Kanal notifikasi belum ditetapkan dan ditangguhkan bersama fitur pengingat.
 
 Detail teknologi, struktur database, API, autentikasi, otorisasi, penyimpanan file, dan deployment dibahas dalam `ARCHITECTURE.md`.

@@ -5,9 +5,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 ## Status
 
 - **Tahap:** Implementasi Backend
-- **Fase aktif:** Phase 5 — Backend Performance Report
-- **Task aktif:** P6.1 — Finalisasi Kebutuhan Agenda (`NOT_STARTED`, menunggu keputusan)
-- **Task berikutnya:** P6.1 — Finalisasi Kebutuhan Agenda
+- **Fase aktif:** Phase 6 — Backend Schedule & Reminder
+- **Task aktif:** P6.1 — Finalisasi Kebutuhan Agenda (`IN_PROGRESS`, dokumen, menunggu commit)
+- **Task berikutnya:** P6.2 — Schedule API
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -166,12 +166,22 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:report-format`, `check:file-rules`, `check:archive-folders` lulus.
 - Migration `20261115042939_add_work_log_target_realisasi` sudah dijalankan dan di-commit.
 
+### P6.1 — Finalisasi Kebutuhan Agenda (menunggu commit)
+
+- Field agenda: `title` (wajib), `description` opsional, `startAt`, `endAt` opsional, `allDay` (default `false`), `location` opsional, `category`, `status` (default `NOT_STARTED`).
+- Kategori enum: Rapat dan Koordinasi, Pekerjaan dan Tugas, Pelatihan dan Pengembangan Kompetensi, Perjalanan Dinas, Kegiatan Pribadi, Tenggat Waktu (Deadline), Lainnya.
+- Status enum: Belum Dimulai (`NOT_STARTED`), Selesai (`DONE`), Dibatalkan (`CANCELLED`).
+- Zona waktu acuan WITA (`Asia/Makassar`).
+- Tanpa pengulangan agenda; tanpa pengingat/notifikasi (ditangguhkan).
+- Hanya mengubah `PROJECT.md` §5.5 dan §8 serta `ROADMAP.md` P6.1–P6.2; tidak ada perubahan kode.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
 - Akun yang hanya login lewat Google belum dapat menetapkan password sendiri; harus lewat alur reset password.
 - Cookie sesi memakai `sameSite=lax`. Pada deployment frontend dan backend beda site (Vercel ↔ Render), cookie tidak terkirim pada request XHR lintas site. Perlu keputusan `sameSite=none` + `secure` atau domain induk bersama sebelum P12.
 - `busboy` mendekode nama file multipart sebagai latin1; nama file non-ASCII berpotensi tampil tidak sesuai. Perlu normalisasi bila diperlukan.
+- Pengingat dan notifikasi agenda ditangguhkan: perlu keputusan kanal (email/in-app), mekanisme penjadwalan, dan penanganan multi-instance sebelum dijadwalkan sebagai task roadmap baru.
 
 ## Keputusan Teknis Kumulatif
 
@@ -203,8 +213,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Lanjut P6.1 — Finalisasi Kebutuhan Agenda (perlu keputusan jenis agenda, pengulangan, waktu, dan notifikasi).
-2. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+1. Commit P6.1 (perubahan dokumen).
+2. Lanjut P6.2 — Schedule API: model `Schedule` + enum kategori/status, CRUD, filter rentang tanggal/kategori/status/pencarian.
+3. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan
 

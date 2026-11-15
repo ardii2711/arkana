@@ -164,21 +164,24 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 ## Phase 6 — Backend Schedule & Reminder
 
-**Tujuan:** Menyelesaikan API agenda dan pengingat.
+**Tujuan:** Menyelesaikan API agenda. Pengingat dan notifikasi ditangguhkan ke pengembangan berikutnya.
 
 ### P6.1 — Finalisasi Kebutuhan
 
-- Tentukan jenis agenda, pengulangan, waktu, dan mekanisme notifikasi.
+- Tetapkan atribut agenda: judul, deskripsi opsional, waktu mulai, waktu selesai opsional, penanda sepanjang hari, lokasi opsional, kategori, dan status (Belum Dimulai, Selesai, Dibatalkan).
+- Tetapkan tujuh kategori tetap agenda.
+- Tetapkan zona waktu WITA (Asia/Makassar).
+- Pengulangan agenda dan notifikasi pengingat ditangguhkan.
 
-**Kriteria penerimaan:** Kebutuhan agenda dan notifikasi disetujui.
+**Kriteria penerimaan:** Kebutuhan agenda disetujui serta tercatat di `PROJECT.md`.
 
 ### P6.2 — Schedule API
 
 - Implementasikan model dan CRUD agenda.
-- Implementasikan pengelolaan pengingat.
-- Implementasikan mekanisme notifikasi sesuai keputusan.
+- Terapkan filter rentang tanggal, kategori, status, dan pencarian.
+- Terapkan validasi serta kepemilikan data.
 
-**Kriteria penerimaan:** API agenda dan pengingat berjalan sesuai kebutuhan.
+**Kriteria penerimaan:** API agenda berjalan sesuai kebutuhan dan hanya dapat diakses pemiliknya.
 
 ## Phase 7 — Backend Notes
 
