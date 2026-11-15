@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 7 — Backend Notes
-- **Task aktif:** P7.1 — Finalisasi Struktur Notes (`IN_PROGRESS`, dokumen, menunggu commit)
-- **Task berikutnya:** P7.2 — Notes API
+- **Task aktif:** P7.2 — Notes API (`IN_PROGRESS`, menunggu migration dan commit)
+- **Task berikutnya:** P8.1 — Finalisasi Dashboard
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -36,6 +36,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P5.2 — Report API:** `DONE` (commit `a1dcf6a`, migration `20261115042939_add_work_log_target_realisasi`).
 - **P6.1 — Finalisasi Kebutuhan Agenda:** `DONE` (commit `a119635`).
 - **P6.2 — Schedule API:** `DONE` (commit `1800e56`, migration `20261115054013_add_schedule`).
+- **P7.1 — Finalisasi Struktur Notes:** `DONE` (commit `752e8a2`).
 
 ## Hasil Berjalan
 
@@ -190,12 +191,23 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:schedule-rules` lulus.
 - Migration `20261115054013_add_schedule` sudah dijalankan dan di-commit.
 
-### P7.1 — Finalisasi Struktur Notes (menunggu commit)
+### P7.1 — Finalisasi Struktur Notes (DONE)
 
 - Catatan tanpa judul: hanya `content` (teks bebas) dan `pinned`.
 - Pencarian pada isi; urutan `pinned` lalu `updatedAt` terbaru.
 - Tanpa tag, folder, checklist, dan lampiran pada versi awal.
 - Hanya mengubah `PROJECT.md` §5.6 dan `ROADMAP.md` P7.1–P7.2; tidak ada perubahan kode.
+
+### P7.2 — Notes API (menunggu migration dan commit)
+
+- Schema: model `Note` (`content`, `pinned` default `false`, timestamps, index `[userId, pinned, updatedAt]`).
+- Endpoint `requireRole('USER')`:
+  - `GET /api/notes` — `page`, `limit` (maks 100), `search` (isi), `pinned=true|false`; urut `pinned` lalu `updatedAt` terbaru.
+  - `POST /api/notes`, `PATCH /api/notes/:id`, `DELETE /api/notes/:id`. Tanpa endpoint detail karena daftar sudah membawa `content`.
+- Validasi: `content` wajib, maks 20.000 karakter; `pinned` boolean; PATCH minimal satu field.
+- Ownership: `updateMany`/`deleteMany` dengan `where { id, userId }`; data pengguna lain → `404 NOT_FOUND`.
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
+- Migration belum dijalankan; perintah manual ada di bagian Pekerjaan Berikutnya.
 
 ### Temuan Di Luar Scope
 
@@ -236,9 +248,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Commit P7.1 (perubahan dokumen).
-2. Lanjut P7.2 — Notes API: model `Note`, CRUD, pencarian, filter pin.
-3. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_note`.
+2. Commit P7.2.
+3. Lanjut P8.1 — Finalisasi Dashboard (perlu keputusan ringkasan dan statistik).
+4. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan
 
