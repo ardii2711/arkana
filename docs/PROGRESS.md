@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.1b — Form dan Penghapusan Kegiatan (menunggu commit)
-- **Task berikutnya:** P11.1c, P11.1d
+- **Task aktif:** P11.1c — Bukti Dukung Kegiatan (menunggu commit)
+- **Task berikutnya:** P11.1d
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -47,6 +47,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P10.1 — Authentication Interface:** `DONE` (commit `9408b58`).
 - **P10.2 — Application Layout:** `DONE` (commit `fa44cec`, penyempurnaan `bb44c0b`).
 - **P11.1a — Data Layer & Daftar Kegiatan:** `DONE` (commit `5d12d87`).
+- **P11.1b — Form dan Penghapusan Kegiatan:** `DONE` (commit `470af90`).
 
 ## Hasil Berjalan
 
@@ -336,7 +337,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Komponen shadcn baru: `badge`, `select`, `calendar`, `popover`. Dependency baru: `date-fns` 4.4.0, `react-day-picker` 10.0.2. Komponen bersama: `src/components/shared/date-range-picker.tsx` (nilai `from`/`to` berupa `YYYY-MM-DD`).
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Pengujian UI dilakukan pengguna.
 
-### P11.1b — Form dan Penghapusan Kegiatan (menunggu commit)
+### P11.1b — Form dan Penghapusan Kegiatan (DONE, commit `470af90`)
 
 - API client menambah `fetchWorkLog`, `createWorkLog`, `updateWorkLog`, `deleteWorkLog`, dan tipe `WorkLogInput`.
 - Hook: `useWorkLog` (detail), `useCreateWorkLog`, `useUpdateWorkLog` (memperbarui cache detail + invalidasi daftar), `useDeleteWorkLog` (menghapus cache detail + invalidasi daftar).
@@ -348,6 +349,17 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Komponen shadcn baru: `dialog`, `alert-dialog`, `sonner` (+ dependency `sonner`). `Toaster` dipasang di root layout; `next-themes` tidak dipakai sehingga `sonner.tsx` tidak memanggil `useTheme`.
 - Script frontend `typecheck` menjadi `next typegen && tsc --noEmit` agar tipe route baru tersedia sebelum `tsc`.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/kegiatan` dan `/kegiatan/[id]`. Pengujian UI dilakukan pengguna.
+
+### P11.1c — Bukti Dukung Kegiatan (menunggu commit)
+
+- `work-log-file.api.ts`: tipe `WorkLogFile`, batas klien (5 MB/file, 10 file, 50 MB total), daftar ekstensi, `fileExtension`, `formatFileSize`, `isAllowedFile`, `fetchWorkLogFiles`, `uploadWorkLogFile` (multipart field `file`), `deleteWorkLogFile`, dan `workLogFileContentUrl` (opsi `inline=true`).
+- `use-work-log-files.ts`: query daftar file serta mutation unggah/hapus yang memperbarui cache daftar.
+- `work-log-evidence.tsx` pada halaman detail: ringkasan jumlah file dan pemakaian byte, unggah beberapa file sekaligus (validasi format, ukuran, slot, dan total sebelum kirim; unggahan berurutan), daftar file dengan format dan ukuran, pratinjau gambar/PDF dalam dialog, unduh, serta hapus dengan konfirmasi.
+- Unggahan menampilkan modal progres per file (`Progress`, persen dari `onUploadProgress` Axios) dengan status Menunggu/Mengunggah/Selesai/Gagal; modal tidak dapat ditutup selama unggahan berjalan.
+- Pratinjau dan unduh mengambil konten sebagai blob melalui Axios (`responseType: 'blob'`, cookie sesi ikut) lalu memakai object URL. URL konten backend langsung tidak dipakai karena ditolak browser pada pratinjau/iframe. HEIC/HEIF tampil sebagai JPEG hasil konversi server.
+- Tanpa pengaturan ulang batas di klien; angka batas hanya untuk validasi awal, keputusan akhir tetap di backend.
+- Komponen shadcn baru: `progress`.
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Pengujian UI dan unggah file nyata ke R2 dilakukan pengguna.
 
 ### Temuan Di Luar Scope
 
@@ -401,7 +413,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Tinjau dan commit P11.1b, lalu lanjut P11.1c (bukti dukung) dan P11.1d (halaman publik).
+1. Tinjau dan commit P11.1c, lalu lanjut P11.1d (detail kegiatan dan halaman publik).
 3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 
 ## Aturan Pembaruan

@@ -25,6 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
 import { WORK_CATEGORY_LABELS } from './work-log.api';
 import { formatActivityDate } from './work-log.format';
+import { WorkLogEvidence } from './work-log-evidence';
 import { WorkLogFormDialog } from './work-log-form-dialog';
 import { useDeleteWorkLog, useWorkLog } from './use-work-logs';
 
@@ -151,6 +152,8 @@ export function WorkLogDetail({ id }: { id: string }) {
       </Card>
 
       {editOpen ? <WorkLogFormDialog workLog={workLog} onOpenChange={setEditOpen} /> : null}
+
+      <WorkLogEvidence workLogId={id} />
     </div>
   );
 }
