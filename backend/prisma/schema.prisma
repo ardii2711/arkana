@@ -35,6 +35,22 @@ enum WorkCategory {
   PERJALANAN_DINAS
 }
 
+enum ScheduleCategory {
+  RAPAT_KOORDINASI
+  PEKERJAAN_TUGAS
+  PELATIHAN_PENGEMBANGAN
+  PERJALANAN_DINAS
+  KEGIATAN_PRIBADI
+  TENGGAT_WAKTU
+  LAINNYA
+}
+
+enum ScheduleStatus {
+  NOT_STARTED
+  DONE
+  CANCELLED
+}
+
 model User {
   id           String     @id @default(uuid())
   name         String
@@ -50,6 +66,7 @@ model User {
   refreshTokens  RefreshToken[]
   accountTokens  AccountToken[]
   workLogs       WorkLog[]
+  schedules      Schedule[]
   archiveFolders ArchiveFolder[]
   archiveFiles   ArchiveFile[]
 }
@@ -109,6 +126,24 @@ model WorkLogFile {
   createdAt    DateTime @default(now())
 
   @@index([workLogId])
+}
+
+model Schedule {
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime?
+  allDay      Boolean          @default(false)
+  location    String?
+  category    ScheduleCategory
+  status      ScheduleStatus   @default(NOT_STARTED)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([userId, startAt])
 }
 
 model ArchiveFolder {

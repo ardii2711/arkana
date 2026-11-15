@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 6 — Backend Schedule & Reminder
-- **Task aktif:** P6.1 — Finalisasi Kebutuhan Agenda (`IN_PROGRESS`, dokumen, menunggu commit)
-- **Task berikutnya:** P6.2 — Schedule API
+- **Task aktif:** P6.2 — Schedule API (`IN_PROGRESS`, menunggu migration dan commit)
+- **Task berikutnya:** P7.1 — Finalisasi Struktur Notes
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -34,6 +34,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P4.2 — Archive API:** `DONE` (commit `5f3e9e2`).
 - **P5.1 — Finalisasi Format Laporan:** `DONE` (commit `93b198c`).
 - **P5.2 — Report API:** `DONE` (commit `a1dcf6a`, migration `20261115042939_add_work_log_target_realisasi`).
+- **P6.1 — Finalisasi Kebutuhan Agenda:** `DONE` (commit `a119635`).
 
 ## Hasil Berjalan
 
@@ -166,7 +167,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:report-format`, `check:file-rules`, `check:archive-folders` lulus.
 - Migration `20261115042939_add_work_log_target_realisasi` sudah dijalankan dan di-commit.
 
-### P6.1 — Finalisasi Kebutuhan Agenda (menunggu commit)
+### P6.1 — Finalisasi Kebutuhan Agenda (DONE)
 
 - Field agenda: `title` (wajib), `description` opsional, `startAt`, `endAt` opsional, `allDay` (default `false`), `location` opsional, `category`, `status` (default `NOT_STARTED`).
 - Kategori enum: Rapat dan Koordinasi, Pekerjaan dan Tugas, Pelatihan dan Pengembangan Kompetensi, Perjalanan Dinas, Kegiatan Pribadi, Tenggat Waktu (Deadline), Lainnya.
@@ -174,6 +175,19 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Zona waktu acuan WITA (`Asia/Makassar`).
 - Tanpa pengulangan agenda; tanpa pengingat/notifikasi (ditangguhkan).
 - Hanya mengubah `PROJECT.md` §5.5 dan §8 serta `ROADMAP.md` P6.1–P6.2; tidak ada perubahan kode.
+
+### P6.2 — Schedule API (menunggu migration dan commit)
+
+- Schema: enum `ScheduleCategory` (7 nilai), enum `ScheduleStatus` (`NOT_STARTED`, `DONE`, `CANCELLED`), model `Schedule` (`title`, `description?`, `startAt`, `endAt?`, `allDay`, `location?`, `category`, `status`, `userId`, index `[userId, startAt]`).
+- Endpoint `requireRole('USER')`:
+  - `GET /api/schedules` — `page`, `limit` (maks 100), `from`, `to` (tanggal WITA), `category`, `status`, `search` (judul, deskripsi, lokasi); urut `startAt` terdekat.
+  - `POST /api/schedules`, `GET/PATCH/DELETE /api/schedules/:id`.
+- Validasi: `title` ≤200 wajib; `description` ≤2000 dan `location` ≤200 opsional (string kosong → `null`); `startAt` wajib berupa ISO 8601 dengan offset; `endAt` opsional dan tidak boleh sebelum `startAt`; `category` wajib; `status` default `NOT_STARTED`.
+- `PATCH` memvalidasi ulang `endAt` terhadap `startAt` tersimpan → `400 INVALID_SCHEDULE_RANGE`.
+- Waktu disimpan UTC dan dikembalikan sebagai ISO 8601; filter rentang `from`/`to` dihitung sebagai hari penuh WITA (`+08:00`, `schedule.time.ts`).
+- Ownership: query `where { id, userId }`; data pengguna lain → `404 NOT_FOUND`.
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:schedule-rules` lulus.
+- Migration belum dijalankan; perintah manual ada di bagian Pekerjaan Berikutnya.
 
 ### Temuan Di Luar Scope
 
@@ -202,6 +216,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Ekspor laporan: `exceljs` untuk XLSX dan `pdfkit` (A4 landscape) untuk PDF; tanpa headless browser.
 - Tautan bukti dukung pada laporan memakai `PUBLIC_WEB_URL` (fallback `CORS_ORIGIN`) + `/p/evidence/{publicToken}`.
 - Zona waktu acuan proyek: WITA (`Asia/Makassar`, UTC+8) untuk rekap laporan dan agenda.
+- Agenda: waktu disimpan UTC, batas hari/filter memakai offset `+08:00`; status default `NOT_STARTED`; tanpa pengulangan dan tanpa pengingat.
 
 ## Urutan Pengembangan
 
@@ -213,9 +228,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Commit P6.1 (perubahan dokumen).
-2. Lanjut P6.2 — Schedule API: model `Schedule` + enum kategori/status, CRUD, filter rentang tanggal/kategori/status/pencarian.
-3. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_schedule`.
+2. Commit P6.2.
+3. Lanjut P7.1 — Finalisasi Struktur Notes (perlu keputusan atribut dan pengelompokan).
+4. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan
 
