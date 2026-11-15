@@ -1,5 +1,7 @@
 import type { WorkLog } from '../../generated/prisma/client.js';
+import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
+import { deleteObjects } from '../../lib/storage.js';
 import { ApiError } from '../../utils/api-error.js';
 import type {
   CreateWorkLogInput,
@@ -39,7 +41,7 @@ function notFound(): ApiError {
   return new ApiError(404, 'NOT_FOUND', 'Catatan pekerjaan tidak ditemukan');
 }
 
-async function findOwned(userId: string, id: string): Promise<WorkLogRow> {
+export async function findOwnedWorkLog(userId: string, id: string): Promise<WorkLogRow> {
   const workLog = await prisma.workLog.findFirst({
     where: { id, userId },
     select: workLogSelect,
@@ -90,7 +92,7 @@ export async function listWorkLogs(userId: string, query: ListWorkLogsQuery) {
 }
 
 export async function getWorkLog(userId: string, id: string) {
-  return toItem(await findOwned(userId, id));
+  return toItem(await findOwnedWorkLog(userId, id));
 }
 
 export async function createWorkLog(userId: string, input: CreateWorkLogInput) {
@@ -109,7 +111,7 @@ export async function createWorkLog(userId: string, input: CreateWorkLogInput) {
 }
 
 export async function updateWorkLog(userId: string, id: string, input: UpdateWorkLogInput) {
-  await findOwned(userId, id);
+  await findOwnedWorkLog(userId, id);
 
   const { activityDate, ...rest } = input;
 
@@ -126,9 +128,18 @@ export async function updateWorkLog(userId: string, id: string, input: UpdateWor
 }
 
 export async function deleteWorkLog(userId: string, id: string): Promise<void> {
-  const { count } = await prisma.workLog.deleteMany({ where: { id, userId } });
+  const workLog = await prisma.workLog.findFirst({
+    where: { id, userId },
+    select: { id: true, files: { select: { key: true } } },
+  });
 
-  if (count === 0) {
+  if (!workLog) {
     throw notFound();
   }
+
+  await deleteObjects(workLog.files.map((file) => file.key)).catch((error: unknown) => {
+    logger.error({ err: error, workLogId: workLog.id }, 'Gagal menghapus file kegiatan dari R2');
+    throw new ApiError(502, 'STORAGE_ERROR', 'Penyimpanan file sedang bermasalah');
+  });
+  await prisma.workLog.delete({ where: { id: workLog.id } });
 }

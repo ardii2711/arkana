@@ -88,5 +88,20 @@ model WorkLog {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
+  files WorkLogFile[]
+
   @@index([userId, activityDate])
+}
+
+model WorkLogFile {
+  id           String   @id @default(uuid())
+  workLogId    String
+  workLog      WorkLog  @relation(fields: [workLogId], references: [id], onDelete: Cascade)
+  key          String   @unique
+  originalName String
+  mimeType     String
+  size         Int
+  createdAt    DateTime @default(now())
+
+  @@index([workLogId])
 }

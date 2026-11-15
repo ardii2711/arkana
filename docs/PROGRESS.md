@@ -6,9 +6,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 3 — Backend Work Log & Evidence
-- **Task aktif:** P3.1 — Work Log (`IN_PROGRESS`, menunggu migration dan commit)
-- **Task berikutnya:** P3.2 — Evidence File Management
-- **Update terakhir:** 14 November 2026
+- **Task aktif:** P3.2 — Evidence File Management (`IN_PROGRESS`, menunggu migration dan commit)
+- **Task berikutnya:** P3.3 — Public Evidence Sharing
+- **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
 
@@ -27,6 +27,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P2.3 — Google OAuth & Password Recovery:** `DONE` (commit `f7c1ce1`).
 - **P2.4 — Authorization:** `DONE` (commit `58e3854`).
 - **P2.5 — Self-Service Password & Account Notifications:** `DONE` (commit `8dd04c7`).
+- **P3.1 — Work Log:** `DONE` (commit `5ebc9e3`).
 
 ## Hasil Berjalan
 
@@ -70,7 +71,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tidak ada perubahan schema/migration.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
 
-### P3.1 — Work Log (menunggu migration dan commit)
+### P3.1 — Work Log (DONE)
 
 - Schema: enum `WorkCategory` (7 kategori tetap) dan model `WorkLog` (`activityDate @db.Date`, `name`, `description`, `output`, `category`, `userId`, index `[userId, activityDate]`). Kategori khusus dibatalkan atas persetujuan pengguna; `PROJECT.md` dan `ROADMAP.md` disesuaikan.
 - Kategori tidak punya tabel/endpoint sendiri; nilainya enum di API.
@@ -80,14 +81,30 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Validasi: `name` ≤200, `description` ≤10000, `output` ≤5000 wajib; `activityDate` opsional (default hari ini) dan tidak boleh melewati hari ini; `from <= to`.
 - `activityDate` dikembalikan sebagai `YYYY-MM-DD`; disimpan UTC tengah malam.
 - Ownership: query `where { id, userId }`; data pengguna lain → 404.
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus.
+
+### P3.2 — Evidence File Management (menunggu migration dan commit)
+
+- Dependency baru: `busboy` 1.6.0, `@aws-sdk/lib-storage` 3.1169.0, `heic-convert` 2.1.0 (+ `@types`).
+- Schema: model `WorkLogFile` (`key` unik, `originalName`, `mimeType`, `size`, cascade delete, index `workLogId`).
+- `src/lib/storage.ts`: `uploadObject` (multipart streaming via `Upload`), `downloadObject`, `deleteObjects`.
+- `src/modules/work-logs/work-log-file.rules.ts`: whitelist ekstensi↔MIME, batas 5 MB/file, 10 file, 50 MB/kegiatan, set MIME previewable.
+- Endpoint (`requireRole('USER')`, ownership):
+  - `POST /api/work-logs/:id/files` — multipart field `file`, streaming langsung ke R2, metadata disimpan setelah upload; gagal simpan → objek dihapus.
+  - `GET /api/work-logs/:id/files` — daftar file + `previewable`.
+  - `GET /api/work-logs/:id/files/:fileId/content` — default attachment; `?inline=true` untuk gambar/PDF; HEIC/HEIF dikonversi ke JPEG saat inline.
+  - `DELETE /api/work-logs/:id/files/:fileId` — hapus objek R2 dulu, lalu metadata.
+- `DELETE /api/work-logs/:id` kini menghapus seluruh objek R2 file terkait sebelum record.
+- Kode error: `INVALID_FILE_TYPE`, `FILE_TOO_LARGE`, `TOO_MANY_FILES`, `FILE_REQUIRED`, `INVALID_MULTIPART`, `STORAGE_ERROR` (502), `PREVIEW_UNAVAILABLE` (422).
+- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `npm run check:file-rules` (assert) lulus.
 - Migration belum dijalankan; perintah manual ada di bagian Pekerjaan Berikutnya.
-- Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `prisma generate` sudah dijalankan.
 
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
 - Akun yang hanya login lewat Google belum dapat menetapkan password sendiri; harus lewat alur reset password.
 - Cookie sesi memakai `sameSite=lax`. Pada deployment frontend dan backend beda site (Vercel ↔ Render), cookie tidak terkirim pada request XHR lintas site. Perlu keputusan `sameSite=none` + `secure` atau domain induk bersama sebelum P12.
+- `busboy` mendekode nama file multipart sebagai latin1; nama file non-ASCII berpotensi tampil tidak sesuai. Perlu normalisasi bila diperlukan.
 
 ## Keputusan Teknis Kumulatif
 
@@ -99,6 +116,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Env wajib fail-fast via Zod; `JWT_ACCESS_SECRET` minimal 32 karakter.
 - Kategori Work Log memakai enum tetap 7 nilai; kategori khusus dibatalkan.
 - Form Work Log tidak menampilkan `activityDate`; backend memakai tanggal hari ini dan menolak tanggal setelah hari ini.
+- File bukti dukung: multipart streaming (`busboy` + `@aws-sdk/lib-storage`) langsung ke R2, object key `work-logs/{userId}/{workLogId}/{uuid}.{ext}`, MIME disimpan dari whitelist ekstensi (bukan dari klien).
+- Penghapusan file dan kegiatan selalu menghapus objek R2 lebih dulu; kegagalan R2 → 502 dan metadata dipertahankan.
+- HEIC/HEIF dikonversi ke JPEG saat preview inline (`heic-convert`), file asli tidak diubah.
 
 ## Urutan Pengembangan
 
@@ -110,9 +130,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_work_log`.
-2. Commit P3.1.
-3. Lanjut P3.2 — Evidence File Management.
+1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_work_log_file`.
+2. Commit P3.2.
+3. Lanjut P3.3 — Public Evidence Sharing.
 4. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan

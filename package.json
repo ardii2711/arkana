@@ -9,6 +9,7 @@
     "lint": "npm --prefix backend run lint",
     "typecheck": "npm --prefix backend run typecheck",
     "format": "npm --prefix backend run format",
-    "format:check": "npm --prefix backend run format:check"
+    "format:check": "npm --prefix backend run format:check",
+    "check:file-rules": "npm --prefix backend run check:file-rules"
   }
 }
