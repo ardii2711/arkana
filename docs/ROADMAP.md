@@ -189,14 +189,16 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 ### P7.1 — Finalisasi Struktur Notes
 
-- Tentukan atribut, kategori, dan pengelompokan jika diperlukan.
+- Tetapkan catatan tanpa judul: satu isi teks bebas dan penanda pin.
+- Tetapkan pencarian pada isi catatan dan urutan pin lalu pembaruan terbaru.
+- Tetapkan bahwa tag, folder, checklist, dan lampiran tidak tersedia pada versi awal.
 
-**Kriteria penerimaan:** Struktur Notes disetujui.
+**Kriteria penerimaan:** Struktur Notes disetujui serta tercatat di `PROJECT.md`.
 
 ### P7.2 — Notes API
 
-- Implementasikan model dan CRUD catatan.
-- Terapkan validasi dan kepemilikan data.
+- Implementasikan model dan CRUD catatan (`content`, `pinned`).
+- Terapkan pencarian, filter pin, validasi, dan kepemilikan data.
 
 **Kriteria penerimaan:** User dapat mengelola catatan miliknya sendiri.
 

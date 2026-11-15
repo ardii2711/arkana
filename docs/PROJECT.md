@@ -185,6 +185,14 @@ Ketentuan:
 
 Menyediakan tempat untuk menyimpan catatan, ide, informasi, dan hal-hal yang perlu ditindaklanjuti.
 
+Ketentuan:
+
+- Satu catatan hanya berisi satu isi teks bebas tanpa judul.
+- Catatan dapat disematkan (pin) agar tampil lebih dahulu.
+- Pencarian dilakukan pada isi catatan.
+- Tidak tersedia tag, folder, checklist, maupun lampiran pada versi awal.
+- Catatan bersifat privat dan hanya dapat diakses pemiliknya.
+
 ## 6. Business Rules
 
 - Setiap aktivitas pekerjaan dicatat sebagai satu record tersendiri.

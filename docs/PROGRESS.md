@@ -5,9 +5,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 ## Status
 
 - **Tahap:** Implementasi Backend
-- **Fase aktif:** Phase 6 — Backend Schedule & Reminder
-- **Task aktif:** P6.2 — Schedule API (`IN_PROGRESS`, menunggu migration dan commit)
-- **Task berikutnya:** P7.1 — Finalisasi Struktur Notes
+- **Fase aktif:** Phase 7 — Backend Notes
+- **Task aktif:** P7.1 — Finalisasi Struktur Notes (`IN_PROGRESS`, dokumen, menunggu commit)
+- **Task berikutnya:** P7.2 — Notes API
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -35,6 +35,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P5.1 — Finalisasi Format Laporan:** `DONE` (commit `93b198c`).
 - **P5.2 — Report API:** `DONE` (commit `a1dcf6a`, migration `20261115042939_add_work_log_target_realisasi`).
 - **P6.1 — Finalisasi Kebutuhan Agenda:** `DONE` (commit `a119635`).
+- **P6.2 — Schedule API:** `DONE` (commit `1800e56`, migration `20261115054013_add_schedule`).
 
 ## Hasil Berjalan
 
@@ -176,7 +177,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa pengulangan agenda; tanpa pengingat/notifikasi (ditangguhkan).
 - Hanya mengubah `PROJECT.md` §5.5 dan §8 serta `ROADMAP.md` P6.1–P6.2; tidak ada perubahan kode.
 
-### P6.2 — Schedule API (menunggu migration dan commit)
+### P6.2 — Schedule API (DONE)
 
 - Schema: enum `ScheduleCategory` (7 nilai), enum `ScheduleStatus` (`NOT_STARTED`, `DONE`, `CANCELLED`), model `Schedule` (`title`, `description?`, `startAt`, `endAt?`, `allDay`, `location?`, `category`, `status`, `userId`, index `[userId, startAt]`).
 - Endpoint `requireRole('USER')`:
@@ -187,7 +188,14 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Waktu disimpan UTC dan dikembalikan sebagai ISO 8601; filter rentang `from`/`to` dihitung sebagai hari penuh WITA (`+08:00`, `schedule.time.ts`).
 - Ownership: query `where { id, userId }`; data pengguna lain → `404 NOT_FOUND`.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:schedule-rules` lulus.
-- Migration belum dijalankan; perintah manual ada di bagian Pekerjaan Berikutnya.
+- Migration `20261115054013_add_schedule` sudah dijalankan dan di-commit.
+
+### P7.1 — Finalisasi Struktur Notes (menunggu commit)
+
+- Catatan tanpa judul: hanya `content` (teks bebas) dan `pinned`.
+- Pencarian pada isi; urutan `pinned` lalu `updatedAt` terbaru.
+- Tanpa tag, folder, checklist, dan lampiran pada versi awal.
+- Hanya mengubah `PROJECT.md` §5.6 dan `ROADMAP.md` P7.1–P7.2; tidak ada perubahan kode.
 
 ### Temuan Di Luar Scope
 
@@ -228,10 +236,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Jalankan migration manual di `backend`: `npx prisma migrate dev --name add_schedule`.
-2. Commit P6.2.
-3. Lanjut P7.1 — Finalisasi Struktur Notes (perlu keputusan atribut dan pengelompokan).
-4. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+1. Commit P7.1 (perubahan dokumen).
+2. Lanjut P7.2 — Notes API: model `Note`, CRUD, pencarian, filter pin.
+3. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan
 
