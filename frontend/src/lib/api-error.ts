@@ -51,3 +51,10 @@ export function toApiError(error: unknown): ApiError {
 
   return new ApiError('UNKNOWN_ERROR', 'Terjadi kesalahan yang tidak dikenali.');
 }
+
+export function getErrorMessage(
+  error: unknown,
+  fallback = 'Terjadi kesalahan. Coba lagi.',
+): string {
+  return error instanceof ApiError ? error.message : fallback;
+}

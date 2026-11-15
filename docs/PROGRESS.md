@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 9 — Frontend Foundation
-- **Task aktif:** P9.2 — Frontend Infrastructure (`IN_PROGRESS`, menunggu commit)
-- **Task berikutnya:** P10.1 — Authentication Interface
+- **Task aktif:** P10.1 — Authentication Interface (`IN_PROGRESS`, menunggu commit)
+- **Task berikutnya:** P10.2 — Application Layout
 - **Update terakhir:** 15 November 2026
 
 ## Kesiapan Proyek
@@ -43,6 +43,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P8.3 — Backend Verification:** `DONE` (commit `77c454f`).
 - **P8.4 — Backend Hardening Ringan:** `DONE` (commit `0e671f8`).
 - **P9.1 — Inisialisasi Frontend:** `DONE` (commit `d3ccab2`).
+- **P9.2 — Frontend Infrastructure:** `DONE` (commit `c971a38`).
 
 ## Hasil Berjalan
 
@@ -259,7 +260,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Prasyarat environment: npm 12.2.2 (npm 11.19.1 menolak flag `--allow-scripts` yang dipakai `create-next-app` dan shadcn CLI).
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Build menghasilkan route statis `/` dan `/_not-found`.
 
-### P9.2 — Frontend Infrastructure (menunggu commit)
+### P9.2 — Frontend Infrastructure (DONE)
 
 - Dependency baru: `axios` 1.21.1, `@tanstack/react-query` 5.107.1, `zustand` 5.1.0, `react-hook-form` 7.92.0, `@hookform/resolvers` 7.0.6, `zod` 4.6.7 (sama dengan backend).
 - `src/config/env.ts`: `NEXT_PUBLIC_API_URL` divalidasi Zod (URL absolut), gagal → error jelas saat modul dimuat.
@@ -271,6 +272,26 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Zustand hanya di-install; store pertama dibuat saat P10.2 membutuhkan state UI, agar tidak ada kode tanpa konsumen.
 - Belum ada check runner otomatis untuk frontend; logika interceptor diverifikasi lewat `typecheck`, `lint`, dan `build`, lalu pengujian fungsional P12.1.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus.
+
+### P10.1 — Authentication Interface (menunggu commit)
+
+- Halaman di route group `(auth)` dengan layout terpusat: `/login`, `/activate`, `/lupa-password`, `/reset-password`. Route `/activate` mengikuti tautan undangan backend (`/activate?token=...`).
+- `src/features/auth/`: `auth.api.ts` (login, me, logout, activation info, activate, forgot, reset), `auth.schemas.ts` (Zod), `use-auth.ts` (`useSession`, `useLogin`, `useLogout`, `useActivationInfo`, `useActivateAccount`, `useRequestPasswordReset`, `useResetPassword`), `auth-card.tsx`, dan empat form.
+- Form memakai pola resmi shadcn/ui: `useForm` + `zodResolver` + `Controller` + `Field`/`FieldLabel`/`FieldError`/`FieldDescription`/`FieldGroup`, `aria-invalid` pada input dan `data-invalid` pada `Field`; bukan komponen `Form` legacy.
+- Komponen shadcn ditambah: `field`, `input`, `card`, `alert`, `input-group` (+ `textarea` sebagai dependensi), `label`, `separator`.
+- Validasi form hanya dipicu saat submit (mode default React Hook Form, `reValidateMode: onChange`); blur atau klik di luar field tidak memunculkan error.
+- Komponen bersama: `src/components/shared/password-input.tsx` (ikon gembok, tombol tampil/sembunyikan dengan `aria-label` + `aria-pressed`) dan `src/components/shared/google-icon.tsx` (SVG logo Google inline, tanpa dependency baru).
+- UI auth: kartu `max-w-md`, latar grid halus dengan glow, input berikon (`MailIcon`), link "Lupa password?" sebaris label password, tombol submit dengan spinner, tombol Google berlogo, alert dengan ikon status. Semua `<button>` non-disabled memakai `cursor-pointer` (aturan di `globals.css`).
+- Placeholder password di semua form (login, aktivasi, reset). Field input dan tombol submit di-disable saat submit berjalan (flag pending mutation yang sama, termasuk `info.isPending` di aktivasi); tombol Google dibiarkan (redirect penuh).
+- `/login`: email+password, tombol Google mengarah ke `${NEXT_PUBLIC_API_URL}/auth/google`, pemetaan kode error OAuth, tautan lupa password; pengguna dengan sesi aktif diarahkan ke `/`.
+- `/activate`: memuat info akun dari token, form password + konfirmasi, status sukses, dan penanganan token tidak valid/kedaluwarsa.
+- `/lupa-password`: respons selalu dinetralkan ("jika email terdaftar…").
+- `/reset-password`: token dari query, password + konfirmasi, status sukses.
+- Sesi tetap di TanStack Query (`/auth/me`, 401 → `null`); login mengisi cache, logout membersihkan cache lalu redirect `/login`. Tidak ada duplikasi di Zustand.
+- Halaman beranda sementara menampilkan sesi aktif (nama, email, role) + tombol keluar, dan mengarahkan ke `/login` bila tanpa sesi; akan diganti pada P10.2.
+- Halaman yang memakai `useSearchParams` dibungkus `<Suspense>` sesuai Next 16.
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/`, `/login`, `/activate`, `/lupa-password`, `/reset-password`.
+- Uji manual alur auth belum dilakukan (kredensial Google dan `SMTP_*` di `backend/.env` sudah diisi). Verifikasi visual akhir dan testing alur auth menunggu sesi testing final.
 
 ### Temuan Di Luar Scope
 
@@ -306,6 +327,11 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Cache Components dan React Compiler dimatikan pada versi awal; data server ditangani TanStack Query, bukan cache server Next.js.
 - API client frontend: satu instance Axios terpusat dengan `withCredentials` dan interceptor refresh single-flight; server state hanya di TanStack Query, Zustand untuk state UI saat dibutuhkan.
 - Env publik frontend `NEXT_PUBLIC_API_URL` wajib dan divalidasi Zod; `.env.local` tidak di-commit, hanya `.env.example`.
+- Form shadcn/ui memakai `Field` + `Controller` + `zodResolver`; komponen `Form` legacy tidak dipakai.
+- Validasi form frontend hanya berjalan saat submit; error tidak muncul saat field ditinggalkan.
+- Ikon di dalam input memakai `InputGroup` + `InputGroupAddon` (addon diletakkan setelah input sesuai dokumentasi shadcn), bukan absolute icon manual.
+- Sesi frontend bersumber tunggal dari `/auth/me` melalui TanStack Query; login/logout hanya mengubah cache, bukan state terpisah.
+- Route frontend mengikuti tautan email backend: `/activate?token=...`, `/reset-password?token=...`, `/login`.
 - Topologi domain: satu domain induk dengan subdomain terpisah untuk frontend dan backend (opsi A). Cookie `sameSite=lax` dipertahankan; token CSRF tidak diperlukan selama topologi ini dipakai.
 
 ## Urutan Pengembangan
@@ -318,8 +344,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Lanjut P10.1 — Authentication Interface (login email/password, login Google, aktivasi akun, reset password, pengelolaan sesi) di atas API client P9.2.
-2. Isi `frontend/.env.local` (`NEXT_PUBLIC_API_URL`) dan kredensial Google + `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+1. Lanjut P10.2 — Application Layout (layout utama, navigasi, pembatasan tampilan berdasarkan role, komponen bersama).
+2. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth (env frontend sudah diisi).
 3. Sesuaikan env deployment dengan topologi subdomain satu domain induk: backend `CORS_ORIGIN` = URL frontend, `PUBLIC_WEB_URL` = URL frontend, `GOOGLE_REDIRECT_URI` = URL backend + `/api/auth/google/callback`; frontend `NEXT_PUBLIC_API_URL` = URL backend + `/api`.
 
 ## Aturan Pembaruan
