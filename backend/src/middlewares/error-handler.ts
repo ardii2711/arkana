@@ -8,7 +8,7 @@ import { ApiError } from '../utils/api-error.js';
 export const notFoundHandler: RequestHandler = (_req, res) => {
   res.status(404).json({
     success: false,
-    error: { code: 'NOT_FOUND', message: 'Resource not found' },
+    error: { code: 'NOT_FOUND', message: 'Endpoint tidak ditemukan' },
   });
 };
 
@@ -18,7 +18,7 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
       success: false,
       error: {
         code: 'VALIDATION_ERROR',
-        message: 'Invalid request',
+        message: 'Permintaan tidak valid',
         details: err.issues.map((issue) => ({
           path: issue.path.join('.'),
           message: issue.message,

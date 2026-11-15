@@ -233,6 +233,13 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 **Kriteria penerimaan:** Seluruh API backend siap diintegrasikan dan tidak memiliki masalah kritis yang diketahui.
 
+### P8.4 — Backend Hardening Ringan
+
+- Tambahkan rate limit pada `POST /api/auth/refresh` dan `POST /api/auth/logout`.
+- Samakan bahasa pesan error global (`NOT_FOUND`, `VALIDATION_ERROR`) dengan pesan error lainnya.
+
+**Kriteria penerimaan:** Endpoint refresh/logout memiliki batas percobaan dan pesan error global konsisten berbahasa Indonesia.
+
 ## Phase 9 — Frontend Foundation
 
 **Tujuan:** Menyiapkan aplikasi frontend setelah backend selesai.

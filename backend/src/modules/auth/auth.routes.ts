@@ -43,6 +43,8 @@ const limiter = (limit: number) =>
   });
 
 const loginLimiter = limiter(10);
+const refreshLimiter = limiter(60);
+const logoutLimiter = limiter(30);
 const activateLimiter = limiter(10);
 const googleLimiter = limiter(20);
 const forgotPasswordLimiter = limiter(5);
@@ -52,8 +54,8 @@ const changePasswordLimiter = limiter(5);
 export const authRouter = Router();
 
 authRouter.post('/login', loginLimiter, validate({ body: loginSchema }), loginHandler);
-authRouter.post('/refresh', refreshHandler);
-authRouter.post('/logout', logoutHandler);
+authRouter.post('/refresh', refreshLimiter, refreshHandler);
+authRouter.post('/logout', logoutLimiter, logoutHandler);
 authRouter.get('/me', requireAuth, meHandler);
 authRouter.get('/google', googleLimiter, googleStartHandler);
 authRouter.get('/google/callback', googleLimiter, googleCallbackHandler);

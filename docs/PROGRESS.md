@@ -6,7 +6,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Backend
 - **Fase aktif:** Phase 8 — Backend Dashboard & API Finalization
-- **Task aktif:** P8.3 — Backend Verification (`IN_PROGRESS`, menunggu commit)
+- **Task aktif:** P8.4 — Backend Hardening Ringan (`IN_PROGRESS`, menunggu commit)
 - **Task berikutnya:** P9.1 — Inisialisasi Frontend
 - **Update terakhir:** 15 November 2026
 
@@ -40,6 +40,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P7.2 — Notes API:** `DONE` (commit `38e4d1e`, migration `20261115054854_add_note`).
 - **P8.1 — Finalisasi Dashboard:** `DONE` (commit `9cab800`).
 - **P8.2 — Dashboard API:** `DONE` (commit `c645a50`).
+- **P8.3 — Backend Verification:** `DONE` (commit `77c454f`).
 
 ## Hasil Berjalan
 
@@ -228,7 +229,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa perubahan schema/migration.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:dashboard`, `check:schedule-rules`, `check:report-format`, `check:file-rules`, `check:archive-folders` lulus.
 
-### P8.3 — Backend Verification (menunggu commit)
+### P8.3 — Backend Verification (DONE)
 
 - Audit seluruh rute: publik (health, auth, aktivasi, reset password, Google, bukti dukung publik), login (`/auth/me`, change password), Admin (`/users`, `/dashboard/admin`), User (dashboard, work log, arsip, laporan, agenda, notes).
 - Konsistensi terverifikasi: envelope `{ success, data }` / `{ success, error }`, `204` tanpa body, ownership `where { id, userId }` pada seluruh data pribadi, `404 NOT_FOUND` untuk resource pengguna lain, validasi Zod di semua endpoint ber-body/query/params.
@@ -236,6 +237,13 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Dokumentasi API baru: `docs/API.md` (endpoint, akses, query, batas unggahan, kode error, rate limit). `AGENTS.md` dan `ARCHITECTURE.md` §2.3 merujuk dokumen tersebut.
 - Tanpa perubahan schema/migration.
 - Pemeriksaan statis (`typecheck`, `lint`, `format:check`, `build`): lulus. `check:dashboard`, `check:schedule-rules`, `check:report-format`, `check:file-rules`, `check:archive-folders` lulus.
+
+### P8.4 — Backend Hardening Ringan (menunggu commit)
+
+- `POST /api/auth/refresh` dibatasi 60 permintaan/15 menit per IP dan `POST /api/auth/logout` 30 permintaan/15 menit per IP (`429 RATE_LIMITED`).
+- Pesan global `NOT_FOUND` menjadi "Endpoint tidak ditemukan" dan `VALIDATION_ERROR` menjadi "Permintaan tidak valid".
+- `docs/API.md` diperbarui pada bagian rate limit.
+- Tanpa perubahan schema/migration.
 
 ### Temuan Di Luar Scope
 
@@ -245,9 +253,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `busboy` mendekode nama file multipart sebagai latin1; nama file non-ASCII berpotensi tampil tidak sesuai. Perlu normalisasi bila diperlukan.
 - Pengingat dan notifikasi agenda ditangguhkan: perlu keputusan kanal (email/in-app), mekanisme penjadwalan, dan penanganan multi-instance sebelum dijadwalkan sebagai task roadmap baru.
 - Perlindungan CSRF belum diimplementasikan; mitigasi saat ini hanya `sameSite=lax`. Bila cookie harus `sameSite=none` untuk deployment lintas site, token CSRF wajib ditambahkan sebelum P12.
-- `POST /api/auth/refresh` dan `POST /api/auth/logout` belum memiliki rate limit.
 - Health check belum memeriksa koneksi database maupun R2; relevan untuk verifikasi deployment di P12.
-- Pesan `404` global masih berbahasa Inggris, berbeda dari pesan error lain yang berbahasa Indonesia.
 
 ## Keputusan Teknis Kumulatif
 
@@ -281,7 +287,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 ## Pekerjaan Berikutnya
 
 1. Lanjut P9.1 — Inisialisasi Frontend (backend Phase 1–8 selesai).
-2. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
+2. Putuskan topologi domain sebelum P9.2: subdomain satu domain induk (`sameSite=lax`, tanpa kode CSRF) atau lintas site (`sameSite=none` + token CSRF).
+3. Isi kredensial Google dan `SMTP_*` di `backend/.env` untuk uji manual fitur auth.
 
 ## Aturan Pembaruan
 

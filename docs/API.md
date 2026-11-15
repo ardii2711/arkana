@@ -28,7 +28,7 @@ Cookie sesi: `arkana_access` (path `/`, 15 menit) dan `arkana_refresh` (path `/a
 | POST   | `/auth/password/reset`    | publik | Reset password: `token`, `password`                             |
 | POST   | `/auth/password/change`   | login  | `currentPassword`, `newPassword`; mencabut sesi lain            |
 
-Rate limit per IP: login 10, aktivasi 10, Google 20, forgot password 5, reset password 10, change password 5 per 15 menit. Pelanggaran → `429 RATE_LIMITED`.
+Rate limit per IP: login 10, refresh 60, logout 30, aktivasi 10, Google 20, forgot password 5, reset password 10, change password 5 per 15 menit. Pelanggaran → `429 RATE_LIMITED`.
 
 Kode error OAuth pada redirect ke `/login?error=`: `oauth_cancelled`, `oauth_invalid_state`, `account_not_registered`, `account_inactive`, `google_account_mismatch`, `oauth_failed`.
 
