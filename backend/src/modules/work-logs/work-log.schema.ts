@@ -8,6 +8,13 @@ const name = z.string().trim().min(1).max(200);
 const description = z.string().trim().min(1).max(10_000);
 const output = z.string().trim().min(1).max(5_000);
 const category = z.enum(WorkCategory);
+const shortText = z
+  .string()
+  .trim()
+  .max(100)
+  .nullable()
+  .optional()
+  .transform((value) => (value === '' ? null : value));
 const activityDate = z.iso
   .date()
   .refine((value) => value <= today(), { message: 'Tanggal tidak boleh melewati hari ini' });
@@ -17,6 +24,8 @@ export const createWorkLogSchema = z.object({
   description,
   output,
   category,
+  target: shortText,
+  realisasi: shortText,
   activityDate: activityDate.optional(),
 });
 
@@ -26,6 +35,8 @@ export const updateWorkLogSchema = z
     description: description.optional(),
     output: output.optional(),
     category: category.optional(),
+    target: shortText,
+    realisasi: shortText,
     activityDate: activityDate.optional(),
   })
   .refine((input) => Object.values(input).some((value) => value !== undefined), {

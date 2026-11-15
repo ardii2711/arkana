@@ -19,7 +19,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "check:file-rules": "tsx scripts/check-work-log-file-rules.ts",
-    "check:archive-folders": "tsx scripts/check-archive-folders.ts"
+    "check:archive-folders": "tsx scripts/check-archive-folders.ts",
+    "check:report-format": "tsx scripts/check-report-format.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1169.0",
@@ -30,6 +31,7 @@
     "busboy": "1.6.0",
     "cookie-parser": "1.4.7",
     "cors": "^2.8.6",
+    "exceljs": "4.4.0",
     "express": "^5.3.0",
     "express-rate-limit": "8.7.4",
     "google-auth-library": "^11.3.4",
@@ -37,6 +39,7 @@
     "helmet": "^8.3.0",
     "jose": "6.2.17",
     "nodemailer": "10.5.0",
+    "pdfkit": "0.20.2",
     "pg": "8.23.1",
     "pino": "^10.4.0",
     "pino-http": "^11.0.0",
@@ -51,6 +54,7 @@
     "@types/heic-convert": "2.1.1",
     "@types/node": "^24.19.2",
     "@types/nodemailer": "^8.0.2",
+    "@types/pdfkit": "^0.17.7",
     "@types/pg": "8.23.1",
     "eslint": "^10.15.0",
     "eslint-config-prettier": "^10.1.8",

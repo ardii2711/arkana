@@ -17,6 +17,8 @@ type WorkLogRow = Pick<
   | 'description'
   | 'output'
   | 'category'
+  | 'target'
+  | 'realisasi'
   | 'createdAt'
   | 'updatedAt'
 >;
@@ -29,6 +31,8 @@ const workLogSelect = {
   description: true,
   output: true,
   category: true,
+  target: true,
+  realisasi: true,
   createdAt: true,
   updatedAt: true,
 } as const;
