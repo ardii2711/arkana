@@ -1,6 +1,7 @@
 import type { WorkLog } from '../../generated/prisma/client.js';
 import { prisma } from '../../lib/prisma.js';
 import { deleteObjects, storageError } from '../../lib/storage.js';
+import { todayWita } from '../../lib/wita.js';
 import { ApiError } from '../../utils/api-error.js';
 import type {
   CreateWorkLogInput,
@@ -42,7 +43,7 @@ function toDateOnly(value: string): Date {
 }
 
 function today(): Date {
-  return toDateOnly(new Date().toISOString().slice(0, 10));
+  return toDateOnly(todayWita());
 }
 
 function toItem(row: WorkLogRow) {
