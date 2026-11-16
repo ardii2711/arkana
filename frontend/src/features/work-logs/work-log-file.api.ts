@@ -1,23 +1,9 @@
 import { api } from '@/lib/api';
+import { downloadBlob } from '@/lib/download';
 import type { ApiSuccess } from '@/types/api';
 
-export const MAX_FILE_BYTES = 5 * 1024 * 1024;
 export const MAX_FILES_PER_WORK_LOG = 10;
 export const MAX_TOTAL_BYTES_PER_WORK_LOG = 50 * 1024 * 1024;
-export const ALLOWED_FILE_EXTENSIONS = [
-  'jpg',
-  'jpeg',
-  'png',
-  'webp',
-  'heic',
-  'heif',
-  'pdf',
-  'doc',
-  'docx',
-  'xls',
-  'xlsx',
-];
-export const FILE_ACCEPT = ALLOWED_FILE_EXTENSIONS.map((extension) => `.${extension}`).join(',');
 
 export type WorkLogFile = {
   id: string;
@@ -28,21 +14,6 @@ export type WorkLogFile = {
   createdAt: string;
   previewable: boolean;
 };
-
-export function fileExtension(name: string) {
-  return /\.([a-z0-9]+)$/i.exec(name)?.[1]?.toUpperCase() ?? 'FILE';
-}
-
-export function formatFileSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`;
-}
-
-export function isAllowedFile(file: File) {
-  const extension = fileExtension(file.name).toLowerCase();
-  return ALLOWED_FILE_EXTENSIONS.includes(extension);
-}
 
 export async function fetchWorkLogFiles(workLogId: string): Promise<WorkLogFile[]> {
   const { data } = await api.get<ApiSuccess<{ files: WorkLogFile[] }>>(
@@ -92,18 +63,4 @@ export async function fetchWorkLogFileBlob(
 
 export async function downloadWorkLogFile(workLogId: string, file: WorkLogFile) {
   downloadBlob(await fetchWorkLogFileBlob(workLogId, file.id), file.originalName);
-}
-
-export function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.append(anchor);
-  anchor.click();
-  anchor.remove();
-
-  // Beri waktu browser memulai unduhan sebelum blob dilepas.
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

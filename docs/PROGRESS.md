@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.1d — Detail Kegiatan & Halaman Publik (menunggu commit)
-- **Task berikutnya:** P11.2
+- **Task aktif:** P11.2 — Personal Document Archive (menunggu commit)
+- **Task berikutnya:** P11.3
 - **Update terakhir:** 16 November 2026
 
 ## Kesiapan Proyek
@@ -49,6 +49,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.1a — Data Layer & Daftar Kegiatan:** `DONE` (commit `5d12d87`).
 - **P11.1b — Form dan Penghapusan Kegiatan:** `DONE` (commit `470af90`).
 - **P11.1c — Bukti Dukung Kegiatan:** `DONE` (commit `3fb3917`).
+- **P11.1d — Detail Kegiatan & Halaman Publik:** `DONE` (commit `28dc27a`).
 
 ## Hasil Berjalan
 
@@ -362,7 +363,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Komponen shadcn baru: `progress`.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Pengujian UI dan unggah file nyata ke R2 dilakukan pengguna.
 
-### P11.1d — Detail Kegiatan & Halaman Publik (menunggu commit)
+### P11.1d — Detail Kegiatan & Halaman Publik (DONE, commit `28dc27a`)
 
 - `work-log-public.api.ts`: tipe `PublicWorkLog` (tanpa `id`/`publicToken`), `fetchPublicWorkLog(token)`, dan `publicFileUrl(token, fileId, inline)` untuk URL konten langsung.
 - `use-work-log-public.ts`: `usePublicWorkLog` dengan `retry: false`.
@@ -375,6 +376,20 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `work-log-file-icon.tsx`: `FileTypeIcon` dipindah dari `work-log-evidence.tsx` dan dipakai kedua tampilan.
 - Tanpa perubahan backend, schema, migration, env, atau dependency baru.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/p/evidence/[token]`. Pengujian UI dan tautan nyata dilakukan pengguna.
+
+### P11.2 — Personal Document Archive (menunggu commit)
+
+- Feature `frontend/src/features/archive/`: `archive.api.ts`, `archive.schemas.ts`, `archive.util.ts`, `use-archive.ts`, `archive-view.tsx`, `archive-folder-panel.tsx`, `archive-folder-dialog.tsx`, `archive-files.tsx`, `archive-file-upload-dialog.tsx`, `archive-file-edit-dialog.tsx`, `archive-file-detail.tsx`. Route `/arsip` memakai `ArchiveView`.
+- Layout dua kolom di desktop (`lg:grid-cols-[17rem_minmax(0,1fr)]`): panel folder di kiri, daftar dokumen di kanan. Di mobile panel folder dibuka lewat `Sheet` (tombol `Folder`) dan ada select folder pada filter.
+- Folder: pohon maksimal 3 level dengan jumlah file, tambah/ubah (pilihan folder induk dibatasi kedalaman), hapus (otomatis rekursif bila berisi, dengan peringatan), validasi nama unik dari backend ditampilkan di dialog.
+- Dokumen: pencarian nama/deskripsi, filter jenis (gambar/PDF/dokumen), urutan (terbaru/nama/tanggal dokumen), pagination 20, dan ringkasan folder + tanggal dokumen per baris.
+- Unggah: multipart satu file, nama opsional (default nama file), deskripsi, tanggal dokumen, folder; validasi format, 5 MB, dan sisa kuota; progres unggah dari `onUploadProgress`; dialog tidak dapat ditutup saat mengunggah.
+- Ubah metadata dan pindah folder melalui PATCH; hapus dengan konfirmasi; nomor halaman turun bila halaman terakhir menjadi kosong.
+- Detail dokumen: metadata lengkap (jenis, ukuran, folder, tanggal dokumen, deskripsi) untuk semua file, pratinjau blob untuk gambar/PDF, dan unduh.
+- Kuota 1 GB ditampilkan dengan `Progress`; tombol unggah nonaktif saat kuota habis.
+- Shared dipindah/ditambah: `src/lib/file-format.ts` (batas, ekstensi, `fileExtension`, `formatFileSize`, `isAllowedFile`), `src/lib/download.ts` (`downloadBlob`), `src/components/shared/file-type-icon.tsx`, `src/components/shared/date-picker.tsx`. `features/work-logs/work-log-file-icon.tsx` dihapus.
+- Tanpa perubahan backend, schema, migration, env, atau dependency baru.
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/arsip`. Pengujian UI dilakukan pengguna.
 
 ### Temuan Di Luar Scope
 
@@ -430,8 +445,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Tinjau dan commit P11.1d, lalu mulai P11.2 — Personal Document Archive.
-2. Lanjutkan P11.3–P11.7 sesuai urutan dependensi roadmap.
+1. Tinjau dan commit P11.2, lalu mulai P11.3 — Performance Report.
+2. Lanjutkan P11.4–P11.7 sesuai urutan dependensi roadmap.
 3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 
 ## Aturan Pembaruan

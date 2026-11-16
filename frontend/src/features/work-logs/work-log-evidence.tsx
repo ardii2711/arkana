@@ -36,16 +36,18 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
 import {
   FILE_ACCEPT,
-  MAX_FILES_PER_WORK_LOG,
   MAX_FILE_BYTES,
-  MAX_TOTAL_BYTES_PER_WORK_LOG,
-  downloadWorkLogFile,
   fileExtension,
   formatFileSize,
   isAllowedFile,
+} from '@/lib/file-format';
+import {
+  MAX_FILES_PER_WORK_LOG,
+  MAX_TOTAL_BYTES_PER_WORK_LOG,
+  downloadWorkLogFile,
   type WorkLogFile,
 } from './work-log-file.api';
-import { FileTypeIcon } from './work-log-file-icon';
+import { FileTypeIcon } from '@/components/shared/file-type-icon';
 import {
   useDeleteWorkLogFile,
   useUploadWorkLogFile,

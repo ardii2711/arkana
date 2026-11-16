@@ -18,9 +18,11 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
+import { downloadBlob } from '@/lib/download';
+import { fileExtension, formatFileSize } from '@/lib/file-format';
 import { WORK_CATEGORY_LABELS } from './work-log.api';
-import { FileTypeIcon } from './work-log-file-icon';
-import { downloadBlob, fileExtension, formatFileSize, type WorkLogFile } from './work-log-file.api';
+import { FileTypeIcon } from '@/components/shared/file-type-icon';
+import type { WorkLogFile } from './work-log-file.api';
 import { formatActivityDate } from './work-log.format';
 import { fetchPublicWorkLogFileBlob } from './work-log-public.api';
 import { usePublicWorkLog, usePublicWorkLogFileBlob } from './use-work-log-public';
