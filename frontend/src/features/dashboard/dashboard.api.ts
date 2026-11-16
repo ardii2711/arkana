@@ -41,7 +41,3 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
 
   return data.data;
 }
-
-export async function resendInvitation(id: string): Promise<void> {
-  await api.post(`/users/${id}/resend-invitation`);
-}

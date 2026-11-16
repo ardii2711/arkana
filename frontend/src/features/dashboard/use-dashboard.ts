@@ -1,8 +1,8 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import { fetchAdminDashboard, fetchUserDashboard, resendInvitation } from './dashboard.api';
+import { fetchAdminDashboard, fetchUserDashboard } from './dashboard.api';
 
 const rootKey = ['dashboard'] as const;
 
@@ -17,14 +17,5 @@ export function useAdminDashboard() {
   return useQuery({
     queryKey: [...rootKey, 'admin'] as const,
     queryFn: fetchAdminDashboard,
-  });
-}
-
-export function useResendInvitation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => resendInvitation(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: rootKey }),
   });
 }

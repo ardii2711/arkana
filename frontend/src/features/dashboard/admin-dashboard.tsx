@@ -22,7 +22,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
 import { getInitials } from '@/lib/initials';
 import { witaShortDate } from '@/features/schedules/schedule.format';
-import { useAdminDashboard, useResendInvitation } from './use-dashboard';
+import { useAdminDashboard } from './use-dashboard';
+import { useResendInvitation } from '@/features/users/use-users';
 
 export function AdminDashboard() {
   const query = useAdminDashboard();

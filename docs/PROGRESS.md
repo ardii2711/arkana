@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.6 — Dashboard (menunggu commit)
-- **Task berikutnya:** P11.7
+- **Task aktif:** P11.7 — User Management (menunggu commit)
+- **Task berikutnya:** P11.8
 - **Update terakhir:** 16 November 2026
 
 ## Kesiapan Proyek
@@ -54,6 +54,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.3 — Performance Report:** `DONE` (commit `e5ce01c`).
 - **P11.4 — Schedule:** `DONE` (commit `02ad063`).
 - **P11.5 — Notes:** `DONE` (commit `f9add48`).
+- **P11.6 — Dashboard:** `DONE` (commit `7405453`).
 
 ## Hasil Berjalan
 
@@ -429,12 +430,22 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pagination 20; catatan baru dan ubah memakai dialog yang sama (RHF tidak dipakai, form sederhana; validasi manual dengan `MAX_LENGTH` 20.000 dan pesan error).
 - Tanpa dependency, migration, atau env baru. Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) lulus; build menghasilkan route `/catatan`. Pengujian UI dilakukan pengguna.
 
-### P11.6 — Dashboard (menunggu commit)
+### P11.6 — Dashboard (DONE, commit `7405453`)
 
 - Feature `frontend/src/features/dashboard/`: `dashboard.api.ts`, `use-dashboard.ts`, `dashboard-view.tsx` (switch role via `useSession`), `user-dashboard.tsx`, `admin-dashboard.tsx`; route `/` menggantikan placeholder. Fungsi `resendInvitation` (`POST /users/:id/resend-invitation`) termasuk di file ini.
 - Dashboard USER: 4 kartu ringkasan (kegiatan bulan berjalan, 7 hari terakhir, file bukti dukung, pemakaian kuota arsip via `Progress`); agenda hari ini; 5 agenda terdekat (bukan `CANCELLED`, dari backend); 5 catatan disematkan; aksi cepat berupa `Link` ke `/kegiatan`, `/agenda`, `/catatan`. Tanpa grafik — data `workLogCategories`/`workLogTrend` dari API dibiarkan (tipe tetap akurat), tidak dirender.
 - Dashboard ADMIN: 3 kartu (akun aktif/diundang/nonaktif, khusus role `USER` di backend); daftar undangan belum diterima + tombol `Kirim ulang` (`{ sent: true }` → toast sukses; error → `getErrorMessage`).
 - Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah. Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) lulus; build tetap menghasilkan route `/`. Pengujian UI dilakukan pengguna.
+
+### P11.7 — User Management (menunggu commit)
+
+- `resendInvitation` dipindah dari `features/dashboard/dashboard.api.ts` ke `features/users/users.api.ts` (tanpa duplikasi); `admin-dashboard.tsx` kini memakai `useResendInvitation` dari `features/users/use-users`; mutasi user meng-`invalidateQueries` `['users']` dan `['dashboard']`.
+- Feature `frontend/src/features/users/`: `users.api.ts`, `users.schemas.ts`, `use-users.ts`, `user-invite-dialog.tsx`, `user-edit-dialog.tsx`, `users-view.tsx`; route `/akun` menggantikan placeholder.
+- Daftar akun: tabel (≥`md`) dan kartu (mobile) — kolom Pengguna (avatar initials + badge `Admin` untuk role `ADMIN`) · Status (`Aktif`/`Diundang`/`Nonaktif`) · Terdaftar (WITA) · Aksi; pagination 20; pencarian nama/email (submit); kosong/halaman di luar tersedia menampilkan tombol kembali.
+- Guard halaman: selain `ADMIN` melihat layar "Akses ditolak" + tautan ke `/`; baris `role: 'ADMIN'` tanpa aksi (backend `403` untuk ubah/undang Admin).
+- Undangan (`POST /users/invite`) via dialog RHF + Zod; error 409 `EMAIL_TAKEN` tampil di dialog. Edit (`PATCH /users/:id`): ubah `name`/`email`/`status` (`ACTIVE`/`INACTIVE`); select status dinonaktifkan untuk akun `INVITED` dan `status` tidak dikirim saat itu (backend menolak `ACTIVE` sebelum aktivasi).
+- Kirim ulang undangan (`INVITED`) dan ubah memakai pola admin dashboard (toast `sonner`, `getErrorMessage`).
+- Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah. Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) lulus; build tetap menghasilkan route `/akun`. Pengujian UI dilakukan pengguna.
 
 ### Temuan Di Luar Scope
 
@@ -490,8 +501,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Mulai P11.6 — Dashboard.
-2. Lanjutkan P11.7 sesuai urutan dependensi roadmap.
+1. Mulai P11.7 — User Management (Admin).
+2. Lanjutkan P11.8 sesuai urutan dependensi roadmap.
 3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 
 ## Aturan Pembaruan
