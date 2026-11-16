@@ -6,9 +6,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.1c — Bukti Dukung Kegiatan (menunggu commit)
-- **Task berikutnya:** P11.1d
-- **Update terakhir:** 15 November 2026
+- **Task aktif:** P11.1d — Detail Kegiatan & Halaman Publik
+- **Task berikutnya:** P11.2
+- **Update terakhir:** 16 November 2026
 
 ## Kesiapan Proyek
 
@@ -48,6 +48,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P10.2 — Application Layout:** `DONE` (commit `fa44cec`, penyempurnaan `bb44c0b`).
 - **P11.1a — Data Layer & Daftar Kegiatan:** `DONE` (commit `5d12d87`).
 - **P11.1b — Form dan Penghapusan Kegiatan:** `DONE` (commit `470af90`).
+- **P11.1c — Bukti Dukung Kegiatan:** `DONE` (commit `3fb3917`).
 
 ## Hasil Berjalan
 
@@ -350,7 +351,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Script frontend `typecheck` menjadi `next typegen && tsc --noEmit` agar tipe route baru tersedia sebelum `tsc`.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/kegiatan` dan `/kegiatan/[id]`. Pengujian UI dilakukan pengguna.
 
-### P11.1c — Bukti Dukung Kegiatan (menunggu commit)
+### P11.1c — Bukti Dukung Kegiatan (DONE, commit `3fb3917`)
 
 - `work-log-file.api.ts`: tipe `WorkLogFile`, batas klien (5 MB/file, 10 file, 50 MB total), daftar ekstensi, `fileExtension`, `formatFileSize`, `isAllowedFile`, `fetchWorkLogFiles`, `uploadWorkLogFile` (multipart field `file`), `deleteWorkLogFile`, dan `workLogFileContentUrl` (opsi `inline=true`).
 - `use-work-log-files.ts`: query daftar file serta mutation unggah/hapus yang memperbarui cache daftar.
@@ -413,7 +414,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Pekerjaan Berikutnya
 
-1. Tinjau dan commit P11.1c, lalu lanjut P11.1d (detail kegiatan dan halaman publik).
+Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
+
+1. Mulai P11.1d — Detail Kegiatan & Halaman Publik (`/p/evidence/[token]`).
+2. Lanjutkan P11.2–P11.7 sesuai urutan dependensi roadmap.
 3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 
 ## Aturan Pembaruan

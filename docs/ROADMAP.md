@@ -8,6 +8,7 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 - Kerjakan fase dan task secara berurutan sesuai dependensi.
 - Selesaikan satu task sebelum beralih ke task berikutnya.
 - Setiap task memiliki tujuan, ruang lingkup, dan kriteria penerimaan.
+- Format task: `Objective`, `Scope`, `Acceptance Criteria`, dan `Dependencies`. Task yang sudah selesai sebelum normalisasi dipertahankan dalam bentuk ringkas dan tidak diubah.
 - Keputusan yang belum ditentukan harus disepakati sebelum implementasi terkait.
 - Perubahan kebutuhan atau arsitektur harus mendapat persetujuan.
 - Catat perkembangan aktual di `PROGRESS.md`.
@@ -322,68 +323,60 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 
 #### P11.1d — Detail Kegiatan & Halaman Publik
 
-- Implementasikan tautan publik permanen per kegiatan beserta aksi salin tautan.
-- Implementasikan halaman publik `/p/evidence/[token]` tanpa sesi, memuat nama kegiatan, tanggal, kategori, uraian, output, dan seluruh bukti dukung.
-
-**Kriteria penerimaan:** Tautan publik menampilkan kegiatan dan bukti dukung terkait tanpa login serta mengikuti rute yang dipakai backend pada laporan.
-
-**Dependensi:** P11.1c.
+- **Objective:** Menyediakan tautan publik permanen per kegiatan dan halaman publiknya untuk pemeriksa tanpa login.
+- **Scope:** Tautan publik per kegiatan beserta aksi salin tautan; halaman `/p/evidence/[token]` tanpa sesi yang memuat nama kegiatan, tanggal, kategori, uraian, output, dan seluruh bukti dukung.
+- **Acceptance Criteria:** Tautan publik menampilkan kegiatan dan bukti dukung terkait tanpa login serta mengikuti rute yang dipakai backend pada laporan.
+- **Dependencies:** P11.1c.
 
 ### P11.2 — Personal Document Archive
 
-- Implementasikan daftar, detail, folder, dan form arsip.
-- Implementasikan preview, download, dan pengelolaan dokumen.
-
-**Kriteria penerimaan:** Pengelolaan arsip berjalan sesuai API backend.
+- **Objective:** Menyediakan antarmuka pengelolaan arsip dokumen pribadi yang terhubung ke Archive API.
+- **Scope:** Daftar, detail, folder, dan form arsip; preview, download, dan pengelolaan dokumen.
+- **Acceptance Criteria:** Pengelolaan arsip berjalan sesuai API backend.
+- **Dependencies:** P10.2, P4.2.
 
 ### P11.3 — Performance Report
 
-- Implementasikan pemilihan periode dan tampilan rekap.
-- Implementasikan penyusunan dan ekspor laporan.
-
-**Kriteria penerimaan:** Laporan dapat dilihat dan diekspor sesuai ketentuan.
+- **Objective:** Menyediakan antarmuka penyusunan dan ekspor rekap kinerja.
+- **Scope:** Pemilihan periode dan tampilan rekap; penyusunan dan ekspor laporan.
+- **Acceptance Criteria:** Laporan dapat dilihat dan diekspor sesuai ketentuan.
+- **Dependencies:** P11.1d (tautan publik kegiatan), P5.2.
 
 ### P11.4 — Schedule
 
-- Implementasikan kalender, daftar agenda, dan form agenda.
-- Pengingat dan notifikasi tidak termasuk dalam task ini (ditangguhkan).
-
-**Kriteria penerimaan:** Agenda dapat dikelola melalui antarmuka sesuai API backend.
+- **Objective:** Menyediakan antarmuka pengelolaan agenda.
+- **Scope:** Kalender, daftar agenda, dan form agenda. Pengingat dan notifikasi tidak termasuk dalam task ini (ditangguhkan).
+- **Acceptance Criteria:** Agenda dapat dikelola melalui antarmuka sesuai API backend.
+- **Dependencies:** P6.2.
 
 ### P11.5 — Notes
 
-- Implementasikan daftar, detail, dan form catatan.
-
-**Kriteria penerimaan:** Notes dapat dikelola melalui antarmuka.
+- **Objective:** Menyediakan antarmuka pengelolaan catatan pribadi.
+- **Scope:** Daftar, detail, dan form catatan.
+- **Acceptance Criteria:** Notes dapat dikelola melalui antarmuka.
+- **Dependencies:** P7.2.
 
 ### P11.6 — Dashboard
 
-- Implementasikan ringkasan, statistik, dan informasi aktivitas.
-- Integrasikan dengan Dashboard API.
-
-**Kriteria penerimaan:** Dashboard menampilkan data sesuai backend.
+- **Objective:** Menyediakan antarmuka ringkasan aktivitas bagi User dan Admin.
+- **Scope:** Ringkasan, statistik, dan informasi aktivitas; integrasi dengan Dashboard API.
+- **Acceptance Criteria:** Dashboard menampilkan data sesuai backend.
+- **Dependencies:** P8.2, P11.1d, P11.4, P11.5.
 
 ### P11.7 — User Management
 
-- Implementasikan antarmuka pengelolaan akun untuk Admin.
-- Implementasikan undangan, perubahan informasi, dan penonaktifan akun.
-
-**Kriteria penerimaan:** Admin dapat mengelola akun tanpa akses ke konten pribadi User.
+- **Objective:** Menyediakan antarmuka pengelolaan akun bagi Admin.
+- **Scope:** Undangan, perubahan informasi, dan penonaktifan akun.
+- **Acceptance Criteria:** Admin dapat mengelola akun tanpa akses ke konten pribadi User.
+- **Dependencies:** P2.2, P2.5, P8.2.
 
 ### P11.8 — Profil Pengguna
 
-**Tujuan:** Memungkinkan User mengubah informasi profilnya sendiri.
-
-**Ruang lingkup:**
-
-- Backend: endpoint pembaruan profil milik sendiri (`requireRole('USER')`), validasi input, dan notifikasi email bila alamat email berubah sesuai pola `P2.5`.
-- Frontend: form edit profil pada `/profil` beserta feedback hasil operasi, memakai kembali komponen form yang sudah ada.
-
-**Keputusan yang diperlukan sebelum implementasi:** field yang boleh diubah (nama, email, atau keduanya) dan syarat verifikasi email baru.
-
-**Kriteria penerimaan:** User dapat mengubah profilnya sendiri dan perubahan terekam pada sesi yang aktif.
-
-**Dependensi:** P10.2; P11.1a untuk pola feature frontend.
+- **Objective:** Memungkinkan User mengubah informasi profilnya sendiri.
+- **Scope:** Backend: endpoint pembaruan profil milik sendiri (`requireRole('USER')`), validasi input, dan notifikasi email bila alamat email berubah sesuai pola `P2.5`. Frontend: form edit profil pada `/profil` beserta feedback hasil operasi, memakai kembali komponen form yang sudah ada.
+- **Acceptance Criteria:** User dapat mengubah profilnya sendiri dan perubahan terekam pada sesi yang aktif.
+- **Dependencies:** P10.2; P11.1a untuk pola feature frontend.
+- **Blocker:** Field yang boleh diubah (nama, email, atau keduanya) dan syarat verifikasi email baru harus disepakati sebelum implementasi.
 
 ## Phase 12 — Final Integration & Production Release
 
@@ -391,38 +384,31 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 
 ### P12.1 — Functional & Integration Testing
 
-- Uji seluruh alur utama frontend dan backend.
-- Uji integrasi database, email, dan R2.
-- Uji autentikasi, otorisasi, dan kepemilikan data.
-- Uji upload, preview, download, dan tautan publik.
-- Uji seluruh modul dan alur lintas fitur.
-
-**Kriteria penerimaan:** Seluruh alur utama berjalan dan tidak ada kegagalan kritis.
+- **Objective:** Memastikan seluruh alur aplikasi berjalan terintegrasi antara frontend, backend, database, email, dan R2.
+- **Scope:** Uji seluruh alur utama frontend dan backend; integrasi database, email, dan R2; autentikasi, otorisasi, dan kepemilikan data; upload, preview, download, dan tautan publik; seluruh modul dan alur lintas fitur.
+- **Acceptance Criteria:** Seluruh alur utama berjalan dan tidak ada kegagalan kritis.
+- **Dependencies:** Seluruh task implementasi P1.1–P11.8.
 
 ### P12.2 — Security & Performance Verification
 
-- Periksa keamanan autentikasi dan akses data.
-- Periksa validasi, penanganan error, dan kebocoran informasi.
-- Periksa performa aplikasi dan penggunaan sumber daya.
-
-**Kriteria penerimaan:** Tidak ditemukan masalah keamanan kritis dan performa memadai.
+- **Objective:** Memastikan keamanan akses data dan performa aplikasi memadai sebelum rilis.
+- **Scope:** Pemeriksaan keamanan autentikasi dan akses data; validasi, penanganan error, dan kebocoran informasi; performa aplikasi dan penggunaan sumber daya.
+- **Acceptance Criteria:** Tidak ditemukan masalah keamanan kritis dan performa memadai.
+- **Dependencies:** P12.1.
 
 ### P12.3 — Production Deployment
 
-- Siapkan environment produksi.
-- Konfigurasikan domain, HTTPS, cookie, CORS, database, dan R2.
-- Deploy frontend dan backend.
-- Verifikasi fungsi aplikasi di produksi.
-
-**Kriteria penerimaan:** Aplikasi berjalan dan dapat digunakan di lingkungan produksi.
+- **Objective:** Menjalankan aplikasi di lingkungan produksi.
+- **Scope:** Penyiapan environment produksi; konfigurasi domain, HTTPS, cookie, CORS, database, dan R2; deploy frontend dan backend; verifikasi fungsi di produksi.
+- **Acceptance Criteria:** Aplikasi berjalan dan dapat digunakan di lingkungan produksi.
+- **Dependencies:** P12.1, P12.2.
 
 ### P12.4 — Backup & Recovery
 
-- Finalisasi strategi backup database dan file.
-- Dokumentasikan prosedur pemulihan.
-- Verifikasi proses recovery sesuai cakupan yang disetujui.
-
-**Kriteria penerimaan:** Prosedur backup dan recovery tersedia dan terverifikasi.
+- **Objective:** Menyediakan prosedur backup dan pemulihan data yang terverifikasi.
+- **Scope:** Finalisasi strategi backup database dan file; dokumentasi prosedur pemulihan; verifikasi proses recovery sesuai cakupan yang disetujui.
+- **Acceptance Criteria:** Prosedur backup dan recovery tersedia dan terverifikasi.
+- **Dependencies:** P12.3.
 
 ## Roadmap Governance
 
