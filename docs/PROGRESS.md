@@ -6,7 +6,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.1d — Detail Kegiatan & Halaman Publik
+- **Task aktif:** P11.1d — Detail Kegiatan & Halaman Publik (menunggu commit)
 - **Task berikutnya:** P11.2
 - **Update terakhir:** 16 November 2026
 
@@ -362,6 +362,20 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Komponen shadcn baru: `progress`.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus. Pengujian UI dan unggah file nyata ke R2 dilakukan pengguna.
 
+### P11.1d — Detail Kegiatan & Halaman Publik (menunggu commit)
+
+- `work-log-public.api.ts`: tipe `PublicWorkLog` (tanpa `id`/`publicToken`), `fetchPublicWorkLog(token)`, dan `publicFileUrl(token, fileId, inline)` untuk URL konten langsung.
+- `use-work-log-public.ts`: `usePublicWorkLog` dengan `retry: false`.
+- Route publik `src/app/p/evidence/[token]/page.tsx` di luar route group `(app)`, metadata `robots: { index: false, follow: false }` agar tautan bearer tidak diindeks.
+- `work-log-public-view.tsx`: tampilan read-only (nama, tanggal, kategori, uraian, output, daftar file dengan format dan ukuran), tanpa identitas pemilik.
+- Pratinjau dan unduh memakai blob melalui Axios (`responseType: 'blob'`, `?inline=true` untuk pratinjau) lalu object URL. URL konten langsung tidak bisa dipakai: `helmet()` mengirim `Cross-Origin-Resource-Policy: same-origin` dan `X-Frame-Options: SAMEORIGIN`, sehingga browser memblokir `localhost:4000` dari halaman `localhost:3000`. Perilaku ini sama dengan halaman privat.
+- Helper `downloadBlob` diekstrak ke `work-log-file.api.ts` dan dipakai halaman privat serta publik.
+- Dialog pratinjau diperbesar: `sm:max-w-5xl`, area pratinjau `60vh` di mobile dan `75vh` di desktop (berlaku juga pada halaman detail privat).
+- Halaman detail privat: tombol `Salin tautan` menyalin `${origin}/p/evidence/{publicToken}` ke clipboard beserta toast berhasil/gagal.
+- `work-log-file-icon.tsx`: `FileTypeIcon` dipindah dari `work-log-evidence.tsx` dan dipakai kedua tampilan.
+- Tanpa perubahan backend, schema, migration, env, atau dependency baru.
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/p/evidence/[token]`. Pengujian UI dan tautan nyata dilakukan pengguna.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
@@ -416,8 +430,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Mulai P11.1d — Detail Kegiatan & Halaman Publik (`/p/evidence/[token]`).
-2. Lanjutkan P11.2–P11.7 sesuai urutan dependensi roadmap.
+1. Tinjau dan commit P11.1d, lalu mulai P11.2 — Personal Document Archive.
+2. Lanjutkan P11.3–P11.7 sesuai urutan dependensi roadmap.
 3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 
 ## Aturan Pembaruan

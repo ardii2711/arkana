@@ -3,9 +3,6 @@
 import {
   DownloadIcon,
   EyeIcon,
-  FileIcon,
-  FileImageIcon,
-  FileTextIcon,
   Loader2Icon,
   Trash2Icon,
   TriangleAlertIcon,
@@ -48,6 +45,7 @@ import {
   isAllowedFile,
   type WorkLogFile,
 } from './work-log-file.api';
+import { FileTypeIcon } from './work-log-file-icon';
 import {
   useDeleteWorkLogFile,
   useUploadWorkLogFile,
@@ -253,7 +251,7 @@ export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
             >
               <div className="flex min-w-0 items-center gap-3">
                 <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
-                  <FileTypeIcon file={file} />
+                  <FileTypeIcon mimeType={file.mimeType} />
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{file.originalName}</p>
@@ -338,13 +336,13 @@ export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
       </Dialog>
 
       <Dialog open={preview !== null} onOpenChange={(open) => !open && setPreview(null)}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-5xl">
           <DialogHeader>
             <DialogTitle className="truncate pr-6">{preview?.originalName}</DialogTitle>
           </DialogHeader>
 
           {previewBlob.isPending ? (
-            <Skeleton className="h-[55vh] w-full" />
+            <Skeleton className="h-[60vh] sm:h-[75vh] w-full" />
           ) : previewBlob.isError ? (
             <Alert variant="destructive">
               <TriangleAlertIcon />
@@ -355,14 +353,14 @@ export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
               <iframe
                 src={previewUrl}
                 title={preview.originalName}
-                className="bg-muted h-[65vh] w-full rounded-lg border"
+                className="bg-muted h-[60vh] sm:h-[75vh] w-full rounded-lg border"
               />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={previewUrl}
                 alt={preview.originalName}
-                className="bg-muted max-h-[65vh] w-full rounded-lg object-contain"
+                className="bg-muted max-h-[60vh] w-full rounded-lg object-contain sm:max-h-[75vh]"
               />
             )
           ) : null}
@@ -396,10 +394,4 @@ export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
       </AlertDialog>
     </section>
   );
-}
-
-function FileTypeIcon({ file }: { file: WorkLogFile }) {
-  if (file.mimeType.startsWith('image/')) return <FileImageIcon aria-hidden="true" />;
-  if (file.mimeType === 'application/pdf') return <FileTextIcon aria-hidden="true" />;
-  return <FileIcon aria-hidden="true" />;
 }

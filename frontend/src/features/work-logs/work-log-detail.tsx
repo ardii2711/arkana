@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeftIcon, PencilIcon, Trash2Icon, TriangleAlertIcon } from 'lucide-react';
+import { ArrowLeftIcon, LinkIcon, PencilIcon, Trash2Icon, TriangleAlertIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -76,6 +76,17 @@ export function WorkLogDetail({ id }: { id: string }) {
     });
   }
 
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/p/evidence/${workLog.publicToken}`,
+      );
+      toast.success('Tautan publik disalin.');
+    } catch {
+      toast.error('Tautan gagal disalin.');
+    }
+  }
+
   return (
     <div className="w-full space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -93,7 +104,11 @@ export function WorkLogDetail({ id }: { id: string }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" onClick={() => void handleCopyLink()}>
+            <LinkIcon />
+            Salin tautan
+          </Button>
           <Button variant="outline" onClick={() => setEditOpen(true)}>
             <PencilIcon />
             Ubah

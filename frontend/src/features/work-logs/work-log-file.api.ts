@@ -91,12 +91,15 @@ export async function fetchWorkLogFileBlob(
 }
 
 export async function downloadWorkLogFile(workLogId: string, file: WorkLogFile) {
-  const blob = await fetchWorkLogFileBlob(workLogId, file.id);
+  downloadBlob(await fetchWorkLogFileBlob(workLogId, file.id), file.originalName);
+}
+
+export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
 
   anchor.href = url;
-  anchor.download = file.originalName;
+  anchor.download = filename;
   document.body.append(anchor);
   anchor.click();
   anchor.remove();
