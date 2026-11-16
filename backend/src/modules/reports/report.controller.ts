@@ -2,9 +2,10 @@ import type { RequestHandler } from 'express';
 
 import { logger } from '../../lib/logger.js';
 import { ApiError } from '../../utils/api-error.js';
+import { sendSuccess } from '../../utils/api-response.js';
 import { currentUser } from '../../utils/current-user.js';
 import { createReportPdf } from './report.pdf.js';
-import type { ReportExportQuery } from './report.schema.js';
+import type { ReportExportQuery, ReportQuery } from './report.schema.js';
 import { buildReport } from './report.service.js';
 import { buildReportXlsx } from './report.xlsx.js';
 
@@ -18,6 +19,12 @@ function fileName(query: ReportExportQuery, from: string, to: string): string {
 
   return `rekap-kinerja-${range}.${query.format}`;
 }
+
+export const getReportHandler: RequestHandler = async (req, res) => {
+  const query = res.locals.input.query as ReportQuery;
+
+  sendSuccess(res, await buildReport(currentUser(req), query));
+};
 
 export const exportReportHandler: RequestHandler = async (req, res) => {
   const query = res.locals.input.query as ReportExportQuery;

@@ -3,7 +3,7 @@ import { prisma } from '../../lib/prisma.js';
 import type { AuthUser } from '../../types/auth.js';
 import { formatDateTimeWita, resolveRange } from './report.period.js';
 import { CATEGORY_LABELS, summarizeEvidence, type ReportData } from './report.rows.js';
-import type { ReportExportQuery } from './report.schema.js';
+import type { ReportQuery } from './report.schema.js';
 
 function toDbDate(value: string): Date {
   return new Date(`${value}T00:00:00.000Z`);
@@ -15,7 +15,7 @@ function evidenceUrl(publicToken: string): string {
   return `${base}/p/evidence/${publicToken}`;
 }
 
-export async function buildReport(user: AuthUser, query: ReportExportQuery): Promise<ReportData> {
+export async function buildReport(user: AuthUser, query: ReportQuery): Promise<ReportData> {
   const range = resolveRange(query);
 
   const workLogs = await prisma.workLog.findMany({

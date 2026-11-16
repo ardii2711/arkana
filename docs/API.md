@@ -89,11 +89,12 @@ Role `USER`. Privat, tanpa tautan publik. Kuota 1 GB per akun.
 
 ## 6. Laporan Kinerja
 
-| Method | Endpoint                    | Keterangan     |
-| ------ | --------------------------- | -------------- |
-| GET    | `/reports/work-logs/export` | Unduh XLSX/PDF |
+| Method | Endpoint                    | Keterangan                       |
+| ------ | --------------------------- | -------------------------------- |
+| GET    | `/reports/work-logs`        | Pratinjau rekap (JSON)           |
+| GET    | `/reports/work-logs/export` | Unduh XLSX/PDF                   |
 
-Query: `format=xlsx|pdf` (default `xlsx`), `period=daily|weekly|monthly|yearly|custom`, `date` (opsional untuk periode non-custom), `from`+`to` (wajib untuk `custom`), `category`, `groupBy=category`, `onlyWithEvidence=true`. Periode dihitung WITA; minggu Senin–Minggu.
+Query: `period` wajib (`daily|weekly|monthly|yearly|custom`), `date` opsional untuk periode non-custom (default hari ini), `from`+`to` wajib untuk `custom`, `category`, `groupBy=category`, `onlyWithEvidence=true`; `format=xlsx|pdf` (default `xlsx`) hanya untuk endpoint export. Periode dihitung WITA; minggu Senin–Minggu.
 
 ## 7. Agenda
 
