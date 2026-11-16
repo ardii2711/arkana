@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.7 — User Management (menunggu commit)
-- **Task berikutnya:** P11.8
+- **Task aktif:** P11.8 — Profil Pengguna
+- **Task berikutnya:** P11.9
 - **Update terakhir:** 16 November 2026
 
 ## Kesiapan Proyek
@@ -55,6 +55,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.4 — Schedule:** `DONE` (commit `02ad063`).
 - **P11.5 — Notes:** `DONE` (commit `f9add48`).
 - **P11.6 — Dashboard:** `DONE` (commit `7405453`).
+- **P11.7 — User Management:** `DONE` (commit `fc24f0a`).
 
 ## Hasil Berjalan
 
@@ -437,7 +438,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Dashboard ADMIN: 3 kartu (akun aktif/diundang/nonaktif, khusus role `USER` di backend); daftar undangan belum diterima + tombol `Kirim ulang` (`{ sent: true }` → toast sukses; error → `getErrorMessage`).
 - Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah. Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) lulus; build tetap menghasilkan route `/`. Pengujian UI dilakukan pengguna.
 
-### P11.7 — User Management (menunggu commit)
+### P11.7 — User Management (DONE, commit `fc24f0a`)
 
 - `resendInvitation` dipindah dari `features/dashboard/dashboard.api.ts` ke `features/users/users.api.ts` (tanpa duplikasi); `admin-dashboard.tsx` kini memakai `useResendInvitation` dari `features/users/use-users`; mutasi user meng-`invalidateQueries` `['users']` dan `['dashboard']`.
 - Feature `frontend/src/features/users/`: `users.api.ts`, `users.schemas.ts`, `use-users.ts`, `user-invite-dialog.tsx`, `user-edit-dialog.tsx`, `users-view.tsx`; route `/akun` menggantikan placeholder.
@@ -501,7 +502,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Mulai P11.7 — User Management (Admin).
+1. Mulai P11.8 — Profil Pengguna (blocker: field yang boleh diubah dan syarat verifikasi email baru harus disepakati).
 2. Lanjutkan P11.8 sesuai urutan dependensi roadmap.
 3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 

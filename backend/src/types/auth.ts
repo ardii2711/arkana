@@ -6,4 +6,13 @@ export interface AuthUser {
   email: string;
   role: Role;
   status: UserStatus;
+  titleBefore?: string | null;
+  titleAfter?: string | null;
+  nip?: string | null;
+  employeeStatus?: string | null;
+  golongan?: string | null;
+  position?: string | null;
+  unit?: string | null;
+  hasAvatar?: boolean;
+  updatedAt?: Date;
 }

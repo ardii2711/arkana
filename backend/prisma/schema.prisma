@@ -23,6 +23,7 @@ enum UserStatus {
 enum AccountTokenType {
   INVITATION
   PASSWORD_RESET
+  EMAIL_CHANGE
 }
 
 enum WorkCategory {
@@ -59,6 +60,15 @@ model User {
   googleId     String?    @unique
   role         Role       @default(USER)
   status       UserStatus @default(INVITED)
+  titleBefore    String?
+  titleAfter     String?
+  nip            String?    @unique
+  employeeStatus String?
+  golongan       String?
+  position       String?
+  unit           String?
+  avatarKey      String?
+  pendingEmail   String?
   activatedAt  DateTime?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt

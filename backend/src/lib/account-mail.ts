@@ -20,6 +20,21 @@ export async function sendInvitationEmail(
   });
 }
 
+export async function sendEmailChangeLink(
+  name: string,
+  email: string,
+  token: string,
+): Promise<void> {
+  const link = appLink(`/verifikasi-email?token=${token}`);
+
+  await sendMail({
+    to: email,
+    subject: 'Verifikasi email akun ARKANA',
+    text: `Halo ${name},\n\nAnda meminta perubahan email akun ARKANA ke alamat ini. Klik tautan berikut untuk memverifikasinya:\n${link}\n\nTautan berlaku 7 hari. Jika bukan Anda yang meminta, abaikan email ini.`,
+    html: `<p>Halo ${name},</p><p>Anda meminta perubahan email akun ARKANA ke alamat ini. Klik tautan berikut untuk memverifikasinya:</p><p><a href="${link}">Verifikasi email</a></p><p>Tautan berlaku 7 hari. Jika bukan Anda yang meminta, abaikan email ini.</p>`,
+  });
+}
+
 export async function notifyAccountActivated(name: string, email: string): Promise<void> {
   const link = appLink('/login');
 

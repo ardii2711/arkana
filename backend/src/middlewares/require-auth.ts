@@ -15,13 +15,29 @@ export const requireAuth: RequestHandler = async (req, _res, next) => {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, name: true, email: true, role: true, status: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      titleBefore: true,
+      titleAfter: true,
+      nip: true,
+      employeeStatus: true,
+      golongan: true,
+      position: true,
+      unit: true,
+      avatarKey: true,
+      updatedAt: true,
+    },
   });
 
   if (!user || user.status !== 'ACTIVE') {
     throw new ApiError(401, 'UNAUTHENTICATED', 'Akun tidak aktif');
   }
 
-  req.user = user;
+  const { avatarKey, ...profile } = user;
+  req.user = { ...profile, hasAvatar: Boolean(avatarKey) };
   next();
 };
