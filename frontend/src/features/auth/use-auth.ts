@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ApiError } from '@/lib/api-error';
 import {
   activateAccount,
+  changePassword,
   fetchActivationInfo,
   fetchSession,
   login,
@@ -70,6 +71,10 @@ export function useActivateAccount() {
 
 export function useRequestPasswordReset() {
   return useMutation({ mutationFn: requestPasswordReset });
+}
+
+export function useChangePassword() {
+  return useMutation({ mutationFn: changePassword });
 }
 
 export function useResetPassword() {

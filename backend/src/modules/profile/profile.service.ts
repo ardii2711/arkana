@@ -30,6 +30,7 @@ const profileSelect = {
   position: true,
   unit: true,
   avatarKey: true,
+  pendingEmail: true,
   updatedAt: true,
 } as const;
 
@@ -47,6 +48,7 @@ interface ProfileRow {
   position: string | null;
   unit: string | null;
   avatarKey: string | null;
+  pendingEmail: string | null;
   updatedAt: Date;
 }
 

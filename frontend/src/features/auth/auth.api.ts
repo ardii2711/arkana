@@ -7,6 +7,16 @@ export type SessionUser = {
   email: string;
   role: 'ADMIN' | 'USER';
   status: 'INVITED' | 'ACTIVE' | 'INACTIVE';
+  titleBefore?: string | null;
+  titleAfter?: string | null;
+  nip?: string | null;
+  employeeStatus?: string | null;
+  golongan?: string | null;
+  position?: string | null;
+  unit?: string | null;
+  hasAvatar?: boolean;
+  pendingEmail?: string | null;
+  updatedAt?: string;
 };
 
 export type ActivationInfo = {
@@ -41,6 +51,13 @@ export async function activateAccount(input: { token: string; password: string }
 
 export async function requestPasswordReset(email: string): Promise<void> {
   await api.post('/auth/password/forgot', { email });
+}
+
+export async function changePassword(input: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<void> {
+  await api.post('/auth/password/change', input);
 }
 
 export async function resetPassword(input: { token: string; password: string }): Promise<void> {

@@ -14,5 +14,6 @@ export interface AuthUser {
   position?: string | null;
   unit?: string | null;
   hasAvatar?: boolean;
+  pendingEmail?: string | null;
   updatedAt?: Date;
 }

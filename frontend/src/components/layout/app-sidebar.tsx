@@ -16,7 +16,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/shared/user-avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/sidebar';
 import type { SessionUser } from '@/features/auth/auth.api';
 import { useLogout } from '@/features/auth/use-auth';
-import { getInitials } from '@/lib/initials';
+import { getDisplayName } from '@/lib/display-name';
 
 type NavItem = {
   href: string;
@@ -73,6 +73,7 @@ export function AppSidebar({ user }: { user: SessionUser }) {
   const logout = useLogout();
   const { setOpenMobile } = useSidebar();
   const items = user.role === 'ADMIN' ? adminNav : userNav;
+  const displayName = getDisplayName(user);
 
   return (
     <Sidebar collapsible="icon">
@@ -133,14 +134,12 @@ export function AppSidebar({ user }: { user: SessionUser }) {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  aria-label={`Buka menu akun ${user.name}`}
+                  aria-label={`Buka menu akun ${displayName}`}
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
-                  <Avatar>
-                    <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                  </Avatar>
+                  <UserAvatar user={user} />
                   <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate font-medium">{displayName}</span>
                     <span className="text-muted-foreground truncate text-xs">{user.email}</span>
                   </div>
                   <ChevronsUpDownIcon className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
@@ -149,12 +148,10 @@ export function AppSidebar({ user }: { user: SessionUser }) {
               <DropdownMenuContent side="top" align="start" sideOffset={8} className="min-w-56">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex items-center gap-3 py-1">
-                    <Avatar size="lg">
-                      <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                    </Avatar>
+                    <UserAvatar user={user} size="lg" />
                     <div className="grid min-w-0 flex-1">
                       <span className="truncate text-sm font-medium text-foreground">
-                        {user.name}
+                        {displayName}
                       </span>
                       <span className="text-muted-foreground truncate text-xs">{user.email}</span>
                     </div>

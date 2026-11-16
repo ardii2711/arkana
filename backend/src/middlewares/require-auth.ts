@@ -29,6 +29,7 @@ export const requireAuth: RequestHandler = async (req, _res, next) => {
       position: true,
       unit: true,
       avatarKey: true,
+      pendingEmail: true,
       updatedAt: true,
     },
   });

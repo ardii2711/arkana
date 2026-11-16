@@ -19,7 +19,7 @@ Cookie sesi: `arkana_access` (path `/`, 15 menit) dan `arkana_refresh` (path `/a
 | POST   | `/auth/login`             | publik | Email + password; memasang cookie sesi                          |
 | POST   | `/auth/refresh`           | cookie | Rotasi refresh token; memasang cookie sesi baru                 |
 | POST   | `/auth/logout`            | publik | Mencabut refresh token; `204`                                   |
-| GET    | `/auth/me`                | login  | Profil pengguna aktif (`id`, `name`, `email`, `role`, `status`) |
+| GET    | `/auth/me`                | login  | Profil pengguna aktif (`id`, `name`, `email`, `role`, `status`, field profil, `hasAvatar`, `pendingEmail`, `updatedAt`) |
 | GET    | `/auth/google`            | publik | Redirect ke Google (Authorization Code + PKCE)                  |
 | GET    | `/auth/google/callback`   | publik | Callback OAuth; sukses/gagal redirect ke `CORS_ORIGIN`          |
 | GET    | `/auth/activation/:token` | publik | Info akun untuk halaman aktivasi (`name`, `email`)              |
@@ -32,7 +32,22 @@ Rate limit per IP: login 10, refresh 60, logout 30, aktivasi 10, Google 20, forg
 
 Kode error OAuth pada redirect ke `/login?error=`: `oauth_cancelled`, `oauth_invalid_state`, `account_not_registered`, `account_inactive`, `google_account_mismatch`, `oauth_failed`.
 
-## 2. Endpoint Admin
+## 2. Profil Pengguna
+
+Role `USER` dan `ADMIN` (self-service). `GET /auth/me` memuat field profil berikut: `titleBefore`, `titleAfter`, `nip`, `employeeStatus`, `golongan`, `position`, `unit` (semua `null`-able), `hasAvatar` (boolean), dan `updatedAt`. `avatarKey` tidak diekspos.
+
+| Method | Endpoint                | Akses  | Keterangan                                                                                     |
+| ------ | ----------------------- | ------ | --------------------------------------------------------------------------------------------- |
+| PATCH  | `/profile`              | login  | Perubahan parsial (≥ 1 field): `name`, `titleBefore` (≤ 50), `titleAfter` (≤ 100), `nip` (18 digit angka, unik), `employeeStatus` (`PNS` \| `PPPK`), `golongan`, `position` (≤ 100), `unit` (≤ 150). `null` mengosongkan field. 409 `NIP_TAKEN` bila NIP dipakai akun lain |
+| POST   | `/profile/email`        | login  | Ajukan perubahan email: `email`. Membuat token `EMAIL_CHANGE` (7 hari, sekali pakai) + `pendingEmail`, tautan dikirim ke email baru. 409 `EMAIL_TAKEN`, 400 `EMAIL_UNCHANGED`, 502 `EMAIL_SEND_FAILED`; dibatasi 5 permintaan / 15 menit |
+| POST   | `/profile/email/verify` | publik | Verifikasi token dari email: `token`. Email berubah setelah panggilan ini; notifikasi ke email lama dan baru |
+| POST   | `/profile/avatar`       | login  | Unggah avatar (multipart field `file`): JPG/JPEG/PNG/WEBP, maks 2 MB. Mengganti avatar menghapus objek lama. 400 `AVATAR_TOO_LARGE` \| `INVALID_FILE_TYPE`                |
+| GET    | `/profile/avatar`       | login  | Stream avatar (inline). 404 `NOT_FOUND` bila belum ada                                        |
+| DELETE | `/profile/avatar`       | login  | Hapus avatar                                                                                  |
+
+Nilai `golongan` — PNS: `I/a` … `IV/e`; PPPK: `Golongan I` … `Golongan XVII`.
+
+## 3. Endpoint Admin
 
 Role `ADMIN`. Respons daftar akun tidak memuat data pribadi User.
 
@@ -44,7 +59,7 @@ Role `ADMIN`. Respons daftar akun tidak memuat data pribadi User.
 | PATCH  | `/users/:id`                   | Ubah `name`, `email`, dan/atau `status`                        |
 | GET    | `/dashboard/admin`             | `accounts { active, invited, inactive }`, `pendingInvitations` |
 
-## 3. Dashboard User
+## 4. Dashboard User
 
 Role `USER`. Seluruh data dibatasi pada kepemilikan pengguna; periode memakai WITA.
 
@@ -52,7 +67,7 @@ Role `USER`. Seluruh data dibatasi pada kepemilikan pengguna; periode memakai WI
 | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | GET    | `/dashboard` | `summary { monthWorkLogs, weekWorkLogs, evidenceFiles, archive { usedBytes, quotaBytes } }`, `todaySchedules`, `upcomingSchedules` (maks 5), `pinnedNotes` (maks 5), `workLogCategories`, `workLogTrend` (30 hari) |
 
-## 4. Work Log dan Bukti Dukung
+## 5. Work Log dan Bukti Dukung
 
 Role `USER`, ownership wajib. Tanggal kegiatan memakai WITA dan tidak boleh melewati hari ini.
 
@@ -70,7 +85,7 @@ Role `USER`, ownership wajib. Tanggal kegiatan memakai WITA dan tidak boleh mele
 
 Batas: 5 MB per file, 10 file per kegiatan, 50 MB total per kegiatan. Format: JPG, JPEG, PNG, WEBP, HEIC, HEIF, PDF, DOC, DOCX, XLS, XLSX.
 
-## 5. Arsip Pribadi
+## 6. Arsip Pribadi
 
 Role `USER`. Privat, tanpa tautan publik. Kuota 1 GB per akun.
 
@@ -87,7 +102,7 @@ Role `USER`. Privat, tanpa tautan publik. Kuota 1 GB per akun.
 | DELETE | `/archive/files/:id`         | Hapus objek R2 lalu metadata; `204`                                      |
 | GET    | `/archive/files/:id/content` | `inline=true` untuk gambar/PDF                                           |
 
-## 6. Laporan Kinerja
+## 7. Laporan Kinerja
 
 | Method | Endpoint                    | Keterangan                       |
 | ------ | --------------------------- | -------------------------------- |
@@ -96,7 +111,7 @@ Role `USER`. Privat, tanpa tautan publik. Kuota 1 GB per akun.
 
 Query: `period` wajib (`daily|weekly|monthly|yearly|custom`), `date` opsional untuk periode non-custom (default hari ini), `from`+`to` wajib untuk `custom`, `category`, `groupBy=category`, `onlyWithEvidence=true`; `format=xlsx|pdf` (default `xlsx`) hanya untuk endpoint export. Periode dihitung WITA; minggu Senin–Minggu.
 
-## 7. Agenda
+## 8. Agenda
 
 Role `USER`. Waktu disimpan UTC, filter tanggal memakai WITA.
 
@@ -108,7 +123,7 @@ Role `USER`. Waktu disimpan UTC, filter tanggal memakai WITA.
 | PATCH  | `/schedules/:id` | Ubah sebagian field                                                                                   |
 | DELETE | `/schedules/:id` | Hapus agenda; `204`                                                                                   |
 
-## 8. Catatan
+## 9. Catatan
 
 Role `USER`.
 
@@ -121,7 +136,7 @@ Role `USER`.
 
 Tidak ada endpoint detail; daftar sudah memuat `content`. Urutan: `pinned` lalu `updatedAt` terbaru.
 
-## 9. Bukti Dukung Publik
+## 10. Bukti Dukung Publik
 
 Tanpa autentikasi, rate limit 120 permintaan/menit per IP. Token permanen, tidak dapat dinonaktifkan pengguna.
 
@@ -132,13 +147,13 @@ Tanpa autentikasi, rate limit 120 permintaan/menit per IP. Token permanen, tidak
 
 Tautan yang dipakai laporan dan aplikasi: `${PUBLIC_WEB_URL}/p/evidence/{publicToken}`.
 
-## 10. Health Check
+## 11. Health Check
 
 | Method | Endpoint  | Keterangan                      |
 | ------ | --------- | ------------------------------- |
 | GET    | `/health` | `status`, `uptime`, `timestamp` |
 
-## 11. Aturan Umum
+## 12. Aturan Umum
 
 - Sumber kebenaran role dan status akun adalah database pada setiap request; klaim JWT tidak dipakai untuk otorisasi.
 - Resource milik pengguna lain dijawab `404 NOT_FOUND`.

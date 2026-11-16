@@ -6,7 +6,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.8 — Profil Pengguna
+- **Task aktif:** menunggu commit pengguna — P11.8b (Profil Pengguna)
 - **Task berikutnya:** P11.9
 - **Update terakhir:** 16 November 2026
 
@@ -56,6 +56,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.5 — Notes:** `DONE` (commit `f9add48`).
 - **P11.6 — Dashboard:** `DONE` (commit `7405453`).
 - **P11.7 — User Management:** `DONE` (commit `fc24f0a`).
+- **P11.8a — Backend Profil Pengguna:** `DONE` (commit `0e5ef6e`, migration `20261116064315_add_profile_fields`).
+- **P11.8b — Frontend Profil Pengguna:** `DONE` (menunggu commit pengguna).
 
 ## Hasil Berjalan
 
@@ -448,11 +450,41 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Kirim ulang undangan (`INVITED`) dan ubah memakai pola admin dashboard (toast `sonner`, `getErrorMessage`).
 - Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah. Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) lulus; build tetap menghasilkan route `/akun`. Pengujian UI dilakukan pengguna.
 
+### P11.8a — Backend Profil Pengguna (DONE, commit `0e5ef6e`, migration `20261116064315_add_profile_fields`)
+
+- Schema: `User` + `titleBefore`, `titleAfter`, `nip` (`@unique`), `employeeStatus` (`PNS`|`PPPK`), `golongan`, `position`, `unit`, `avatarKey`, `pendingEmail`; enum `AccountTokenType` + `EMAIL_CHANGE`. Kolom kepegawaian `String?` + validasi Zod di boundary (bukan enum DB).
+- Module `src/modules/profile/` (route `/api/profile`, role `USER` dan `ADMIN`):
+  - `PATCH /profile` — parsial (≥ 1 field), `null` mengosongkan; NIP 18 digit angka; `employeeStatus` `PNS`|`PPPK`; `golongan` PNS `I/a`–`IV/e` (17 nilai) atau PPPK `Golongan I`–`XVII` (17 nilai); NIP dipakai akun lain → 409 `NIP_TAKEN`.
+  - `POST /profile/email` — rate limit 5/15 menit; membuat token `EMAIL_CHANGE` (7 hari) + `pendingEmail`; tautan dikirim ke email **baru**; 409 `EMAIL_TAKEN`, 400 `EMAIL_UNCHANGED`, 502 `EMAIL_SEND_FAILED`.
+  - `POST /profile/email/verify` — publik (token = bukti kepemilikan inbox, pola reset password); set `email = pendingEmail`, kosongkan `pendingEmail`, token `usedAt`; notifikasi ke email lama dan baru.
+  - `POST /profile/avatar` — multipart (field `file`), JPG/JPEG/PNG/WEBP maks 2 MB; key lama dihapus setelah ganti; error infra `FILE_TOO_LARGE`/`INVALID_FILE_TYPE` diterjemahkan ke pesan avatar.
+  - `GET /profile/avatar` — stream inline; 404 bila belum ada. `DELETE /profile/avatar` — hapus objek R2 + `avatarKey = null`.
+- `requireAuth` memuat ulang field profil + `avatarKey`; `avatarKey` tidak diekspos — diganti `hasAvatar`. `GET /auth/me` memuat field profil + `hasAvatar` + `updatedAt`.
+- `account-mail.ts` + `sendEmailChangeLink` (link `/verifikasi-email?token=…`); `notifyEmailChanged` dipakai ulang.
+- Dokumentasi API diperbarui di `docs/API.md` §2 (bagian lama dirujuk sebagai §3–§12).
+- Pemeriksaan statis backend (`typecheck`, `lint`, `format:check`, `build`): lulus. Daftar gol. PNS diimplementasikan 17 nilai (4+4+4+5) sesuai daftar resmi; catatan awal "19 nilai" keliru.
+- Migration `20261116064315_add_profile_fields` dijalankan pengguna; commit `0e5ef6e`.
+
+### P11.8b — Frontend Profil Pengguna (DONE, menunggu commit pengguna)
+
+- Backend (bagian dari task ini, disetujui): `GET /auth/me` dan respons `PATCH /profile` memuat `pendingEmail`; tidak ada endpoint baru.
+- Feature `frontend/src/features/profile/`: `profile.api.ts`, `profile.schemas.ts`, `use-profile.ts`, `profile-view.tsx` (ditulis ulang), `verify-email-form.tsx`; shared `src/components/shared/user-avatar.tsx` dan `src/lib/display-name.ts`.
+- `/profil` menggantikan placeholder; kartu:
+  - **Identitas**: avatar (blob, fallback initials), display name (gelar + nama), email, badge role/status; ubah foto (jpg/jpeg/png/webp ≤ 2 MB, validasi client) dan hapus (AlertDialog).
+  - **Kelengkapan Profil** (form RHF + Zod): nama, gelar depan/belakang, NIP (18 digit), status kepegawaian (PNS/PPPK), pangkat/golongan (optgroup PNS `I/a`–`IV/e` dan PPPK `Golongan I`–`XVII`; direset saat status berubah), jabatan, unit kerja; pratinjau "Nama tampilan" langsung; kosong = hapus.
+  - **Email**: menampilkan email sekarang; banner "Menunggu verifikasi" bila `pendingEmail` di sesi; form kirim tautan (rate limit 5/15 menit backend; error 409 `EMAIL_TAKEN` / 400 `EMAIL_UNCHANGED` / 429 tampil inline).
+  - **Keamanan**: ganti password via `POST /auth/password/change` (RHF + Zod, sesi lain dicabut).
+- Halaman publik `/verifikasi-email?token=` (route group `(auth)`): verifikasi otomatis sekali (ref guard), status memuat/sukses/gagal; sukses → link ke `/profil`.
+- Sidebar & dropdown akun: display name + avatar (`UserAvatar`, query key `['profile','avatar', user.id, user.updatedAt]`, `staleTime: Infinity`), menggantikan inisial nama biasa.
+- Sesi tetap bersumber dari `/auth/me`; mutasi meng-`invalidateQueries`/`setQueryData` `['auth','me']`.
+- Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah.
+- Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `format:check`, `build`): lulus; route `/verifikasi-email` dan `/profil` tersedia di build.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
 - Akun yang hanya login lewat Google belum dapat menetapkan password sendiri; harus lewat alur reset password.
-- Edit profil sendiri belum tersedia: backend belum memiliki endpoint pembaruan profil untuk User. Dijadwalkan sebagai task P11.8 — Profil Pengguna.
+- Edit profil sendiri tersedia end-to-end sejak P11.8a (backend) dan P11.8b (frontend).
 - ~~Cookie sesi memakai `sameSite=lax`; pada deployment beda site cookie tidak terkirim.~~ Diputuskan: frontend dan backend memakai subdomain pada satu domain induk (same site), sehingga `sameSite=lax` tetap dipakai.
 - `busboy` mendekode nama file multipart sebagai latin1; nama file non-ASCII berpotensi tampil tidak sesuai. Perlu normalisasi bila diperlukan.
 - Pengingat dan notifikasi agenda ditangguhkan: perlu keputusan kanal (email/in-app), mekanisme penjadwalan, dan penanganan multi-instance sebelum dijadwalkan sebagai task roadmap baru.
@@ -502,9 +534,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Mulai P11.8 — Profil Pengguna (blocker: field yang boleh diubah dan syarat verifikasi email baru harus disepakati).
-2. Lanjutkan P11.8 sesuai urutan dependensi roadmap.
-3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
+1. Tunggu commit pengguna untuk P11.8b (`feat(profile): add frontend profile page with email verification and avatar`), lalu lanjut P11.9 sesuai roadmap.
+2. `ROADMAP.md` tidak diubah; P11.8 dijalankan sesuai urutan roadmap.
 
 ## Aturan Pembaruan
 
