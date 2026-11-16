@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.4 — Schedule (menunggu commit)
-- **Task berikutnya:** P11.5
+- **Task aktif:** P11.5 — Notes (menunggu commit)
+- **Task berikutnya:** P11.6
 - **Update terakhir:** 16 November 2026
 
 ## Kesiapan Proyek
@@ -52,6 +52,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.1d — Detail Kegiatan & Halaman Publik:** `DONE` (commit `28dc27a`).
 - **P11.2 — Personal Document Archive:** `DONE` (commit `62ba5c9`).
 - **P11.3 — Performance Report:** `DONE` (commit `e5ce01c`).
+- **P11.4 — Schedule:** `DONE` (commit `02ad063`).
 
 ## Hasil Berjalan
 
@@ -410,7 +411,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Baris lama yang terlanjur salah tanggal perlu dikoreksi manual.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`): lulus.
 
-### P11.4 — Schedule (menunggu commit)
+### P11.4 — Schedule (DONE, commit `02ad063`)
 
 - Feature `frontend/src/features/schedules/`: `schedule.api.ts`, `schedule.schemas.ts`, `schedule.format.ts`, `use-schedules.ts`, `schedule-calendar.tsx`, `schedule-list.tsx`, `schedule-form-dialog.tsx`, `schedule-view.tsx`; route `/agenda` menggantikan placeholder.
 - Layout desktop dua kolom: kalender bulan (`ui/calendar`, locale `id`) di kiri, daftar agenda di kanan; mobile bertumpuk. Bulan aktif memuat rentang `from`/`to` (WITA, limit 100); hari yang berisi agenda diberi aksen tebal.
@@ -418,6 +419,14 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Form: judul, deskripsi opsional, sepanjang hari (waktu disembunyikan), tanggal dan jam mulai, tanggal dan jam selesai opsional (`selesai >= mulai` divalidasi di client dan backend), tempat, kategori, status. Waktu dikirim sebagai ISO WITA dan ditampilkan dengan `Intl` zona `Asia/Makassar`.
 - Hapus memakai `AlertDialog`; aksi tambah/ubah memakai dialog yang sama (mode lintas edit/create).
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`): lulus; build menghasilkan route `/agenda`. Pengujian UI dilakukan pengguna. Status P11.3 dan bugfix WITA ikut commit ini.
+
+### P11.5 — Notes (menunggu commit)
+
+- Feature `frontend/src/features/notes/`: `note.api.ts`, `note.format.ts`, `use-notes.ts`, `note-editor-dialog.tsx`, `note-card.tsx`, `note-view.tsx`; route `/catatan` menggantikan placeholder.
+- Daftar grid kartu 1/2/3 kolom, `line-clamp-5`, urut backend (pinned lalu `updatedAt`); klik isi kartu membuka editor, tombol pin toggle (`PATCH { pinned }`), hapus via `AlertDialog`; footer menampilkan `updatedAt` (WITA).
+- Toolbar: pencarian (draft + submit, pola Kegiatan) dan toggle `Disematkan` dengan reset; kosong/halaman melebihi tersedia menampilkan tombol kembali.
+- Pagination 20; catatan baru dan ubah memakai dialog yang sama (RHF tidak dipakai, form sederhana; validasi manual dengan `MAX_LENGTH` 20.000 dan pesan error).
+- Tanpa dependency, migration, atau env baru. Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) lulus; build menghasilkan route `/catatan`. Pengujian UI dilakukan pengguna.
 
 ### Temuan Di Luar Scope
 
@@ -473,8 +482,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Mulai P11.4 — Schedule.
-2. Lanjutkan P11.5–P11.7 sesuai urutan dependensi roadmap.
+1. Mulai P11.5 — Notes.
+2. Lanjutkan P11.6–P11.7 sesuai urutan dependensi roadmap.
 3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 
 ## Aturan Pembaruan
