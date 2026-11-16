@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.5 — Notes (menunggu commit)
-- **Task berikutnya:** P11.6
+- **Task aktif:** P11.6 — Dashboard (menunggu commit)
+- **Task berikutnya:** P11.7
 - **Update terakhir:** 16 November 2026
 
 ## Kesiapan Proyek
@@ -53,6 +53,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.2 — Personal Document Archive:** `DONE` (commit `62ba5c9`).
 - **P11.3 — Performance Report:** `DONE` (commit `e5ce01c`).
 - **P11.4 — Schedule:** `DONE` (commit `02ad063`).
+- **P11.5 — Notes:** `DONE` (commit `f9add48`).
 
 ## Hasil Berjalan
 
@@ -420,13 +421,20 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Hapus memakai `AlertDialog`; aksi tambah/ubah memakai dialog yang sama (mode lintas edit/create).
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`): lulus; build menghasilkan route `/agenda`. Pengujian UI dilakukan pengguna. Status P11.3 dan bugfix WITA ikut commit ini.
 
-### P11.5 — Notes (menunggu commit)
+### P11.5 — Notes (DONE, commit `f9add48`)
 
 - Feature `frontend/src/features/notes/`: `note.api.ts`, `note.format.ts`, `use-notes.ts`, `note-editor-dialog.tsx`, `note-card.tsx`, `note-view.tsx`; route `/catatan` menggantikan placeholder.
 - Daftar grid kartu 1/2/3 kolom, `line-clamp-5`, urut backend (pinned lalu `updatedAt`); klik isi kartu membuka editor, tombol pin toggle (`PATCH { pinned }`), hapus via `AlertDialog`; footer menampilkan `updatedAt` (WITA).
 - Toolbar: pencarian (draft + submit, pola Kegiatan) dan toggle `Disematkan` dengan reset; kosong/halaman melebihi tersedia menampilkan tombol kembali.
 - Pagination 20; catatan baru dan ubah memakai dialog yang sama (RHF tidak dipakai, form sederhana; validasi manual dengan `MAX_LENGTH` 20.000 dan pesan error).
 - Tanpa dependency, migration, atau env baru. Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) lulus; build menghasilkan route `/catatan`. Pengujian UI dilakukan pengguna.
+
+### P11.6 — Dashboard (menunggu commit)
+
+- Feature `frontend/src/features/dashboard/`: `dashboard.api.ts`, `use-dashboard.ts`, `dashboard-view.tsx` (switch role via `useSession`), `user-dashboard.tsx`, `admin-dashboard.tsx`; route `/` menggantikan placeholder. Fungsi `resendInvitation` (`POST /users/:id/resend-invitation`) termasuk di file ini.
+- Dashboard USER: 4 kartu ringkasan (kegiatan bulan berjalan, 7 hari terakhir, file bukti dukung, pemakaian kuota arsip via `Progress`); agenda hari ini; 5 agenda terdekat (bukan `CANCELLED`, dari backend); 5 catatan disematkan; aksi cepat berupa `Link` ke `/kegiatan`, `/agenda`, `/catatan`. Tanpa grafik — data `workLogCategories`/`workLogTrend` dari API dibiarkan (tipe tetap akurat), tidak dirender.
+- Dashboard ADMIN: 3 kartu (akun aktif/diundang/nonaktif, khusus role `USER` di backend); daftar undangan belum diterima + tombol `Kirim ulang` (`{ sent: true }` → toast sukses; error → `getErrorMessage`).
+- Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah. Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) lulus; build tetap menghasilkan route `/`. Pengujian UI dilakukan pengguna.
 
 ### Temuan Di Luar Scope
 
@@ -482,8 +490,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Mulai P11.5 — Notes.
-2. Lanjutkan P11.6–P11.7 sesuai urutan dependensi roadmap.
+1. Mulai P11.6 — Dashboard.
+2. Lanjutkan P11.7 sesuai urutan dependensi roadmap.
 3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 
 ## Aturan Pembaruan
