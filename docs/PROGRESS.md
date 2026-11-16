@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.3 — Performance Report (menunggu commit)
-- **Task berikutnya:** P11.4
+- **Task aktif:** P11.4 — Schedule (menunggu commit)
+- **Task berikutnya:** P11.5
 - **Update terakhir:** 16 November 2026
 
 ## Kesiapan Proyek
@@ -51,6 +51,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.1c — Bukti Dukung Kegiatan:** `DONE` (commit `3fb3917`).
 - **P11.1d — Detail Kegiatan & Halaman Publik:** `DONE` (commit `28dc27a`).
 - **P11.2 — Personal Document Archive:** `DONE` (commit `62ba5c9`).
+- **P11.3 — Performance Report:** `DONE` (commit `e5ce01c`).
 
 ## Hasil Berjalan
 
@@ -392,7 +393,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa perubahan backend, schema, migration, env, atau dependency baru.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`) di frontend: lulus; build menghasilkan route `/arsip`. Pengujian UI dilakukan pengguna.
 
-### P11.3 — Performance Report (menunggu commit)
+### P11.3 — Performance Report (DONE)
 
 - Backend: `GET /api/reports/work-logs` membalas rekap JSON dan memakai ulang `buildReport()`; `reportQuerySchema` dipisah dari `reportExportQuerySchema` agar query pratinjau dan ekspor identik. Tanpa migration, schema database, atau dependency baru.
 - `docs/API.md` §6: endpoint pratinjau ditambahkan.
@@ -402,12 +403,21 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Ekspor XLSX/PDF memakai filter aktif dan `downloadBlob`; nama berkas diambil dari rentang laporan. Periode rentang khusus menunggu `from` dan `to` yang valid.
 - Pemeriksaan statis backend (`lint`, `typecheck`, `format:check`, `build`) dan frontend (`lint`, `typecheck`, `format:check`, `build`): lulus; build menghasilkan route `/laporan`. Pengujian UI dan ekspor nyata dilakukan pengguna.
 
-### Bugfix — Work Log tanggal default WITA (menunggu commit)
+### Bugfix — Work Log tanggal default WITA (DONE, commit `8e8e67a`)
 
 - `work-log.service.ts` `today()` sebelumnya memakai tanggal UTC (`toISOString().slice(0, 10)`), sehingga kegiatan yang dibuat 00:00–07:59 WITA tersimpan ke tanggal sebelumnya.
 - Sekarang memakai `todayWita()` sesuai aturan WITA proyek. Tanpa migration, env, atau dependency baru.
 - Baris lama yang terlanjur salah tanggal perlu dikoreksi manual.
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`): lulus.
+
+### P11.4 — Schedule (menunggu commit)
+
+- Feature `frontend/src/features/schedules/`: `schedule.api.ts`, `schedule.schemas.ts`, `schedule.format.ts`, `use-schedules.ts`, `schedule-calendar.tsx`, `schedule-list.tsx`, `schedule-form-dialog.tsx`, `schedule-view.tsx`; route `/agenda` menggantikan placeholder.
+- Layout desktop dua kolom: kalender bulan (`ui/calendar`, locale `id`) di kiri, daftar agenda di kanan; mobile bertumpuk. Bulan aktif memuat rentang `from`/`to` (WITA, limit 100); hari yang berisi agenda diberi aksen tebal.
+- Panel daftar memakai tab: `Mendatang` (hari ini +30 hari, limit 20, default; tiap item menampilkan tanggal) dan hari terpilih. Klik tanggal di kalender berpindah ke tab hari terpilih. Setelah agenda disimpan, panel lompat ke tanggal agenda.
+- Form: judul, deskripsi opsional, sepanjang hari (waktu disembunyikan), tanggal dan jam mulai, tanggal dan jam selesai opsional (`selesai >= mulai` divalidasi di client dan backend), tempat, kategori, status. Waktu dikirim sebagai ISO WITA dan ditampilkan dengan `Intl` zona `Asia/Makassar`.
+- Hapus memakai `AlertDialog`; aksi tambah/ubah memakai dialog yang sama (mode lintas edit/create).
+- Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`): lulus; build menghasilkan route `/agenda`. Pengujian UI dilakukan pengguna. Status P11.3 dan bugfix WITA ikut commit ini.
 
 ### Temuan Di Luar Scope
 
@@ -463,7 +473,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Tinjau dan commit P11.3, lalu mulai P11.4 — Schedule.
+1. Mulai P11.4 — Schedule.
 2. Lanjutkan P11.5–P11.7 sesuai urutan dependensi roadmap.
 3. Tetapkan field yang boleh diubah pada P11.8 sebelum task tersebut dijadwalkan.
 
