@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** menunggu commit pengguna — P11.8b (Profil Pengguna)
-- **Task berikutnya:** P11.9
+- **Task aktif:** tidak ada — Phase 11 selesai
+- **Task berikutnya:** klarifikasi pengguna — `PROGRESS.md` sebelumnya menyebut P11.9, tetapi `ROADMAP.md` tidak memiliki P11.9; fase berikutnya adalah Phase 12 (P12.1)
 - **Update terakhir:** 16 November 2026
 
 ## Kesiapan Proyek
@@ -57,7 +57,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.6 — Dashboard:** `DONE` (commit `7405453`).
 - **P11.7 — User Management:** `DONE` (commit `fc24f0a`).
 - **P11.8a — Backend Profil Pengguna:** `DONE` (commit `0e5ef6e`, migration `20261116064315_add_profile_fields`).
-- **P11.8b — Frontend Profil Pengguna:** `DONE` (menunggu commit pengguna).
+- **P11.8b — Frontend Profil Pengguna:** `DONE` (commit `e4b13f0`).
 
 ## Hasil Berjalan
 
@@ -465,7 +465,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan statis backend (`typecheck`, `lint`, `format:check`, `build`): lulus. Daftar gol. PNS diimplementasikan 17 nilai (4+4+4+5) sesuai daftar resmi; catatan awal "19 nilai" keliru.
 - Migration `20261116064315_add_profile_fields` dijalankan pengguna; commit `0e5ef6e`.
 
-### P11.8b — Frontend Profil Pengguna (DONE, menunggu commit pengguna)
+### P11.8b — Frontend Profil Pengguna (DONE, commit `e4b13f0`)
 
 - Backend (bagian dari task ini, disetujui): `GET /auth/me` dan respons `PATCH /profile` memuat `pendingEmail`; tidak ada endpoint baru.
 - Feature `frontend/src/features/profile/`: `profile.api.ts`, `profile.schemas.ts`, `use-profile.ts`, `profile-view.tsx` (ditulis ulang), `verify-email-form.tsx`; shared `src/components/shared/user-avatar.tsx` dan `src/lib/display-name.ts`.
@@ -534,8 +534,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Tunggu commit pengguna untuk P11.8b (`feat(profile): add frontend profile page with email verification and avatar`), lalu lanjut P11.9 sesuai roadmap.
-2. `ROADMAP.md` tidak diubah; P11.8 dijalankan sesuai urutan roadmap.
+1. Phase 11 selesai — P11.8b sudah ter-commit pada `e4b13f0`.
+2. `PROGRESS.md` sebelumnya menyebut P11.9 sebagai task berikutnya, tetapi `ROADMAP.md` tidak memiliki P11.9. Fase berikutnya sesuai roadmap adalah Phase 12 (P12.1 Functional & Integration Testing). Menunggu keputusan pengguna sebelum melanjutkan.
 
 ## Aturan Pembaruan
 
