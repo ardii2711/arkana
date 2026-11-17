@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import type { Request, Response } from 'express';
-import { rateLimit } from 'express-rate-limit';
 
+import { createLimiter } from '../../middlewares/rate-limit.js';
 import { requireAuth } from '../../middlewares/require-auth.js';
 import { validate } from '../../middlewares/validate.js';
 import {
@@ -26,30 +25,14 @@ import {
   resetPasswordSchema,
 } from './auth.schema.js';
 
-const rateLimitHandler = (_req: Request, res: Response) => {
-  res.status(429).json({
-    success: false,
-    error: { code: 'RATE_LIMITED', message: 'Terlalu banyak percobaan. Coba lagi nanti.' },
-  });
-};
-
-const limiter = (limit: number) =>
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit,
-    standardHeaders: 'draft-8',
-    legacyHeaders: false,
-    handler: rateLimitHandler,
-  });
-
-const loginLimiter = limiter(10);
-const refreshLimiter = limiter(60);
-const logoutLimiter = limiter(30);
-const activateLimiter = limiter(10);
-const googleLimiter = limiter(20);
-const forgotPasswordLimiter = limiter(5);
-const resetPasswordLimiter = limiter(10);
-const changePasswordLimiter = limiter(5);
+const loginLimiter = createLimiter(10);
+const refreshLimiter = createLimiter(60);
+const logoutLimiter = createLimiter(30);
+const activateLimiter = createLimiter(10);
+const googleLimiter = createLimiter(20);
+const forgotPasswordLimiter = createLimiter(5);
+const resetPasswordLimiter = createLimiter(10);
+const changePasswordLimiter = createLimiter(5);
 
 export const authRouter = Router();
 
