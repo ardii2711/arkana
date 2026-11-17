@@ -3,6 +3,7 @@ import { readFileContent } from '../../lib/file-content.js';
 import { MAX_FILE_BYTES, ARCHIVE_QUOTA_BYTES, isPreviewable } from '../../lib/file-rules.js';
 import { receiveMultipart } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
+import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { deleteObjects, storageError } from '../../lib/storage.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
@@ -116,6 +117,10 @@ async function loadFolderNodes(userId: string): Promise<FolderNode[]> {
   });
 }
 
+function folderNameTaken(): ApiError {
+  return new ApiError(409, 'FOLDER_NAME_TAKEN', 'Nama folder sudah dipakai pada level ini');
+}
+
 async function ensureFolderNameAvailable(
   userId: string,
   parentId: string | null,
@@ -133,7 +138,7 @@ async function ensureFolderNameAvailable(
   });
 
   if (existing) {
-    throw new ApiError(409, 'FOLDER_NAME_TAKEN', 'Nama folder sudah dipakai pada level ini');
+    throw folderNameTaken();
   }
 }
 
@@ -187,10 +192,18 @@ export async function createArchiveFolder(userId: string, input: CreateFolderInp
 
   await ensureFolderNameAvailable(userId, parentId, input.name);
 
-  const folder = await prisma.archiveFolder.create({
-    data: { userId, name: input.name, parentId },
-    select: folderSelect,
-  });
+  const folder = await prisma.archiveFolder
+    .create({
+      data: { userId, name: input.name, parentId },
+      select: folderSelect,
+    })
+    .catch((error: unknown) => {
+      if (isUniqueViolation(error)) {
+        throw folderNameTaken();
+      }
+
+      throw error;
+    });
 
   return { ...folder, fileCount: 0 };
 }
@@ -238,11 +251,19 @@ export async function updateArchiveFolder(
     await ensureFolderNameAvailable(userId, parentId, name, folderId);
   }
 
-  return prisma.archiveFolder.update({
-    where: { id: folderId },
-    data: { name, parentId },
-    select: folderSelect,
-  });
+  return prisma.archiveFolder
+    .update({
+      where: { id: folderId },
+      data: { name, parentId },
+      select: folderSelect,
+    })
+    .catch((error: unknown) => {
+      if (isUniqueViolation(error)) {
+        throw folderNameTaken();
+      }
+
+      throw error;
+    });
 }
 
 export async function deleteArchiveFolder(

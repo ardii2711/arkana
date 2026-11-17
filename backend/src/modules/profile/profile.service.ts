@@ -5,11 +5,11 @@ import { canonicalMimeType, extensionOf } from '../../lib/file-rules.js';
 import { logger } from '../../lib/logger.js';
 import { receiveMultipart } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
+import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { deleteObjects, downloadObject } from '../../lib/storage.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
-import { Prisma } from '../../generated/prisma/client.js';
 import type { UpdateProfileInput } from './profile.schema.js';
 
 const EMAIL_CHANGE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -65,10 +65,6 @@ async function toBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   }
 
   return Buffer.concat(chunks);
-}
-
-function isUniqueViolation(error: unknown): boolean {
-  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
 }
 
 export async function updateProfile(userId: string, input: UpdateProfileInput) {
@@ -167,13 +163,21 @@ export async function verifyEmailChange(token: string) {
 
   const oldEmail = record.user.email;
 
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: record.userId },
-      data: { email: newEmail, pendingEmail: null },
-    }),
-    prisma.accountToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
-  ]);
+  try {
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: record.userId },
+        data: { email: newEmail, pendingEmail: null },
+      }),
+      prisma.accountToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+    ]);
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      throw new ApiError(409, 'EMAIL_TAKEN', 'Email sudah digunakan akun lain');
+    }
+
+    throw error;
+  }
 
   await notifyEmailChanged(record.user.name, oldEmail, newEmail).catch((error) =>
     logger.error({ err: error, userId: record.userId }, 'Gagal mengirim notifikasi email diubah'),

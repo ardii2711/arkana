@@ -6,6 +6,7 @@ import {
 } from '../../lib/account-mail.js';
 import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
+import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { InviteUserInput, ListUsersQuery, UpdateUserInput } from './users.schema.js';
@@ -76,22 +77,30 @@ export async function inviteUser({ name, email }: InviteUserInput) {
 
   const token = createToken();
 
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      role: 'USER',
-      status: 'INVITED',
-      accountTokens: {
-        create: {
-          type: 'INVITATION',
-          tokenHash: hashToken(token),
-          expiresAt: new Date(Date.now() + INVITATION_TTL_MS),
+  const user = await prisma.user
+    .create({
+      data: {
+        name,
+        email,
+        role: 'USER',
+        status: 'INVITED',
+        accountTokens: {
+          create: {
+            type: 'INVITATION',
+            tokenHash: hashToken(token),
+            expiresAt: new Date(Date.now() + INVITATION_TTL_MS),
+          },
         },
       },
-    },
-    select: userSelect,
-  });
+      select: userSelect,
+    })
+    .catch((error: unknown) => {
+      if (isUniqueViolation(error)) {
+        throw new ApiError(409, 'EMAIL_TAKEN', 'Email sudah terdaftar');
+      }
+
+      throw error;
+    });
 
   try {
     await sendInvitationEmail(name, email, token);
@@ -151,11 +160,19 @@ export async function updateUser(id: string, input: UpdateUserInput) {
     throw new ApiError(400, 'ACCOUNT_NOT_ACTIVATED', 'Akun belum diaktivasi oleh pengguna');
   }
 
-  const updated = await prisma.user.update({
-    where: { id },
-    data: input,
-    select: userSelect,
-  });
+  const updated = await prisma.user
+    .update({
+      where: { id },
+      data: input,
+      select: userSelect,
+    })
+    .catch((error: unknown) => {
+      if (isUniqueViolation(error)) {
+        throw new ApiError(409, 'EMAIL_TAKEN', 'Email sudah terdaftar');
+      }
+
+      throw error;
+    });
 
   if (input.status === 'INACTIVE' && user.status !== 'INACTIVE') {
     await prisma.refreshToken.deleteMany({ where: { userId: id } });
