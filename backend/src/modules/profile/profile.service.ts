@@ -8,6 +8,7 @@ import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { deleteObjects, downloadObject } from '../../lib/storage.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
+import { profileSelect, toAuthUser } from '../../lib/user-profile.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
 import type { UpdateProfileInput } from './profile.schema.js';
@@ -15,47 +16,6 @@ import type { UpdateProfileInput } from './profile.schema.js';
 const EMAIL_CHANGE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 const AVATAR_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
-
-const profileSelect = {
-  id: true,
-  name: true,
-  email: true,
-  role: true,
-  status: true,
-  titleBefore: true,
-  titleAfter: true,
-  nip: true,
-  employeeStatus: true,
-  golongan: true,
-  position: true,
-  unit: true,
-  avatarKey: true,
-  pendingEmail: true,
-  updatedAt: true,
-} as const;
-
-interface ProfileRow {
-  id: string;
-  name: string;
-  email: string;
-  role: 'ADMIN' | 'USER';
-  status: 'INVITED' | 'ACTIVE' | 'INACTIVE';
-  titleBefore: string | null;
-  titleAfter: string | null;
-  nip: string | null;
-  employeeStatus: string | null;
-  golongan: string | null;
-  position: string | null;
-  unit: string | null;
-  avatarKey: string | null;
-  pendingEmail: string | null;
-  updatedAt: Date;
-}
-
-function toProfile(user: ProfileRow) {
-  const { avatarKey, ...rest } = user;
-  return { ...rest, hasAvatar: Boolean(avatarKey) };
-}
 
 async function toBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   const chunks: Buffer[] = [];
@@ -75,7 +35,7 @@ export async function updateProfile(userId: string, input: UpdateProfileInput) {
       select: profileSelect,
     });
 
-    return toProfile(user);
+    return toAuthUser(user);
   } catch (error) {
     if (isUniqueViolation(error)) {
       throw new ApiError(409, 'NIP_TAKEN', 'NIP sudah digunakan akun lain');

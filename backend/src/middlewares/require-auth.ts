@@ -1,6 +1,7 @@
 import type { RequestHandler } from 'express';
 
 import { prisma } from '../lib/prisma.js';
+import { profileSelect, toAuthUser } from '../lib/user-profile.js';
 import { ApiError } from '../utils/api-error.js';
 import { ACCESS_COOKIE } from '../modules/auth/auth.cookies.js';
 import { verifyAccessToken } from '../modules/auth/auth.tokens.js';
@@ -15,30 +16,13 @@ export const requireAuth: RequestHandler = async (req, _res, next) => {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      status: true,
-      titleBefore: true,
-      titleAfter: true,
-      nip: true,
-      employeeStatus: true,
-      golongan: true,
-      position: true,
-      unit: true,
-      avatarKey: true,
-      pendingEmail: true,
-      updatedAt: true,
-    },
+    select: profileSelect,
   });
 
   if (!user || user.status !== 'ACTIVE') {
     throw new ApiError(401, 'UNAUTHENTICATED', 'Akun tidak aktif');
   }
 
-  const { avatarKey, ...profile } = user;
-  req.user = { ...profile, hasAvatar: Boolean(avatarKey) };
+  req.user = toAuthUser(user);
   next();
 };
