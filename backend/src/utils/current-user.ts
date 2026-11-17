@@ -1,7 +1,7 @@
 import type { Request } from 'express';
 
 import type { AuthUser } from '../types/auth.js';
-import { ApiError } from './api-error.js';
+import { ApiError } from '../lib/api-error.js';
 
 export function currentUser(req: Request): AuthUser {
   if (!req.user) {

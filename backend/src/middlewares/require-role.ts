@@ -1,7 +1,7 @@
 import type { RequestHandler } from 'express';
 
 import type { Role } from '../generated/prisma/enums.js';
-import { ApiError } from '../utils/api-error.js';
+import { ApiError } from '../lib/api-error.js';
 import { requireAuth } from './require-auth.js';
 
 export const requireRole = (...roles: Role[]): RequestHandler[] => [

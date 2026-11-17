@@ -1,6 +1,9 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-import { env } from '../../config/env.js';
+import { env } from '../config/env.js';
+
+// Cookie HTTP-only pengangkut access JWT; middleware dan modul auth sama-sama membutuhkannya.
+export const ACCESS_COOKIE = 'arkana_access';
 
 const secret = new TextEncoder().encode(env.JWT_ACCESS_SECRET);
 

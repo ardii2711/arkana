@@ -1,5 +1,5 @@
 import { WITA_TIME_ZONE, addDaysWita, dateOnlyUtc, monthRange, todayWita } from '../../lib/wita.js';
-import { ApiError } from '../../utils/api-error.js';
+import { ApiError } from '../../lib/api-error.js';
 import type { ReportPeriod } from './report.schema.js';
 
 const MONTHS = [

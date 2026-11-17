@@ -3,7 +3,7 @@ import { Upload } from '@aws-sdk/lib-storage';
 import type { Readable } from 'node:stream';
 
 import { env } from '../config/env.js';
-import { ApiError } from '../utils/api-error.js';
+import { ApiError } from './api-error.js';
 import { logger } from './logger.js';
 
 export const storage = new S3Client({

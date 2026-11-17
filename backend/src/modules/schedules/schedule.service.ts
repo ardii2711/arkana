@@ -1,6 +1,6 @@
 import type { Schedule } from '../../generated/prisma/client.js';
 import { prisma } from '../../lib/prisma.js';
-import { ApiError } from '../../utils/api-error.js';
+import { ApiError } from '../../lib/api-error.js';
 import type {
   CreateScheduleInput,
   ListSchedulesQuery,

@@ -3,7 +3,7 @@ import { ZodError } from 'zod';
 
 import { env } from '../config/env.js';
 import { logger } from '../lib/logger.js';
-import { ApiError } from '../utils/api-error.js';
+import { ApiError } from '../lib/api-error.js';
 
 export const notFoundHandler: RequestHandler = (_req, res) => {
   res.status(404).json({

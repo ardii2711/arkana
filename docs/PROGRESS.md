@@ -7,7 +7,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
 - **Task aktif:** tidak ada — Phase 11 selesai
-- **Task berikutnya:** Commit audit batch 3 — ekstraksi lib frontend (menunggu pengguna); batch berikutnya belum disetujui
+- **Task berikutnya:** Commit audit batch 4 — backend tidy (menunggu pengguna); lalu batch 5 (frontend mati & konsistensi) sesuai rencana audit yang disetujui 17 Nov 2026
 - **Update terakhir:** 17 November 2026
 
 ## Kesiapan Proyek
@@ -480,7 +480,17 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah.
 - Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `format:check`, `build`): lulus; route `/verifikasi-email` dan `/profil` tersedia di build.
 
-### Audit batch 3 — Ekstraksi lib frontend (implementasi selesai, menunggu commit)
+### Audit batch 4 — Backend tidy (implementasi selesai, menunggu commit)
+
+- Audit temuan A.3.13, A.4.3, A.4.4, A.6.2 dieksekusi. A.5 diputuskan tidak dikerjakan (opsional, YAGNI — nilai nyaris tidak pernah berubah).
+- A.3.13: verifikasi — bentuk helper `notFound()`/`fileNotFound()`/`folderNotFound()` sudah seragam di seluruh modul (`NotFound` lokal `new ApiError(404, 'NOT_FOUND', …)`); tanpa ekstraksi generik (over-engineering).
+- A.4.3: `modules/auth/auth.tokens.ts` dipindah ke `lib/access-token.ts` (JWT sign/verify + TTL + `ACCESS_COOKIE`); `require-auth.ts` tidak lagi impor dari modul fitur; `auth.cookies.ts` hanya memegang cookie spesifik modul (`REFRESH_COOKIE`, OAuth) dan mengimpor dari `lib/`.
+- A.4.4: kontrak tertulis di `ARCHITECTURE.md` §4.2 — `lib/` = infrastruktur + domain murni (tanpa Express, tidak boleh impor `utils/`); `utils/` = lapisan HTTP/framework (boleh impor `lib/`). `lib/api-error.ts` dipindah dari `utils/` (impor disesuaikan di seluruh src + scripts); interface `FileContent` dipindah dari `utils/file-response.ts` ke `lib/file-content.ts`; `file-response.ts` tinggal mengirim konten ke `Response`. Tidak ada lagi impor `lib → utils`.
+- A.6.2: shim di `work-log-file.rules.ts` dihapus — file kini hanya berisi `MAX_FILES_PER_WORK_LOG` dan `MAX_TOTAL_BYTES_PER_WORK_LOG`; `check-work-log-file-rules.ts` impor helper dari `lib/file-rules.js` langsung.
+- Pemeriksaan statis backend: `typecheck`, `lint`, `format:check`, `build`, `check:file-rules` lulus.
+- Tanpa dependency, migration, atau env baru. `AUDIT.md` (tidak di-commit) item terkait sudah dihapus.
+
+### Audit batch 3 — Ekstraksi lib frontend (DONE, commit `6885f98`)
 
 - Audit temuan B.3.1–B.3.3, B.4.1–B.4.2, B.5.3 dieksekusi.
 - Modul baru: `frontend/src/lib/wita.ts` (satu sumber `Asia/Makassar`), `lib/date.ts` (satu sumber formatter, format tampilan `16 Nov 2026`), `lib/limits.ts` (batas lintas fitur), `lib/work-category.ts` (kategori kerja).
@@ -547,7 +557,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. Phase 11 selesai — P11.8b sudah ter-commit pada `e4b13f0`.
 2. `PROGRESS.md` sebelumnya menyebut P11.9 sebagai task berikutnya, tetapi `ROADMAP.md` tidak memiliki P11.9. Fase berikutnya sesuai roadmap adalah Phase 12 (P12.1 Functional & Integration Testing). Menunggu keputusan pengguna sebelum melanjutkan.
-3. Perbaikan hasil audit (16 November 2026) dikerjakan bertahap per kesepakatan 17 November 2026 — batch 1 (backend dedupe) selesai dikerjakan. Rincian status audit mengacu pada `AUDIT.md`.
+3. Perbaikan hasil audit (16 November 2026) dikerjakan bertahap per kesepakatan 17 November 2026 — batch 1–3 ter-commit (backend dedupe, HTTP keluar dari service, ekstraksi lib frontend); batch 4 (backend tidy) selesai dikerjakan, menunggu commit. Rincian status audit mengacu pada `AUDIT.md`.
 
 ## Aturan Pembaruan
 

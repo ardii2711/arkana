@@ -8,9 +8,9 @@ import { prisma } from '../../lib/prisma.js';
 import { TOKEN_TTL_MS, ttlLabel } from '../../lib/token-ttl.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import type { AuthUser } from '../../types/auth.js';
-import { ApiError } from '../../utils/api-error.js';
+import { ApiError } from '../../lib/api-error.js';
 import type { GoogleProfile } from './auth.google.js';
-import { REFRESH_TOKEN_TTL_MS, signAccessToken } from './auth.tokens.js';
+import { REFRESH_TOKEN_TTL_MS, signAccessToken } from '../../lib/access-token.js';
 
 interface AuthResult {
   user: AuthUser;

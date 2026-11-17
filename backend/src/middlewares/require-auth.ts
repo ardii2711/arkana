@@ -2,9 +2,8 @@ import type { RequestHandler } from 'express';
 
 import { prisma } from '../lib/prisma.js';
 import { profileSelect, toAuthUser } from '../lib/user-profile.js';
-import { ApiError } from '../utils/api-error.js';
-import { ACCESS_COOKIE } from '../modules/auth/auth.cookies.js';
-import { verifyAccessToken } from '../modules/auth/auth.tokens.js';
+import { ApiError } from '../lib/api-error.js';
+import { ACCESS_COOKIE, verifyAccessToken } from '../lib/access-token.js';
 
 export const requireAuth: RequestHandler = async (req, _res, next) => {
   const token = req.cookies?.[ACCESS_COOKIE] as string | undefined;

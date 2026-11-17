@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { CodeChallengeMethod, OAuth2Client } from 'google-auth-library';
 
 import { env } from '../../config/env.js';
-import { ApiError } from '../../utils/api-error.js';
+import { ApiError } from '../../lib/api-error.js';
 
 function createClient(): OAuth2Client {
   const {

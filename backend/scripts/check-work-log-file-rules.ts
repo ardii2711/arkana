@@ -2,13 +2,15 @@ import assert from 'node:assert/strict';
 
 import {
   MAX_FILE_BYTES,
-  MAX_FILES_PER_WORK_LOG,
-  MAX_TOTAL_BYTES_PER_WORK_LOG,
   canonicalMimeType,
   extensionOf,
   isAllowedUpload,
   isHeic,
   isPreviewable,
+} from '../src/lib/file-rules.js';
+import {
+  MAX_FILES_PER_WORK_LOG,
+  MAX_TOTAL_BYTES_PER_WORK_LOG,
 } from '../src/modules/work-logs/work-log-file.rules.js';
 
 assert.equal(MAX_FILE_BYTES, 5 * 1024 * 1024);

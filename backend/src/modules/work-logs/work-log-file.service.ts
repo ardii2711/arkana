@@ -1,15 +1,10 @@
-import { readFileContent } from '../../lib/file-content.js';
+import { readFileContent, type FileContent } from '../../lib/file-content.js';
 import type { ReceivedFile } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
 import { deleteObjects, mapStorageError, storageError } from '../../lib/storage.js';
-import { ApiError } from '../../utils/api-error.js';
-import type { FileContent } from '../../utils/file-response.js';
-import {
-  MAX_FILE_BYTES,
-  MAX_FILES_PER_WORK_LOG,
-  MAX_TOTAL_BYTES_PER_WORK_LOG,
-  isPreviewable,
-} from './work-log-file.rules.js';
+import { ApiError } from '../../lib/api-error.js';
+import { MAX_FILE_BYTES, isPreviewable } from '../../lib/file-rules.js';
+import { MAX_FILES_PER_WORK_LOG, MAX_TOTAL_BYTES_PER_WORK_LOG } from './work-log-file.rules.js';
 import { findOwnedWorkLog } from './work-log.service.js';
 
 export const fileSelect = {

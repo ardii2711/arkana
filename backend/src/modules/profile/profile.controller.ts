@@ -1,7 +1,7 @@
 import type { RequestHandler } from 'express';
 
 import { sendSuccess } from '../../utils/api-response.js';
-import { ApiError } from '../../utils/api-error.js';
+import { ApiError } from '../../lib/api-error.js';
 import { receiveMultipart } from '../../lib/multipart.js';
 import { currentUser } from '../../utils/current-user.js';
 import { sendFileContent } from '../../utils/file-response.js';

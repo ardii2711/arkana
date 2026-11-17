@@ -171,6 +171,12 @@ backend/
     └── server.ts
 ```
 
+Kontrak folder:
+
+- `lib/` = infrastruktur + domain murni lintas modul (mis. prisma, storage, mailer, token, `wita.ts`, `file-rules.ts`). Tidak boleh mengimpor dari `utils/` atau modul fitur.
+- `utils/` = helper lapisan HTTP/framework (Express: `api-response`, `current-user`, `file-response`). Boleh mengimpor `lib/`.
+- `FileContent` didefinisikan di `lib/file-content.ts` (persiapan konten, tanpa Express); `utils/file-response.ts` hanya mengirimkannya ke `Response`.
+
 ## 5. Database Architecture
 
 - Database utama menggunakan Supabase PostgreSQL.

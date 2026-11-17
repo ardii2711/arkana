@@ -1,16 +1,7 @@
 import type { Response } from 'express';
-import type { Readable } from 'node:stream';
 
+import type { FileContent } from '../lib/file-content.js';
 import { stripExtension } from '../lib/file-name.js';
-
-export interface FileContent {
-  body: Readable | Buffer;
-  contentType: string;
-  size: number;
-  originalName: string;
-  inline: boolean;
-  converted: boolean;
-}
 
 function contentDisposition(type: 'inline' | 'attachment', filename: string): string {
   const fallback = filename.replace(/[^\x20-\x7e]/g, '_').replace(/["\\]/g, '_');

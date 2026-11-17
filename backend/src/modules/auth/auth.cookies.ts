@@ -1,9 +1,12 @@
 import type { CookieOptions, Response } from 'express';
 
 import { env } from '../../config/env.js';
-import { ACCESS_TOKEN_TTL_MS, REFRESH_TOKEN_TTL_MS } from './auth.tokens.js';
+import {
+  ACCESS_COOKIE,
+  ACCESS_TOKEN_TTL_MS,
+  REFRESH_TOKEN_TTL_MS,
+} from '../../lib/access-token.js';
 
-export const ACCESS_COOKIE = 'arkana_access';
 export const REFRESH_COOKIE = 'arkana_refresh';
 export const OAUTH_STATE_COOKIE = 'arkana_oauth_state';
 export const OAUTH_VERIFIER_COOKIE = 'arkana_oauth_verifier';

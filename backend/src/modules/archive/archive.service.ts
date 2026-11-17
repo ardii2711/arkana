@@ -1,5 +1,5 @@
 import type { ArchiveFolder } from '../../generated/prisma/client.js';
-import { readFileContent } from '../../lib/file-content.js';
+import { readFileContent, type FileContent } from '../../lib/file-content.js';
 import { stripExtension } from '../../lib/file-name.js';
 import { MAX_FILE_BYTES, ARCHIVE_QUOTA_BYTES, isPreviewable } from '../../lib/file-rules.js';
 import type { ReceivedFile } from '../../lib/multipart.js';
@@ -7,8 +7,7 @@ import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { deleteObjects, mapStorageError, storageError } from '../../lib/storage.js';
 import { dateOnlyUtc, dateKey } from '../../lib/wita.js';
-import { ApiError } from '../../utils/api-error.js';
-import type { FileContent } from '../../utils/file-response.js';
+import { ApiError } from '../../lib/api-error.js';
 import {
   MAX_FOLDER_LEVEL,
   descendantIds,

@@ -2,7 +2,7 @@ import type { RequestHandler } from 'express';
 
 import { receiveMultipart } from '../../lib/multipart.js';
 import { mapStorageError } from '../../lib/storage.js';
-import { ApiError } from '../../utils/api-error.js';
+import { ApiError } from '../../lib/api-error.js';
 import { currentUser } from '../../utils/current-user.js';
 import { sendSuccess } from '../../utils/api-response.js';
 import { sendFileContent } from '../../utils/file-response.js';

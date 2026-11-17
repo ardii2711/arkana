@@ -1,11 +1,2 @@
-export {
-  MAX_FILE_BYTES,
-  canonicalMimeType,
-  extensionOf,
-  isAllowedUpload,
-  isHeic,
-  isPreviewable,
-} from '../../lib/file-rules.js';
-
 export const MAX_FILES_PER_WORK_LOG = 10;
 export const MAX_TOTAL_BYTES_PER_WORK_LOG = 50 * 1024 * 1024;

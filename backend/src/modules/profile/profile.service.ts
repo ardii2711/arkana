@@ -9,8 +9,8 @@ import { streamToBuffer } from '../../lib/stream.js';
 import { TOKEN_TTL_MS } from '../../lib/token-ttl.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import { profileSelect, toAuthUser } from '../../lib/user-profile.js';
-import { ApiError } from '../../utils/api-error.js';
-import type { FileContent } from '../../utils/file-response.js';
+import { ApiError } from '../../lib/api-error.js';
+import type { FileContent } from '../../lib/file-content.js';
 import type { UpdateProfileInput } from './profile.schema.js';
 
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;

@@ -9,7 +9,7 @@ import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { TOKEN_TTL_MS } from '../../lib/token-ttl.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
-import { ApiError } from '../../utils/api-error.js';
+import { ApiError } from '../../lib/api-error.js';
 import type { InviteUserInput, ListUsersQuery, UpdateUserInput } from './users.schema.js';
 
 const userSelect = {

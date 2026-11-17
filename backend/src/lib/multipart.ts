@@ -4,7 +4,7 @@ import { Transform } from 'node:stream';
 import Busboy from 'busboy';
 import type { Request } from 'express';
 
-import { ApiError } from '../utils/api-error.js';
+import { ApiError } from './api-error.js';
 import { canonicalMimeType, extensionOf, isAllowedUpload } from './file-rules.js';
 import { uploadObject } from './storage.js';
 

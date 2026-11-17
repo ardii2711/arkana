@@ -1,11 +1,20 @@
 import heicConvert from 'heic-convert';
+import type { Readable } from 'node:stream';
 
-import type { FileContent } from '../utils/file-response.js';
-import { ApiError } from '../utils/api-error.js';
+import { ApiError } from './api-error.js';
 import { isHeic, isPreviewable } from './file-rules.js';
 import { logger } from './logger.js';
 import { downloadObject } from './storage.js';
 import { streamToBuffer } from './stream.js';
+
+export interface FileContent {
+  body: Readable | Buffer;
+  contentType: string;
+  size: number;
+  originalName: string;
+  inline: boolean;
+  converted: boolean;
+}
 
 interface StoredFile {
   key: string;

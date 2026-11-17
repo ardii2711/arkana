@@ -2,7 +2,7 @@ import type { WorkLog } from '../../generated/prisma/client.js';
 import { prisma } from '../../lib/prisma.js';
 import { deleteObjects, storageError } from '../../lib/storage.js';
 import { dateOnlyUtc, dateKey, todayWita } from '../../lib/wita.js';
-import { ApiError } from '../../utils/api-error.js';
+import { ApiError } from '../../lib/api-error.js';
 import type {
   CreateWorkLogInput,
   ListWorkLogsQuery,
