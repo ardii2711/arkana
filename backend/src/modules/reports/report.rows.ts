@@ -1,4 +1,5 @@
 import { WorkCategory } from '../../generated/prisma/enums.js';
+import { stripExtension } from '../../lib/file-name.js';
 
 export const CATEGORY_LABELS = {
   [WorkCategory.PELAKSANAAN_TUGAS]: 'Pelaksanaan Tugas',
@@ -31,10 +32,6 @@ export interface ReportData {
   to: string;
   generatedAt: string;
   rows: ReportRow[];
-}
-
-function stripExtension(fileName: string): string {
-  return fileName.replace(/\.[^.]+$/, '');
 }
 
 /** Ringkasan nama bukti dukung agar muat satu sel laporan e-Kinerja (maks 255 karakter). */

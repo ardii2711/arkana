@@ -15,7 +15,7 @@ const MIME_BY_EXTENSION: Record<string, string> = {
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 };
 
-export const PREVIEWABLE_MIME_TYPES = new Set([
+const PREVIEWABLE_MIME_TYPES = new Set([
   'image/jpeg',
   'image/png',
   'image/webp',

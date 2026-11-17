@@ -1,5 +1,6 @@
 import { env } from '../config/env.js';
 import { sendMail } from './mailer.js';
+import { TOKEN_TTL_MS, ttlLabel } from './token-ttl.js';
 
 function appLink(path: string): string {
   return `${env.CORS_ORIGIN}${path}`;
@@ -11,12 +12,13 @@ export async function sendInvitationEmail(
   token: string,
 ): Promise<void> {
   const link = appLink(`/activate?token=${token}`);
+  const ttl = ttlLabel(TOKEN_TTL_MS.INVITATION);
 
   await sendMail({
     to: email,
     subject: 'Undangan akun ARKANA',
-    text: `Halo ${name},\n\nAkun ARKANA Anda telah dibuat. Aktifkan akun dan atur password melalui tautan berikut:\n${link}\n\nTautan berlaku 7 hari.`,
-    html: `<p>Halo ${name},</p><p>Akun ARKANA Anda telah dibuat. Aktifkan akun dan atur password melalui tautan berikut:</p><p><a href="${link}">Aktifkan akun</a></p><p>Tautan berlaku 7 hari.</p>`,
+    text: `Halo ${name},\n\nAkun ARKANA Anda telah dibuat. Aktifkan akun dan atur password melalui tautan berikut:\n${link}\n\nTautan berlaku ${ttl}.`,
+    html: `<p>Halo ${name},</p><p>Akun ARKANA Anda telah dibuat. Aktifkan akun dan atur password melalui tautan berikut:</p><p><a href="${link}">Aktifkan akun</a></p><p>Tautan berlaku ${ttl}.</p>`,
   });
 }
 
@@ -26,12 +28,13 @@ export async function sendEmailChangeLink(
   token: string,
 ): Promise<void> {
   const link = appLink(`/verifikasi-email?token=${token}`);
+  const ttl = ttlLabel(TOKEN_TTL_MS.EMAIL_CHANGE);
 
   await sendMail({
     to: email,
     subject: 'Verifikasi email akun ARKANA',
-    text: `Halo ${name},\n\nAnda meminta perubahan email akun ARKANA ke alamat ini. Klik tautan berikut untuk memverifikasinya:\n${link}\n\nTautan berlaku 7 hari. Jika bukan Anda yang meminta, abaikan email ini.`,
-    html: `<p>Halo ${name},</p><p>Anda meminta perubahan email akun ARKANA ke alamat ini. Klik tautan berikut untuk memverifikasinya:</p><p><a href="${link}">Verifikasi email</a></p><p>Tautan berlaku 7 hari. Jika bukan Anda yang meminta, abaikan email ini.</p>`,
+    text: `Halo ${name},\n\nAnda meminta perubahan email akun ARKANA ke alamat ini. Klik tautan berikut untuk memverifikasinya:\n${link}\n\nTautan berlaku ${ttl}. Jika bukan Anda yang meminta, abaikan email ini.`,
+    html: `<p>Halo ${name},</p><p>Anda meminta perubahan email akun ARKANA ke alamat ini. Klik tautan berikut untuk memverifikasinya:</p><p><a href="${link}">Verifikasi email</a></p><p>Tautan berlaku ${ttl}. Jika bukan Anda yang meminta, abaikan email ini.</p>`,
   });
 }
 

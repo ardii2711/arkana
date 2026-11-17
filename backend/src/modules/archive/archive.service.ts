@@ -1,5 +1,6 @@
 import type { ArchiveFolder } from '../../generated/prisma/client.js';
 import { readFileContent } from '../../lib/file-content.js';
+import { stripExtension } from '../../lib/file-name.js';
 import { MAX_FILE_BYTES, ARCHIVE_QUOTA_BYTES, isPreviewable } from '../../lib/file-rules.js';
 import { receiveMultipart } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
@@ -346,8 +347,8 @@ export async function listArchiveFiles(userId: string, query: ListFilesQuery) {
   };
 }
 
-function baseName(filename: string): string {
-  const withoutExtension = filename.replace(/\.[^.]+$/, '').trim();
+function documentName(filename: string): string {
+  const withoutExtension = stripExtension(filename).trim();
   return withoutExtension || filename;
 }
 
@@ -386,7 +387,7 @@ export async function createArchiveFile(userId: string, req: Request) {
       data: {
         userId,
         folderId: input.folderId ?? null,
-        name: input.name ?? baseName(file.originalName),
+        name: input.name ?? documentName(file.originalName),
         description: input.description ?? null,
         documentDate: input.documentDate ? dateOnlyUtc(input.documentDate) : null,
         ...file,

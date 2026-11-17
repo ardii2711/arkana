@@ -7,11 +7,10 @@ import {
 import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
+import { TOKEN_TTL_MS } from '../../lib/token-ttl.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { InviteUserInput, ListUsersQuery, UpdateUserInput } from './users.schema.js';
-
-const INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const userSelect = {
   id: true,
@@ -23,21 +22,29 @@ const userSelect = {
   createdAt: true,
 } as const;
 
-async function createInvitationToken(userId: string): Promise<string> {
+/** Token undangan baru + data pembuatan token, dipakai jalur invite dan resend agar tidak berbeda. */
+function invitationTokenData() {
   const token = createToken();
-  const tokenHash = hashToken(token);
+
+  return {
+    token,
+    data: {
+      type: 'INVITATION' as const,
+      tokenHash: hashToken(token),
+      expiresAt: new Date(Date.now() + TOKEN_TTL_MS.INVITATION),
+    },
+  };
+}
+
+async function createInvitationToken(userId: string): Promise<string> {
+  const { token, data } = invitationTokenData();
 
   await prisma.$transaction([
     prisma.accountToken.deleteMany({
       where: { userId, type: 'INVITATION', usedAt: null },
     }),
     prisma.accountToken.create({
-      data: {
-        userId,
-        type: 'INVITATION',
-        tokenHash,
-        expiresAt: new Date(Date.now() + INVITATION_TTL_MS),
-      },
+      data: { userId, ...data },
     }),
   ]);
 
@@ -75,7 +82,7 @@ export async function inviteUser({ name, email }: InviteUserInput) {
     throw new ApiError(409, 'EMAIL_TAKEN', 'Email sudah terdaftar');
   }
 
-  const token = createToken();
+  const { token, data } = invitationTokenData();
 
   const user = await prisma.user
     .create({
@@ -85,11 +92,7 @@ export async function inviteUser({ name, email }: InviteUserInput) {
         role: 'USER',
         status: 'INVITED',
         accountTokens: {
-          create: {
-            type: 'INVITATION',
-            tokenHash: hashToken(token),
-            expiresAt: new Date(Date.now() + INVITATION_TTL_MS),
-          },
+          create: data,
         },
       },
       select: userSelect,

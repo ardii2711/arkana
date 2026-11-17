@@ -1,4 +1,5 @@
-import { WITA_TIME_ZONE, dateOnlyUtc, todayWita } from '../../lib/wita.js';
+import { WITA_TIME_ZONE, addDaysWita, dateOnlyUtc, monthRange, todayWita } from '../../lib/wita.js';
+import { ApiError } from '../../utils/api-error.js';
 import type { ReportPeriod } from './report.schema.js';
 
 const MONTHS = [
@@ -16,7 +17,7 @@ const MONTHS = [
   'Desember',
 ];
 
-export interface ReportRange {
+interface ReportRange {
   from: string;
   to: string;
   label: string;
@@ -39,13 +40,6 @@ export function formatDateTimeWita(now: Date = new Date()): string {
   }).format(now)} WITA`;
 }
 
-function addDays(value: string, days: number): string {
-  const date = dateOnlyUtc(value);
-  date.setUTCDate(date.getUTCDate() + days);
-
-  return date.toISOString().slice(0, 10);
-}
-
 function rangeLabel(from: string, to: string): string {
   return `${formatDateLabel(from)} – ${formatDateLabel(to)}`;
 }
@@ -57,8 +51,11 @@ export function resolveRange(input: {
   to?: string;
 }): ReportRange {
   if (input.period === 'custom') {
-    const from = input.from!;
-    const to = input.to!;
+    const { from, to } = input;
+
+    if (!from || !to) {
+      throw new ApiError(400, 'VALIDATION_ERROR', 'Rentang tanggal wajib diisi');
+    }
 
     return { from, to, label: rangeLabel(from, to) };
   }
@@ -73,21 +70,16 @@ export function resolveRange(input: {
 
     case 'weekly': {
       const weekDay = dateOnlyUtc(base).getUTCDay();
-      const from = addDays(base, -((weekDay + 6) % 7));
-      const to = addDays(from, 6);
+      const from = addDaysWita(base, -((weekDay + 6) % 7));
+      const to = addDaysWita(from, 6);
 
       return { from, to, label: rangeLabel(from, to) };
     }
 
     case 'monthly': {
-      const lastDay = new Date(Date.UTC(Number(year), Number(month), 0)).getUTCDate();
-      const to = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+      const range = monthRange(base);
 
-      return {
-        from: `${year}-${month}-01`,
-        to,
-        label: `${MONTHS[Number(month) - 1]} ${year}`,
-      };
+      return { ...range, label: `${MONTHS[Number(month) - 1]} ${year}` };
     }
 
     case 'yearly':

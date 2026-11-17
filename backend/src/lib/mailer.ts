@@ -9,7 +9,7 @@ const transport = nodemailer.createTransport({
   auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
 });
 
-export interface MailOptions {
+interface MailOptions {
   to: string;
   subject: string;
   text: string;

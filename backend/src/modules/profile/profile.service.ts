@@ -7,25 +7,16 @@ import { receiveMultipart } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { deleteObjects, downloadObject } from '../../lib/storage.js';
+import { streamToBuffer } from '../../lib/stream.js';
+import { TOKEN_TTL_MS } from '../../lib/token-ttl.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import { profileSelect, toAuthUser } from '../../lib/user-profile.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
 import type { UpdateProfileInput } from './profile.schema.js';
 
-const EMAIL_CHANGE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 const AVATAR_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
-
-async function toBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-
-  for await (const chunk of stream) {
-    chunks.push(Buffer.from(chunk as Buffer));
-  }
-
-  return Buffer.concat(chunks);
-}
 
 export async function updateProfile(userId: string, input: UpdateProfileInput) {
   try {
@@ -72,7 +63,7 @@ export async function requestEmailChange(userId: string, newEmail: string) {
         userId,
         type: 'EMAIL_CHANGE',
         tokenHash,
-        expiresAt: new Date(Date.now() + EMAIL_CHANGE_TTL_MS),
+        expiresAt: new Date(Date.now() + TOKEN_TTL_MS.EMAIL_CHANGE),
       },
     }),
     prisma.user.update({ where: { id: userId }, data: { pendingEmail: newEmail } }),
@@ -209,7 +200,7 @@ export async function getAvatar(userId: string): Promise<FileContent> {
     throw new ApiError(404, 'NOT_FOUND', 'Avatar belum diunggah');
   }
 
-  const body = await toBuffer(await downloadObject(user.avatarKey));
+  const body = await streamToBuffer(await downloadObject(user.avatarKey));
   const extension = extensionOf(user.avatarKey) ?? 'jpg';
   const contentType = canonicalMimeType(extension) ?? 'image/jpeg';
 

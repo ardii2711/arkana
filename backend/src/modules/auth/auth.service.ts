@@ -5,15 +5,14 @@ import { notifyAccountActivated } from '../../lib/account-mail.js';
 import { logger } from '../../lib/logger.js';
 import { sendMail } from '../../lib/mailer.js';
 import { prisma } from '../../lib/prisma.js';
+import { TOKEN_TTL_MS, ttlLabel } from '../../lib/token-ttl.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import type { AuthUser } from '../../types/auth.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { GoogleProfile } from './auth.google.js';
 import { REFRESH_TOKEN_TTL_MS, signAccessToken } from './auth.tokens.js';
 
-const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
-
-export interface AuthResult {
+interface AuthResult {
   user: AuthUser;
   accessToken: string;
   refreshToken: string;
@@ -45,7 +44,7 @@ async function issueTokens(userId: string): Promise<{ accessToken: string; refre
   return { accessToken: await signAccessToken(userId), refreshToken };
 }
 
-export async function createSession(user: SessionUser): Promise<AuthResult> {
+async function createSession(user: SessionUser): Promise<AuthResult> {
   return { user: toAuthUser(user), ...(await issueTokens(user.id)) };
 }
 
@@ -205,12 +204,13 @@ export async function loginWithGoogle({ googleId, email }: GoogleProfile): Promi
 
 async function sendPasswordResetEmail(name: string, email: string, token: string): Promise<void> {
   const link = `${env.CORS_ORIGIN}/reset-password?token=${token}`;
+  const ttl = ttlLabel(TOKEN_TTL_MS.PASSWORD_RESET);
 
   await sendMail({
     to: email,
     subject: 'Reset password ARKANA',
-    text: `Halo ${name},\n\nKami menerima permintaan reset password akun ARKANA Anda. Atur password baru melalui tautan berikut:\n${link}\n\nTautan berlaku 60 menit. Abaikan email ini jika Anda tidak meminta reset password.`,
-    html: `<p>Halo ${name},</p><p>Kami menerima permintaan reset password akun ARKANA Anda. Atur password baru melalui tautan berikut:</p><p><a href="${link}">Atur password baru</a></p><p>Tautan berlaku 60 menit. Abaikan email ini jika Anda tidak meminta reset password.</p>`,
+    text: `Halo ${name},\n\nKami menerima permintaan reset password akun ARKANA Anda. Atur password baru melalui tautan berikut:\n${link}\n\nTautan berlaku ${ttl}. Abaikan email ini jika Anda tidak meminta reset password.`,
+    html: `<p>Halo ${name},</p><p>Kami menerima permintaan reset password akun ARKANA Anda. Atur password baru melalui tautan berikut:</p><p><a href="${link}">Atur password baru</a></p><p>Tautan berlaku ${ttl}. Abaikan email ini jika Anda tidak meminta reset password.</p>`,
   });
 }
 
@@ -233,7 +233,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
         userId: user.id,
         type: 'PASSWORD_RESET',
         tokenHash,
-        expiresAt: new Date(Date.now() + PASSWORD_RESET_TTL_MS),
+        expiresAt: new Date(Date.now() + TOKEN_TTL_MS.PASSWORD_RESET),
       },
     }),
   ]);

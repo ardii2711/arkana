@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { AT_LEAST_ONE_FIELD_MESSAGE, hasAtLeastOneField } from '../../lib/validation.js';
 
-export const PNS_GOLONGAN = [
+const PNS_GOLONGAN = [
   'I/a',
   'I/b',
   'I/c',
@@ -22,7 +22,7 @@ export const PNS_GOLONGAN = [
   'IV/e',
 ] as const;
 
-export const PPPK_GOLONGAN = [
+const PPPK_GOLONGAN = [
   'Golongan I',
   'Golongan II',
   'Golongan III',

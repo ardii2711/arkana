@@ -5,22 +5,13 @@ import { ApiError } from '../utils/api-error.js';
 import { isHeic, isPreviewable } from './file-rules.js';
 import { logger } from './logger.js';
 import { downloadObject } from './storage.js';
+import { streamToBuffer } from './stream.js';
 
-export interface StoredFile {
+interface StoredFile {
   key: string;
   originalName: string;
   mimeType: string;
   size: number;
-}
-
-async function toBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-
-  for await (const chunk of stream) {
-    chunks.push(Buffer.from(chunk as Buffer));
-  }
-
-  return Buffer.concat(chunks);
 }
 
 export async function readFileContent(
@@ -34,7 +25,7 @@ export async function readFileContent(
     // ponytail: konversi setiap kali preview, tanpa cache. Simpan turunan JPEG
     // bila latensi preview mulai terasa.
     const jpeg = await heicConvert({
-      buffer: await toBuffer(body),
+      buffer: await streamToBuffer(body),
       format: 'JPEG',
       quality: 0.85,
     }).catch(async (error: unknown) => {

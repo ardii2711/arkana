@@ -1,6 +1,8 @@
 import type { Response } from 'express';
 import type { Readable } from 'node:stream';
 
+import { stripExtension } from '../lib/file-name.js';
+
 export interface FileContent {
   body: Readable | Buffer;
   contentType: string;
@@ -16,7 +18,7 @@ function contentDisposition(type: 'inline' | 'attachment', filename: string): st
 }
 
 function previewName(filename: string): string {
-  return filename.replace(/\.[a-z0-9]+$/i, '') + '.jpg';
+  return `${stripExtension(filename)}.jpg`;
 }
 
 export function sendFileContent(res: Response, content: FileContent): void {

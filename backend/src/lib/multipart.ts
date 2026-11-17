@@ -8,14 +8,14 @@ import { ApiError } from '../utils/api-error.js';
 import { canonicalMimeType, extensionOf, isAllowedUpload } from './file-rules.js';
 import { uploadObject } from './storage.js';
 
-export interface ReceivedFile {
+interface ReceivedFile {
   key: string;
   size: number;
   originalName: string;
   mimeType: string;
 }
 
-export interface MultipartResult {
+interface MultipartResult {
   fields: Record<string, string>;
   file: ReceivedFile | null;
 }
