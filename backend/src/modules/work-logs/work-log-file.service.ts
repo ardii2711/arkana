@@ -1,7 +1,7 @@
 import { readFileContent } from '../../lib/file-content.js';
 import { receiveMultipart } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
-import { deleteObjects, storageError } from '../../lib/storage.js';
+import { deleteObjects, mapStorageError, storageError } from '../../lib/storage.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
 import type { Request } from 'express';
@@ -37,14 +37,6 @@ export function toFileItem(file: FileRow) {
 
 function fileNotFound(): ApiError {
   return new ApiError(404, 'NOT_FOUND', 'File tidak ditemukan');
-}
-
-function requoteStorageError(error: unknown): never {
-  if (error instanceof ApiError) {
-    throw error;
-  }
-
-  return storageError(error);
 }
 
 export async function listWorkLogFiles(userId: string, workLogId: string) {
@@ -92,7 +84,7 @@ export async function uploadWorkLogFile(userId: string, workLogId: string, req: 
     maxBytes: Math.min(MAX_FILE_BYTES, remaining),
     prefix: `work-logs/${userId}/${workLogId}`,
     fileRequired: true,
-  }).catch(requoteStorageError);
+  }).catch(mapStorageError);
 
   if (!file) {
     throw new ApiError(400, 'FILE_REQUIRED', 'File wajib diunggah');
@@ -146,7 +138,7 @@ async function loadFileContent(
     throw fileNotFound();
   }
 
-  return readFileContent(file, wantsInline).catch(requoteStorageError);
+  return readFileContent(file, wantsInline).catch(mapStorageError);
 }
 
 export function getWorkLogFileContent(

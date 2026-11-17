@@ -55,3 +55,11 @@ export function storageError(error: unknown): never {
   logger.error({ err: error }, 'Operasi R2 gagal');
   throw new ApiError(502, 'STORAGE_ERROR', 'Penyimpanan file sedang bermasalah');
 }
+
+export function mapStorageError(error: unknown): never {
+  if (error instanceof ApiError) {
+    throw error;
+  }
+
+  return storageError(error);
+}

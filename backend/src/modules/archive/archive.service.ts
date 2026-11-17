@@ -4,7 +4,7 @@ import { MAX_FILE_BYTES, ARCHIVE_QUOTA_BYTES, isPreviewable } from '../../lib/fi
 import { receiveMultipart } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
-import { deleteObjects, storageError } from '../../lib/storage.js';
+import { deleteObjects, mapStorageError, storageError } from '../../lib/storage.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
 import type { Request } from 'express';
@@ -87,14 +87,6 @@ function folderNotFound(): ApiError {
 
 function fileNotFound(): ApiError {
   return new ApiError(404, 'NOT_FOUND', 'Dokumen tidak ditemukan');
-}
-
-function requoteStorageError(error: unknown): never {
-  if (error instanceof ApiError) {
-    throw error;
-  }
-
-  return storageError(error);
 }
 
 async function findOwnedFolder(userId: string, folderId: string): Promise<FolderRow> {
@@ -379,7 +371,7 @@ export async function createArchiveFile(userId: string, req: Request) {
     prefix: `archive/${userId}`,
     fileRequired: true,
     fields: ['folderId', 'name', 'description', 'documentDate'],
-  }).catch(requoteStorageError);
+  }).catch(mapStorageError);
 
   if (!file) {
     throw new ApiError(400, 'FILE_REQUIRED', 'File wajib diunggah');
@@ -483,5 +475,5 @@ export async function getArchiveFileContent(
     throw fileNotFound();
   }
 
-  return readFileContent(file, wantsInline).catch(requoteStorageError);
+  return readFileContent(file, wantsInline).catch(mapStorageError);
 }

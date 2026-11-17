@@ -537,7 +537,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. Phase 11 selesai — P11.8b sudah ter-commit pada `e4b13f0`.
 2. `PROGRESS.md` sebelumnya menyebut P11.9 sebagai task berikutnya, tetapi `ROADMAP.md` tidak memiliki P11.9. Fase berikutnya sesuai roadmap adalah Phase 12 (P12.1 Functional & Integration Testing). Menunggu keputusan pengguna sebelum melanjutkan.
-3. Perbaikan hasil audit kode 16 November 2026 dikerjakan bertahap dengan urutan A → B → C → E → F → D → G → H, satu commit per item. Item E.1, A.1, dan A.2 selesai. Migration unique index folder root sudah disiapkan di `backend/prisma/migrations/20261117120000_archive_folder_root_unique` dan menunggu dijalankan pengguna sebelum item A.3 dinyatakan selesai.
+3. Perbaikan hasil audit kode 16 November 2026 dikerjakan bertahap dengan urutan A → B → C → E → F → D → G → H, satu commit per item. Item E.1, A.1, A.2, migration unique index folder root, dan B.1 selesai; item B.2 (helper date-only) berikutnya.
 
 ## Aturan Pembaruan
 
