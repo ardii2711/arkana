@@ -128,23 +128,29 @@ modules/
     ├── work-log.routes.ts
     ├── work-log.controller.ts
     ├── work-log.service.ts
-    ├── work-log.repository.ts
     ├── work-log.schema.ts
     └── work-log.types.ts
 ```
 
 Tanggung jawab:
 
-| Lapisan    | Tanggung jawab                   |
-| ---------- | -------------------------------- |
-| Routes     | Endpoint dan middleware          |
-| Controller | Request dan response HTTP        |
-| Service    | Business logic                   |
-| Repository | Akses database melalui Prisma    |
-| Schema     | Validasi request menggunakan Zod |
-| Types      | Tipe TypeScript jika diperlukan  |
+| Lapisan    | Tanggung jawab                                   |
+| ---------- | ------------------------------------------------ |
+| Routes     | Endpoint dan middleware                          |
+| Controller | Request dan response HTTP                        |
+| Service    | Business logic dan akses database melalui Prisma |
+| Schema     | Validasi request menggunakan Zod                 |
+| Types      | Tipe TypeScript jika diperlukan                  |
 
 Tidak semua modul wajib memiliki seluruh lapisan. Terapkan sesuai kompleksitas fitur dan hindari abstraksi yang tidak diperlukan.
+
+Akses database dilakukan langsung melalui Prisma di lapisan service. Lapisan repository tidak diwajibkan. Tambahkan `*.repository.ts` pada sebuah modul hanya bila salah satu terpenuhi:
+
+1. Query yang sama dipakai lebih dari satu modul.
+2. Service didominasi query hingga business logic sulit dibaca.
+3. Dibutuhkan unit test service tanpa database.
+4. Muncul sumber data kedua (ORM, cache, atau API eksternal).
+5. Query kompleks (raw SQL, agregasi berat) perlu diisolasi dan diberi nama.
 
 ### 4.2 Folder Organization
 

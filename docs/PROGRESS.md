@@ -521,6 +521,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Sesi frontend bersumber tunggal dari `/auth/me` melalui TanStack Query; login/logout hanya mengubah cache, bukan state terpisah.
 - Route frontend mengikuti tautan email backend: `/activate?token=...`, `/reset-password?token=...`, `/login`.
 - Topologi domain: satu domain induk dengan subdomain terpisah untuk frontend dan backend (opsi A). Cookie `sameSite=lax` dipertahankan; token CSRF tidak diperlukan selama topologi ini dipakai.
+- Backend tidak memakai lapisan repository; akses database langsung melalui Prisma di service. Repository hanya ditambahkan bila memenuhi kriteria di `ARCHITECTURE.md` §4.1 (query lintas modul, service didominasi query, butuh unit test tanpa DB, ada sumber data kedua, atau query kompleks). Alasan: satu ORM, YAGNI, dan retrofit murah.
 
 ## Urutan Pengembangan
 
@@ -536,6 +537,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. Phase 11 selesai — P11.8b sudah ter-commit pada `e4b13f0`.
 2. `PROGRESS.md` sebelumnya menyebut P11.9 sebagai task berikutnya, tetapi `ROADMAP.md` tidak memiliki P11.9. Fase berikutnya sesuai roadmap adalah Phase 12 (P12.1 Functional & Integration Testing). Menunggu keputusan pengguna sebelum melanjutkan.
+3. Perbaikan hasil audit kode 16 November 2026 dikerjakan bertahap dengan urutan A → B → C → E → F → D → G → H, satu commit per item. Item E.1 (keputusan repository layer) selesai dan menunggu commit pengguna; item A (correctness backend) berikutnya.
 
 ## Aturan Pembaruan
 
