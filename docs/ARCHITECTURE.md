@@ -177,6 +177,7 @@ backend/
 - Prisma menjadi satu-satunya ORM.
 - Prisma Migrate digunakan untuk versioning dan migrasi struktur database.
 - `backend/prisma/schema.prisma` menjadi satu-satunya sumber kebenaran model, field, relasi, dan constraint.
+- PostgreSQL 15+ diperlukan: unique index folder arsip memakai `NULLS NOT DISTINCT` agar nama folder root (`parentId IS NULL`) unik per pengguna. Opsi ini ditulis manual di migration karena Prisma belum mendukungnya di `@@unique`.
 - Backend menjadi satu-satunya pihak yang mengakses database.
 - Pertimbangkan connection pooling yang sesuai dengan lingkungan deployment Render.
 
