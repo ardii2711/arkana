@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { paginationFields } from '../../lib/pagination.js';
+import { AT_LEAST_ONE_FIELD_MESSAGE, hasAtLeastOneField } from '../../lib/validation.js';
 
 export const inviteUserSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -18,9 +19,7 @@ export const updateUserSchema = z
     email: z.email().trim().toLowerCase().optional(),
     status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
   })
-  .refine((input) => Object.values(input).some((value) => value !== undefined), {
-    message: 'Minimal satu field harus diisi',
-  });
+  .refine(hasAtLeastOneField, { message: AT_LEAST_ONE_FIELD_MESSAGE });
 
 export const userIdParamSchema = z.object({ id: z.uuid() });
 

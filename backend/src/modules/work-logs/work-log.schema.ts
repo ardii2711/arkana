@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { WorkCategory } from '../../generated/prisma/enums.js';
 import { paginationFields } from '../../lib/pagination.js';
+import { AT_LEAST_ONE_FIELD_MESSAGE, hasAtLeastOneField } from '../../lib/validation.js';
 import { todayWita } from '../../lib/wita.js';
 
 const name = z.string().trim().min(1).max(200);
@@ -39,9 +40,7 @@ export const updateWorkLogSchema = z
     realisasi: shortText,
     activityDate: activityDate.optional(),
   })
-  .refine((input) => Object.values(input).some((value) => value !== undefined), {
-    message: 'Minimal satu field harus diisi',
-  });
+  .refine(hasAtLeastOneField, { message: AT_LEAST_ONE_FIELD_MESSAGE });
 
 export const listWorkLogsQuerySchema = z
   .object({

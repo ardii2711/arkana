@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { AT_LEAST_ONE_FIELD_MESSAGE, hasAtLeastOneField } from '../../lib/validation.js';
+
 export const PNS_GOLONGAN = [
   'I/a',
   'I/b',
@@ -56,9 +58,7 @@ export const updateProfileSchema = z
     position: z.string().trim().max(100).nullish(),
     unit: z.string().trim().max(150).nullish(),
   })
-  .refine((data) => Object.keys(data).length > 0, {
-    message: 'Minimal satu field diisi',
-  });
+  .refine(hasAtLeastOneField, { message: AT_LEAST_ONE_FIELD_MESSAGE });
 
 export const requestEmailChangeSchema = z.object({
   email: z.email('Format email tidak valid').trim().toLowerCase().max(255),

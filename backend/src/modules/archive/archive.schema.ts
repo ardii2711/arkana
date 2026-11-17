@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { paginationFields } from '../../lib/pagination.js';
+import { AT_LEAST_ONE_FIELD_MESSAGE, hasAtLeastOneField } from '../../lib/validation.js';
 
 const folderName = z.string().trim().min(1).max(100);
 const fileName = z.string().trim().min(1).max(200);
@@ -18,9 +19,7 @@ export const updateFolderSchema = z
     name: folderName.optional(),
     parentId: folderId.nullable().optional(),
   })
-  .refine((input) => input.name !== undefined || input.parentId !== undefined, {
-    message: 'Minimal satu field harus diisi',
-  });
+  .refine(hasAtLeastOneField, { message: AT_LEAST_ONE_FIELD_MESSAGE });
 
 export const deleteFolderQuerySchema = z.object({
   recursive: z.enum(['true', 'false']).optional(),
@@ -42,9 +41,7 @@ export const updateFileSchema = z
     documentDate: documentDate.nullable().optional(),
     folderId: folderId.nullable().optional(),
   })
-  .refine((input) => Object.values(input).some((value) => value !== undefined), {
-    message: 'Minimal satu field harus diisi',
-  });
+  .refine(hasAtLeastOneField, { message: AT_LEAST_ONE_FIELD_MESSAGE });
 
 export const listFilesQuerySchema = z.object({
   folderId: z.union([z.literal('root'), folderId]).optional(),

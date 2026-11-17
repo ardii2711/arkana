@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { ScheduleCategory, ScheduleStatus } from '../../generated/prisma/enums.js';
 import { paginationFields } from '../../lib/pagination.js';
+import { AT_LEAST_ONE_FIELD_MESSAGE, hasAtLeastOneField } from '../../lib/validation.js';
 
 const title = z.string().trim().min(1).max(200);
 const optionalText = (max: number) =>
@@ -49,9 +50,7 @@ export const updateScheduleSchema = z
     category: category.optional(),
     status: status.optional(),
   })
-  .refine((input) => Object.values(input).some((value) => value !== undefined), {
-    message: 'Minimal satu field harus diisi',
-  })
+  .refine(hasAtLeastOneField, { message: AT_LEAST_ONE_FIELD_MESSAGE })
   .refine((input) => !endsBeforeStart(input.startAt, input.endAt), endAtIssue);
 
 export const listSchedulesQuerySchema = z

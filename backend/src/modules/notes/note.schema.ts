@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { paginationFields } from '../../lib/pagination.js';
+import { AT_LEAST_ONE_FIELD_MESSAGE, hasAtLeastOneField } from '../../lib/validation.js';
 
 const content = z.string().trim().min(1).max(20_000);
 
@@ -14,9 +15,7 @@ export const updateNoteSchema = z
     content: content.optional(),
     pinned: z.boolean().optional(),
   })
-  .refine((input) => Object.values(input).some((value) => value !== undefined), {
-    message: 'Minimal satu field harus diisi',
-  });
+  .refine(hasAtLeastOneField, { message: AT_LEAST_ONE_FIELD_MESSAGE });
 
 export const listNotesQuerySchema = z.object({
   ...paginationFields,
