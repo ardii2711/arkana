@@ -187,7 +187,11 @@ export async function createArchiveFolder(userId: string, input: CreateFolderInp
   }
 
   if (parentLevel + 1 > MAX_FOLDER_LEVEL) {
-    throw new ApiError(400, 'FOLDER_DEPTH_EXCEEDED', 'Kedalaman folder maksimal 3 level');
+    throw new ApiError(
+      400,
+      'FOLDER_DEPTH_EXCEEDED',
+      `Kedalaman folder maksimal ${MAX_FOLDER_LEVEL} level`,
+    );
   }
 
   await ensureFolderNameAvailable(userId, parentId, input.name);
@@ -243,7 +247,11 @@ export async function updateArchiveFolder(
     }
 
     if (parentLevel + subtreeHeight(folders, folderId) > MAX_FOLDER_LEVEL) {
-      throw new ApiError(400, 'FOLDER_DEPTH_EXCEEDED', 'Kedalaman folder maksimal 3 level');
+      throw new ApiError(
+        400,
+        'FOLDER_DEPTH_EXCEEDED',
+        `Kedalaman folder maksimal ${MAX_FOLDER_LEVEL} level`,
+      );
     }
   }
 
@@ -359,7 +367,11 @@ export async function createArchiveFile(userId: string, req: Request) {
   const remaining = ARCHIVE_QUOTA_BYTES - (used._sum.size ?? 0);
 
   if (remaining <= 0) {
-    throw new ApiError(400, 'STORAGE_QUOTA_EXCEEDED', 'Kuota penyimpanan arsip sudah penuh (1 GB)');
+    throw new ApiError(
+      400,
+      'STORAGE_QUOTA_EXCEEDED',
+      `Kuota penyimpanan arsip sudah penuh (${ARCHIVE_QUOTA_BYTES / 1024 ** 3} GB)`,
+    );
   }
 
   const { fields, file } = await receiveMultipart(req, {

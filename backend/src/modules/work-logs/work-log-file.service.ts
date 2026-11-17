@@ -69,13 +69,21 @@ export async function uploadWorkLogFile(userId: string, workLogId: string, req: 
   });
 
   if (existing._count >= MAX_FILES_PER_WORK_LOG) {
-    throw new ApiError(400, 'TOO_MANY_FILES', 'Maksimal 10 file per kegiatan');
+    throw new ApiError(
+      400,
+      'TOO_MANY_FILES',
+      `Maksimal ${MAX_FILES_PER_WORK_LOG} file per kegiatan`,
+    );
   }
 
   const remaining = MAX_TOTAL_BYTES_PER_WORK_LOG - (existing._sum.size ?? 0);
 
   if (remaining <= 0) {
-    throw new ApiError(400, 'FILE_TOO_LARGE', 'Kapasitas file kegiatan sudah penuh (50 MB)');
+    throw new ApiError(
+      400,
+      'FILE_TOO_LARGE',
+      `Kapasitas file kegiatan sudah penuh (${MAX_TOTAL_BYTES_PER_WORK_LOG / 1024 ** 2} MB)`,
+    );
   }
 
   // ponytail: batas dihitung sebelum upload; cukup untuk satu pengguna. Ganti ke

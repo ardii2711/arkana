@@ -28,11 +28,7 @@ interface MultipartOptions {
 }
 
 function fileTooLarge(): ApiError {
-  return new ApiError(
-    400,
-    'FILE_TOO_LARGE',
-    'Ukuran file melebihi batas 5 MB atau sisa kapasitas penyimpanan',
-  );
+  return new ApiError(400, 'FILE_TOO_LARGE', 'Ukuran file melebihi batas yang diizinkan');
 }
 
 export function receiveMultipart(
