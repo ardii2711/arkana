@@ -13,9 +13,7 @@ const TREND_DAYS = 30;
 const UPCOMING_LIMIT = 5;
 const PINNED_NOTE_LIMIT = 5;
 
-function dateKey(value: Date): string {
-  return value.toISOString().slice(0, 10);
-}
+import { dateKey } from '../../lib/wita.js';
 
 export async function getDashboard(userId: string, now: Date = new Date()) {
   const today = todayWita(now);

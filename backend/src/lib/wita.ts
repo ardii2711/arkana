@@ -22,7 +22,11 @@ export function addDaysWita(value: string, days: number): string {
   const date = new Date(`${value}T00:00:00.000Z`);
   date.setUTCDate(date.getUTCDate() + days);
 
-  return date.toISOString().slice(0, 10);
+  return dateKey(date);
+}
+
+export function dateKey(value: Date): string {
+  return value.toISOString().slice(0, 10);
 }
 
 export function monthRange(day: string): { from: string; to: string } {

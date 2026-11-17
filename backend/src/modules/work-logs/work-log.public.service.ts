@@ -1,4 +1,5 @@
 import { prisma } from '../../lib/prisma.js';
+import { dateKey } from '../../lib/wita.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
 import { fileSelect, getPublicWorkLogFileContent, toFileItem } from './work-log-file.service.js';
@@ -22,7 +23,7 @@ export async function getPublicWorkLog(publicToken: string) {
 
   return {
     ...workLog,
-    activityDate: workLog.activityDate.toISOString().slice(0, 10),
+    activityDate: dateKey(workLog.activityDate),
     files: workLog.files.map(toFileItem),
   };
 }

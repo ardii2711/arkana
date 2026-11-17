@@ -5,7 +5,7 @@ import { receiveMultipart } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { deleteObjects, mapStorageError, storageError } from '../../lib/storage.js';
-import { dateOnlyUtc } from '../../lib/wita.js';
+import { dateOnlyUtc, dateKey } from '../../lib/wita.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
 import type { Request } from 'express';
@@ -77,7 +77,7 @@ function toFileItem(file: FileRow) {
   return {
     ...rest,
     folderName: folder?.name ?? null,
-    documentDate: file.documentDate ? file.documentDate.toISOString().slice(0, 10) : null,
+    documentDate: file.documentDate ? dateKey(file.documentDate) : null,
     previewable: isPreviewable(file.mimeType),
   };
 }

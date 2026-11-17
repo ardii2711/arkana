@@ -1,6 +1,6 @@
 import { env } from '../../config/env.js';
 import { prisma } from '../../lib/prisma.js';
-import { dateOnlyUtc } from '../../lib/wita.js';
+import { dateOnlyUtc, dateKey } from '../../lib/wita.js';
 import type { AuthUser } from '../../types/auth.js';
 import { formatDateTimeWita, resolveRange } from './report.period.js';
 import { CATEGORY_LABELS, summarizeEvidence, type ReportData } from './report.rows.js';
@@ -46,7 +46,7 @@ export async function buildReport(user: AuthUser, query: ReportQuery): Promise<R
     generatedAt: formatDateTimeWita(),
     rows: workLogs.map((workLog, index) => ({
       no: index + 1,
-      date: workLog.activityDate.toISOString().slice(0, 10),
+      date: dateKey(workLog.activityDate),
       actionPlan: workLog.name,
       target: workLog.target,
       realisasi: workLog.realisasi,
