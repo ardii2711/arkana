@@ -17,36 +17,11 @@ Struktur laporan:
 
 ## A. Backend
 
-Struktur aktual: Express 5 + Prisma 7 (driver adapter `@prisma/adapter-pg`) + Zod + R2 (S3). ESM, TypeScript strict. Pola modular layered: `routes/controller/(service)/schema`. Tidak ada `.repository.ts` — semua service memanggil `prisma` langsung. `ARCHITECTURE.md` mendokumentasikan lapisan Repository, jadi ada gap antara dokumen dan implementasi (lihat A-17).
+Struktur aktual: Express 5 + Prisma 7 (driver adapter `@prisma/adapter-pg`) + Zod + R2 (S3). ESM, TypeScript strict. Pola modular layered: `routes/controller/(service)/schema`. Tidak ada `.repository.ts` — semua service memanggil `prisma` langsung; keputusan dan kriteria penambahannya tercatat di `ARCHITECTURE.md` §4.1.
 
 Pemeriksaan statis yang berjalan: `eslint src` hijau (termasuk `no-unused-vars`). Tidak ada TODO/FIXME di `src`.
 
-### A.2 Pesan error menyesatkan karena angka hardcode
-
-**Lokasi:** `src/lib/multipart.ts` (`fileTooLarge()`), `src/modules/work-logs/work-log-file.service.ts:72,78`, `src/modules/archive/archive.service.ts:341`, `src/modules/archive/archive.service.ts:185,233`.
-
-**Masalah:** Teks seperti "Maksimal 10 file per kegiatan", "50 MB", "1 GB", "Kedalaman folder maksimal 3 level", "batas 5 MB" ditulis literal, padahal konstanta sumbernya sudah ada (`MAX_FILES_PER_WORK_LOG`, `MAX_TOTAL_BYTES_PER_WORK_LOG`, `ARCHIVE_QUOTA_BYTES`, `MAX_FOLDER_LEVEL`, `MAX_FILE_BYTES`). Dua risiko:
-
-1. Drift: konstanta diubah, pesan lupa diubah → pengguna menerima informasi salah.
-2. `fileTooLarge()` membangun pesan "batas 5 MB" padahal limit aktual adalah `Math.min(MAX_FILE_BYTES, sisaKuota)` — bisa jauh lebih kecil saat kuota arsip hampir habis. Pesan menjadi salah bagi kasus tersebut.
-
-**Rekomendasi:** interpolasi angka ke dalam pesan dari konstanta, atau bangun pesan dari nilai `maxBytes` aktual; untuk kasus sisa kuota, gunakan pesan generik ("File melebihi batas yang diizinkan").
-
-**Dampak:** sedang.
-
 ### A.3 Duplikasi fungsi identik / hampir identik
-
-**A.3.1 `requoteStorageError` di dua tempat (identik).**
-`work-log-file.service.ts:42-52` dan `archive.service.ts:91-101`: ApiError diteruskan apa adanya, error lain dibungkus menjadi `storageError` (502). **Rekomendasi:** satu helper `ensureStorageError`/`mapStorageError` di `lib/storage.ts`. **Dampak:** sedang.
-
-**A.3.2 Date-only — empat salinan dengan tiga nama.**
-`toDateOnly` (`work-log.service.ts:41`), `toDateOnly` (`archive.service.ts:332`), `toDbDate` (`report.service.ts:12`), `parseDate` (`report.period.ts:42`) — logika sama: ambil bagian tanggal untuk disimpan sebagai `@db.Date` (UTC midnight). **Rekomendasi:** satu helper `dateOnlyUtc(value)` di `lib/wita.ts` atau `lib/date.ts`. **Dampak:** sedang.
-
-**A.3.3 Select profil 15-field di-duplikasi.**
-Blok `select` Prisma identik di `src/middlewares/require-auth.ts:18-36` dan `profile.service.ts` (`profileSelect`), termasuk langkah strip `avatarKey` → `hasAvatar: Boolean(...)` (`require-auth.ts:41-42`, `profile.service.ts:55-58`). `ProfileRow` (`profile.service.ts:37-53`) menulis ulang 15 tipe field manual — seharusnya `Prisma.UserGetPayload<{ select: typeof profileSelect }>`. **Rekomendasi:** satu `profileSelect` + mapper (`toAuthUser`/`toProfile`) di satu modul, dipakai ulang. **Dampak:** sedang (menyentuh setiap request autentikasi).
-
-**A.3.4 Pola pagination list di 5 modul.**
-`page`/`limit` (default 20, max 100) + `prisma.$transaction([findMany, count])` + bentuk respons `{items,total,page,limit}` di `users.service.ts`, `note.service.ts`, `work-log.service.ts`, `schedule.service.ts`, `archive.service.ts`. **Rekomendasi:** minimal selaraskan konstanta; helper `pageLimitFields` (zod) + `paginate()` jika disetujui (hati-hati over-engineering — pola 5x salinan boleh jadi memang layak diekstrak). **Dampak:** rendah–sedang.
 
 **A.3.5 Refine "minimal satu field" di 6 schema.**
 `note.schema.ts`, `users.schema.ts`, `work-log.schema.ts`, `schedule.schema.ts`, `archive.schema.ts` (message sama: "Minimal satu field harus diisi") dan `profile.schema.ts` (message berbeda: "Minimal satu field diisi") — body identik. **Rekomendasi:** satu `atLeastOneField(message?)` di helper schema bersama. **Dampak:** rendah.
@@ -84,7 +59,7 @@ Pola `findFirst({ where: { id, userId } })` / `updateMany|deleteMany` + `count =
 `archive.service.ts:356` mem-parse `createFileFieldsSchema.parse(values)` di dalam service, bukan lewat middleware `validate` dengan `res.locals.input`. Berjalan (ZodError ditangkap `errorHandler` → 400), tetapi inkonsisten dengan semua endpoint lain. **Rekomendasi:** normalisasi parse multipart fields di controller/route, atau helper `validateMultipart()`. **Dampak:** rendah.
 
 **A.4.3 Middleware mengimpor dari modul fitur.**
-`middlewares/require-auth.ts:5-6` mengimpor `ACCESS_COOKIE` dari `modules/auth/auth.cookies.js` dan `verifyAccessToken` dari `modules/auth/auth.tokens.js`, lalu query Prisma per request autentikasi. Secara modular-purist ini lapisan bocor (middleware → modul); secara pragmatis wajar. **Rekomendasi (pertimbangan):** pindahkan `ACCESS_COOKIE` dan verifikasi token ke `lib/` agar middleware tidak mengimpor modul fitur; konsolidasi select via A.3.3. **Dampak:** rendah–sedang.
+`middlewares/require-auth.ts:5-6` mengimpor `ACCESS_COOKIE` dari `modules/auth/auth.cookies.js` dan `verifyAccessToken` dari `modules/auth/auth.tokens.js`, lalu query Prisma per request autentikasi. Secara modular-purist ini lapisan bocor (middleware → modul); secara pragmatis wajar. **Rekomendasi (pertimbangan):** pindahkan `ACCESS_COOKIE` dan verifikasi token ke `lib/` agar middleware tidak mengimpor modul fitur. **Dampak:** rendah–sedang.
 
 **A.4.4 Batas `lib/` vs `utils/` tidak konsisten.**
 `utils/`: `api-error.ts` (murni, tanpa Express), `api-response.ts` (HTTP), `current-user.ts` (req), `file-response.ts` (res). `lib/`: `prisma.ts`, `storage.ts`, `mailer.ts`, `logger.ts`, `tokens.ts`, `multipart.ts` (infra) **ditambah** domain murni: `wita.ts`, `file-rules.ts`, `account-mail.ts`, `file-content.ts` (business logic: baca storage + konversi HEIC). Pasangan `file-content.ts` (lib) / `file-response.ts` (utils) seharusnya satu tempat. **Rekomendasi:** tetapkan kontrak tertulis, misal `lib = infra + domain murni lintas modul`, `utils = helper HTTP/framework`; pindahkan `api-error.ts` ke lib atau terima sebagai keputusan tertulis. **Perlu verifikasi** preferensi tim. **Dampak:** rendah.
@@ -128,8 +103,6 @@ Catatan: `formatDateLabel` **tetap** di-export — dipakai `scripts/check-report
 **A.7.1 Non-null assertion berdasarkan refiner eksternal.** `report.period.ts:64-65` — `const from = input.from!` aman hanya karena `superRefine` memanggilnya lebih dulu; rapuh terhadap refactor. **Rekomendasi:** guard eksplisit `if (!input.from || !input.to) throw …` atau discriminated union. **Dampak:** rendah.
 
 **A.7.2 Fungsi paling kompleks.** `summarizeEvidence` (`report.rows.ts:47-72`) ~30 baris nested dengan dua branch sisa-file — terdokumentasi (aturan e-Kinerja 255 karakter), tidak harus dipecah, tapi paling rawan bug. Pastikan `scripts/check-report-format.ts` mencakup skenario "+N file lainnya" (cakupan script **perlu verifikasi**). **Dampak:** rendah.
-
-**A.7.3 Nama kurang jelas.** `requoteStorageError` (maksudnya "rethrow, ApiError diteruskan apa adanya") → `ensureStorageError` / `mapStorageError`. Tiga nama berbeda untuk date-only (lihat A.3.2). `ProfileRow` interface manual menulis ulang payload (lihat A.3.3). **Dampak:** rendah.
 
 **Bersih:** tidak ada TODO/FIXME/HACK; tidak ada fungsi raksasa yang melanggar kewajaran (terbesar ~`archive.service.ts` 470 baris tetapi fungsi-fungsinya kecil terpisah); pola delete 204 konsisten; error-handler terpusat OK; `health` tanpa layer adalah exception wajar; `res.locals.input` konsisten; pesan user-facing berbahasa Indonesia.
 
@@ -253,12 +226,10 @@ Setelah setiap task: typecheck + lint + build (frontend & backend sesuai task), 
 
 1. **Ekstraksi berlebihan = abstraksi baru.** Helper generik Prisma (`findOwnedOrThrow`) dan `paginate()` tergoda di-abstraksi; bila hanya 5 modul memakai pola serupa dengan perbedaan kecil, biarkan — samakan bentuknya saja. Utamakan duplikasi yang identik penuh.
 2. **Perubahan perilaku harus nol.** Task F/H (shared component, pecah komponen) wajib mempertahankan tampilan & perilaku piksel-sempurna/flow yang sama; review visual oleh pengguna.
-3. **Migration.** Task A berpotensi butuh migration (unique index `NULLS NOT DISTINCT`). Agent tidak menjalankan migration; perintah disiapkan, pengguna yang menjalankan, dan commit migration terpisah.
-4. **Kontrak publik tidak berubah.** Semua task di atas tidak mengubah bentuk API, envelope respons, atau rute frontend — aman tanpa koordinasi backend↔frontend, kecuali penamaan file internal (bebas).
-5. **Pesan error user-facing** tetap berbahasa Indonesia; samakan istilah ("percobaan" vs "permintaan" dipilih satu).
-6. **Verifikasi akhir.** Setelah task selesai seluruhnya, jalankan ulang audit terarah (bukan penuh) untuk memastikan tidak ada regresi duplikasi.
+3. **Kontrak publik tidak berubah.** Semua task di atas tidak mengubah bentuk API, envelope respons, atau rute frontend — aman tanpa koordinasi backend↔frontend, kecuali penamaan file internal (bebas).
+4. **Pesan error user-facing** tetap berbahasa Indonesia; samakan istilah ("percobaan" vs "permintaan" dipilih satu).
+5. **Verifikasi akhir.** Setelah task selesai seluruhnya, jalankan ulang audit terarah (bukan penuh) untuk memastikan tidak ada regresi duplikasi.
 
 ## E. Keputusan yang menunggu pengguna
 
 1. `pg` pin di backend: sengaja dipertahankan, atau dihapus?
-2. Unique index folder root (`parentId IS NULL`): **disetujui** (17 Nov 2026) — terapkan unique index; dikerjakan pada Task A.3.

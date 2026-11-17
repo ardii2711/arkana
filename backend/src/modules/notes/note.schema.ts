@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { paginationFields } from '../../lib/pagination.js';
+
 const content = z.string().trim().min(1).max(20_000);
 
 export const createNoteSchema = z.object({
@@ -17,8 +19,7 @@ export const updateNoteSchema = z
   });
 
 export const listNotesQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+  ...paginationFields,
   search: z.string().trim().min(1).max(100).optional(),
   pinned: z.enum(['true', 'false']).optional(),
 });

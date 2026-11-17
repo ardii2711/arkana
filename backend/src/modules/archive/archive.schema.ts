@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { paginationFields } from '../../lib/pagination.js';
+
 const folderName = z.string().trim().min(1).max(100);
 const fileName = z.string().trim().min(1).max(200);
 const description = z.string().trim().max(5_000);
@@ -48,8 +50,7 @@ export const listFilesQuerySchema = z.object({
   folderId: z.union([z.literal('root'), folderId]).optional(),
   search: z.string().trim().min(1).max(100).optional(),
   type: z.enum(['image', 'pdf', 'document']).optional(),
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+  ...paginationFields,
   sort: z.enum(['recent', 'name', 'documentDate']).default('recent'),
 });
 

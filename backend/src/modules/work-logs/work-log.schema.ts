@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { WorkCategory } from '../../generated/prisma/enums.js';
+import { paginationFields } from '../../lib/pagination.js';
 import { todayWita } from '../../lib/wita.js';
 
 const name = z.string().trim().min(1).max(200);
@@ -44,8 +45,7 @@ export const updateWorkLogSchema = z
 
 export const listWorkLogsQuerySchema = z
   .object({
-    page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(20),
+    ...paginationFields,
     category: category.optional(),
     from: z.iso.date().optional(),
     to: z.iso.date().optional(),

@@ -1,13 +1,14 @@
 import { z } from 'zod';
 
+import { paginationFields } from '../../lib/pagination.js';
+
 export const inviteUserSchema = z.object({
   name: z.string().trim().min(1).max(100),
   email: z.email().trim().toLowerCase(),
 });
 
 export const listUsersQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+  ...paginationFields,
   search: z.string().trim().max(100).optional(),
 });
 

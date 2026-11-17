@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { ScheduleCategory, ScheduleStatus } from '../../generated/prisma/enums.js';
+import { paginationFields } from '../../lib/pagination.js';
 
 const title = z.string().trim().min(1).max(200);
 const optionalText = (max: number) =>
@@ -55,8 +56,7 @@ export const updateScheduleSchema = z
 
 export const listSchedulesQuerySchema = z
   .object({
-    page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(20),
+    ...paginationFields,
     from: z.iso.date().optional(),
     to: z.iso.date().optional(),
     category: category.optional(),
