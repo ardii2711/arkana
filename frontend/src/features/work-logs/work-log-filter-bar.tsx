@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { WORK_CATEGORIES, WORK_CATEGORY_LABELS, type WorkCategory } from './work-log.api';
+import { NAME_MAX_LENGTH } from '@/lib/limits';
+import { WORK_CATEGORIES, WORK_CATEGORY_LABELS, type WorkCategory } from '@/lib/work-category';
 
 export type WorkLogFilters = {
   search: string;
@@ -68,7 +69,7 @@ export function WorkLogFilterBar({
           <InputGroupInput
             id="work-log-search"
             value={searchDraft}
-            maxLength={100}
+            maxLength={NAME_MAX_LENGTH}
             placeholder="Nama atau uraian kegiatan"
             onChange={(event) => onSearchDraftChange(event.target.value)}
           />

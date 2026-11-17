@@ -1,6 +1,12 @@
 import { z } from 'zod';
 
-const name = z.string().trim().min(1, 'Nama wajib diisi').max(100, 'Nama maksimal 100 karakter');
+import { NAME_MAX_LENGTH } from '@/lib/limits';
+
+const name = z
+  .string()
+  .trim()
+  .min(1, 'Nama wajib diisi')
+  .max(NAME_MAX_LENGTH, 'Nama maksimal 100 karakter');
 
 const email = z.email('Email tidak valid').trim().toLowerCase();
 

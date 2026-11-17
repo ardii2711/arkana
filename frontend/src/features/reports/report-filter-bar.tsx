@@ -10,11 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  WORK_CATEGORIES,
-  WORK_CATEGORY_LABELS,
-  type WorkCategory,
-} from '@/features/work-logs/work-log.api';
+import { WORK_CATEGORIES, WORK_CATEGORY_LABELS, type WorkCategory } from '@/lib/work-category';
 import {
   REPORT_PERIODS,
   REPORT_PERIOD_LABELS,

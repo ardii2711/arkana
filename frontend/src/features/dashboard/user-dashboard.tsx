@@ -27,16 +27,9 @@ import {
   SCHEDULE_STATUS_LABELS,
   type Schedule,
 } from '@/features/schedules/schedule.api';
-import { scheduleDateLabel, witaShortDate } from '@/features/schedules/schedule.format';
+import { formatDate, formatMonthYear } from '@/lib/date';
+import { scheduleDateLabel } from '@/features/schedules/schedule.format';
 import { useUserDashboard } from './use-dashboard';
-
-const WITA = 'Asia/Makassar';
-
-const monthFormatter = new Intl.DateTimeFormat('id-ID', {
-  timeZone: WITA,
-  month: 'long',
-  year: 'numeric',
-});
 
 export function UserDashboard() {
   const query = useUserDashboard();
@@ -88,7 +81,7 @@ export function UserDashboard() {
           icon={<ClipboardListIcon aria-hidden="true" className="text-muted-foreground size-5" />}
           label="Kegiatan bulan ini"
           value={String(summary.monthWorkLogs)}
-          hint={monthFormatter.format(new Date())}
+          hint={formatMonthYear(new Date())}
         />
         <StatCard
           icon={<CalendarCheck2Icon aria-hidden="true" className="text-muted-foreground size-5" />}
@@ -272,7 +265,7 @@ function ScheduleListCard({
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{schedule.title}</p>
                   <p className="text-muted-foreground text-xs">
-                    {showDate ? `${witaShortDate(schedule.startAt)} · ` : ''}
+                    {showDate ? `${formatDate(schedule.startAt)} · ` : ''}
                     {scheduleDateLabel(schedule)}
                     {schedule.location ? ` · ${schedule.location}` : ''}
                   </p>

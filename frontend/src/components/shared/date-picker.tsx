@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { formatDate } from '@/lib/date';
 
 type DatePickerProps = {
   id?: string;
@@ -28,7 +29,7 @@ export function DatePicker({
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const selected = value ? parseISO(value) : undefined;
-  const label = selected ? format(selected, 'd MMM yyyy', { locale: localeId }) : null;
+  const label = value ? formatDate(value) : null;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

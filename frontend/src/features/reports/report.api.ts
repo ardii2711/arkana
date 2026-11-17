@@ -1,4 +1,4 @@
-import type { WorkCategory } from '@/features/work-logs/work-log.api';
+import type { WorkCategory } from '@/lib/work-category';
 import { api } from '@/lib/api';
 import type { ApiSuccess } from '@/types/api';
 

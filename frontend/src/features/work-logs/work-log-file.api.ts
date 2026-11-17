@@ -2,9 +2,6 @@ import { api } from '@/lib/api';
 import { downloadBlob } from '@/lib/download';
 import type { ApiSuccess } from '@/types/api';
 
-export const MAX_FILES_PER_WORK_LOG = 10;
-export const MAX_TOTAL_BYTES_PER_WORK_LOG = 50 * 1024 * 1024;
-
 export type WorkLogFile = {
   id: string;
   workLogId: string;

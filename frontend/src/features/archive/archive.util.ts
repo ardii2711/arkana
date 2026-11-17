@@ -1,6 +1,3 @@
-import { format, parseISO } from 'date-fns';
-import { id as localeId } from 'date-fns/locale';
-
 import type { ArchiveFolder } from './archive.api';
 
 export type FolderNode = {
@@ -39,8 +36,4 @@ export function descendantIds(folders: ArchiveFolder[], folderId: string): strin
   return folders
     .filter((folder) => folder.parentId === folderId)
     .flatMap((folder) => [folder.id, ...descendantIds(folders, folder.id)]);
-}
-
-export function formatDocumentDate(value: string) {
-  return format(parseISO(value), 'd MMM yyyy', { locale: localeId });
 }

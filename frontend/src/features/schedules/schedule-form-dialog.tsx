@@ -27,6 +27,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { getErrorMessage } from '@/lib/api-error';
+import { toWitaIso, witaDatePart, witaTimePart } from '@/lib/wita';
+import { TITLE_MAX_LENGTH } from '@/lib/limits';
 import {
   SCHEDULE_CATEGORIES,
   SCHEDULE_CATEGORY_LABELS,
@@ -35,7 +37,6 @@ import {
   type Schedule,
   type ScheduleInput,
 } from './schedule.api';
-import { toWitaIso, witaDatePart, witaTimePart } from './schedule.format';
 import { scheduleFormSchema, type ScheduleFormValues } from './schedule.schemas';
 import { useCreateSchedule, useUpdateSchedule } from './use-schedules';
 
@@ -118,7 +119,12 @@ export function ScheduleFormDialog({
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="schedule-title">Judul</FieldLabel>
-              <Input id="schedule-title" maxLength={200} autoFocus {...form.register('title')} />
+              <Input
+                id="schedule-title"
+                maxLength={TITLE_MAX_LENGTH}
+                autoFocus
+                {...form.register('title')}
+              />
               <FieldError
                 errors={form.formState.errors.title ? [form.formState.errors.title] : undefined}
               />
@@ -205,7 +211,11 @@ export function ScheduleFormDialog({
 
             <Field>
               <FieldLabel htmlFor="schedule-location">Tempat (opsional)</FieldLabel>
-              <Input id="schedule-location" maxLength={200} {...form.register('location')} />
+              <Input
+                id="schedule-location"
+                maxLength={TITLE_MAX_LENGTH}
+                {...form.register('location')}
+              />
               <FieldError
                 errors={
                   form.formState.errors.location ? [form.formState.errors.location] : undefined

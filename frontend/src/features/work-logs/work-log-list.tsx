@@ -16,14 +16,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
-import { WORK_CATEGORY_LABELS } from './work-log.api';
+import { WORK_CATEGORY_LABELS } from '@/lib/work-category';
 import {
   EMPTY_WORK_LOG_FILTERS,
   WorkLogFilterBar,
   type WorkLogFilters,
 } from './work-log-filter-bar';
 import { WorkLogFormDialog } from './work-log-form-dialog';
-import { formatActivityDate } from './work-log.format';
+import { formatDate } from '@/lib/date';
 import { useWorkLogs } from './use-work-logs';
 
 const PAGE_SIZE = 20;
@@ -148,7 +148,7 @@ export function WorkLogList() {
                     dateTime={workLog.activityDate}
                     className="text-muted-foreground shrink-0 text-xs sm:text-sm"
                   >
-                    {formatActivityDate(workLog.activityDate)}
+                    {formatDate(workLog.activityDate)}
                   </time>
                 </Link>
               </li>

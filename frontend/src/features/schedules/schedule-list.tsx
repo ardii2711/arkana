@@ -32,7 +32,8 @@ import {
   SCHEDULE_STATUS_LABELS,
   type Schedule,
 } from './schedule.api';
-import { scheduleDateLabel, witaShortDate } from './schedule.format';
+import { formatDate } from '@/lib/date';
+import { scheduleDateLabel } from './schedule.format';
 import { useDeleteSchedule } from './use-schedules';
 
 type ScheduleListProps = {
@@ -114,7 +115,7 @@ export function ScheduleList({
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                     <ClockIcon className="size-3.5" />
-                    {showDate ? `${witaShortDate(schedule.startAt)} · ` : ''}
+                    {showDate ? `${formatDate(schedule.startAt)} · ` : ''}
                     {scheduleDateLabel(schedule)}
                   </span>
                   <Badge variant="secondary">{SCHEDULE_CATEGORY_LABELS[schedule.category]}</Badge>

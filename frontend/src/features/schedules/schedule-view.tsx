@@ -3,16 +3,9 @@
 import { useMemo, useState } from 'react';
 
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  currentWitaDate,
-  formatScheduleTitle,
-  isScheduleOnDate,
-  monthRangeWita,
-  sortSchedules,
-  upcomingRangeWita,
-  witaBookedDates,
-  witaDatePart,
-} from './schedule.format';
+import { formatDateLong } from '@/lib/date';
+import { currentWitaDate, monthRangeWita, upcomingRangeWita, witaDatePart } from '@/lib/wita';
+import { isScheduleOnDate, sortSchedules, witaBookedDates } from './schedule.format';
 import type { Schedule } from './schedule.api';
 import { ScheduleCalendar } from './schedule-calendar';
 import { ScheduleFormDialog } from './schedule-form-dialog';
@@ -134,7 +127,7 @@ export function ScheduleView() {
           </div>
 
           <ScheduleList
-            title={listView === 'upcoming' ? 'Mendatang' : formatScheduleTitle(selectedDate)}
+            title={listView === 'upcoming' ? 'Mendatang' : formatDateLong(selectedDate)}
             subtitle={listView === 'upcoming' ? '30 hari ke depan' : 'hari terpilih'}
             schedules={viewing}
             showDate={listView === 'upcoming'}

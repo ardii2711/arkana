@@ -18,7 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
 import { fileExtension, formatFileSize } from '@/lib/file-format';
 import { downloadArchiveFile, type ArchiveFile } from './archive.api';
-import { formatDocumentDate } from './archive.util';
+import { formatDate } from '@/lib/date';
 import { useArchiveFileBlob } from './use-archive';
 
 type ArchiveFileDetailProps = {
@@ -71,7 +71,7 @@ export function ArchiveFileDetail({ file, onOpenChange }: ArchiveFileDetailProps
               </div>
               <div className="space-y-0.5">
                 <dt className="text-muted-foreground text-xs">Tanggal dokumen</dt>
-                <dd>{file.documentDate ? formatDocumentDate(file.documentDate) : '-'}</dd>
+                <dd>{file.documentDate ? formatDate(file.documentDate) : '-'}</dd>
               </div>
             </dl>
 

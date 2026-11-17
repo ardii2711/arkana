@@ -7,7 +7,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
 - **Task aktif:** tidak ada — Phase 11 selesai
-- **Task berikutnya:** Audit batch 3 — ekstraksi lib frontend (B.3, B.4, B.5.3)
+- **Task berikutnya:** Commit audit batch 3 — ekstraksi lib frontend (menunggu pengguna); batch berikutnya belum disetujui
 - **Update terakhir:** 17 November 2026
 
 ## Kesiapan Proyek
@@ -479,6 +479,16 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Sesi tetap bersumber dari `/auth/me`; mutasi meng-`invalidateQueries`/`setQueryData` `['auth','me']`.
 - Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah.
 - Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `format:check`, `build`): lulus; route `/verifikasi-email` dan `/profil` tersedia di build.
+
+### Audit batch 3 — Ekstraksi lib frontend (implementasi selesai, menunggu commit)
+
+- Audit temuan B.3.1–B.3.3, B.4.1–B.4.2, B.5.3 dieksekusi.
+- Modul baru: `frontend/src/lib/wita.ts` (satu sumber `Asia/Makassar`), `lib/date.ts` (satu sumber formatter, format tampilan `16 Nov 2026`), `lib/limits.ts` (batas lintas fitur), `lib/work-category.ts` (kategori kerja).
+- `features/profile/use-avatar.ts` (`useAvatarUrl`) + `features/profile/user-avatar.tsx`; `components/shared/user-avatar.tsx` dihapus (layer shared tidak lagi impor fitur).
+- `note.format.ts`, `work-log.format.ts` dihapus; `schedule.format.ts` hanya menyisakan helper khusus schedule; konstanta `MAX_FILE_BYTES` dipindah dari `lib/file-format.ts` ke `lib/limits.ts`.
+- String pesan batas file dibangun dari `formatFileSize` + konstanta.
+- Pemeriksaan statis: `lint`, `typecheck`, `format:check`, `build` lulus.
+- `docs/AUDIT.md` (tidak di-commit) item terkait sudah dihapus; batch ini belum di-commit pengguna.
 
 ### Temuan Di Luar Scope
 

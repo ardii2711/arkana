@@ -23,8 +23,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
-import { WORK_CATEGORY_LABELS } from './work-log.api';
-import { formatActivityDate } from './work-log.format';
+import { WORK_CATEGORY_LABELS } from '@/lib/work-category';
+import { formatDate } from '@/lib/date';
 import { WorkLogEvidence } from './work-log-evidence';
 import { WorkLogFormDialog } from './work-log-form-dialog';
 import { useDeleteWorkLog, useWorkLog } from './use-work-logs';
@@ -100,7 +100,7 @@ export function WorkLogDetail({ id }: { id: string }) {
           <h1 className="font-heading text-2xl font-semibold tracking-tight">{workLog.name}</h1>
           <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
             <Badge variant="secondary">{WORK_CATEGORY_LABELS[workLog.category]}</Badge>
-            <time dateTime={workLog.activityDate}>{formatActivityDate(workLog.activityDate)}</time>
+            <time dateTime={workLog.activityDate}>{formatDate(workLog.activityDate)}</time>
           </div>
         </div>
 

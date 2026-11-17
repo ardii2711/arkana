@@ -19,6 +19,7 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { getErrorMessage } from '@/lib/api-error';
+import { NAME_MAX_LENGTH } from '@/lib/limits';
 import { inviteUserSchema, type InviteUserFormValues } from './users.schemas';
 import { useInviteUser } from './use-users';
 
@@ -76,7 +77,7 @@ export function UserInviteDialog({ onOpenChange }: UserInviteDialogProps) {
                     {...field}
                     id="invite-name"
                     autoFocus
-                    maxLength={100}
+                    maxLength={NAME_MAX_LENGTH}
                     placeholder="Contoh: Budi Santoso"
                     aria-invalid={fieldState.invalid}
                     disabled={invite.isPending}

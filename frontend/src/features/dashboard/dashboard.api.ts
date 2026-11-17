@@ -1,7 +1,7 @@
 import type { ApiSuccess } from '@/types/api';
 
 import type { Schedule } from '@/features/schedules/schedule.api';
-import type { WorkCategory } from '@/features/work-logs/work-log.api';
+import type { WorkCategory } from '@/lib/work-category';
 import { api } from '@/lib/api';
 
 export type PinnedNote = {

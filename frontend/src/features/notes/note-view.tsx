@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/input-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
+import { NAME_MAX_LENGTH } from '@/lib/limits';
 import type { Note } from './note.api';
 import { NoteCard } from './note-card';
 import { NoteEditorDialog } from './note-editor-dialog';
@@ -87,7 +88,7 @@ export function NoteView() {
           <InputGroup>
             <InputGroupInput
               value={searchDraft}
-              maxLength={100}
+              maxLength={NAME_MAX_LENGTH}
               placeholder="Cari isi catatan"
               aria-label="Cari isi catatan"
               onChange={(event) => setSearchDraft(event.target.value)}

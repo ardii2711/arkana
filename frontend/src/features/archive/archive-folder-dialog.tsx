@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { getErrorMessage } from '@/lib/api-error';
+import { NAME_MAX_LENGTH } from '@/lib/limits';
 import type { ArchiveFolder } from './archive.api';
 import { folderSchema, type FolderFormValues } from './archive.schemas';
 import { buildFolderTree, descendantIds, flattenFolders } from './archive.util';
@@ -124,7 +125,7 @@ export function ArchiveFolderDialog({
                   <Input
                     {...field}
                     id="folder-name"
-                    maxLength={100}
+                    maxLength={NAME_MAX_LENGTH}
                     placeholder="Contoh: Sertifikat"
                     aria-invalid={fieldState.invalid}
                     disabled={mutation.isPending}

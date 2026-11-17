@@ -18,10 +18,9 @@ import {
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Textarea } from '@/components/ui/textarea';
 import { getErrorMessage } from '@/lib/api-error';
+import { NOTE_MAX_LENGTH } from '@/lib/limits';
 import type { Note } from './note.api';
 import { useCreateNote, useUpdateNote } from './use-notes';
-
-const MAX_LENGTH = 20_000;
 
 type NoteEditorDialogProps = {
   note: Note | null;
@@ -38,7 +37,7 @@ export function NoteEditorDialog({ note, onOpenChange }: NoteEditorDialogProps) 
   const [error, setError] = useState<string | null>(null);
 
   const trimmed = content.trim();
-  const isValid = trimmed.length >= 1 && trimmed.length <= MAX_LENGTH;
+  const isValid = trimmed.length >= 1 && trimmed.length <= NOTE_MAX_LENGTH;
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -75,7 +74,7 @@ export function NoteEditorDialog({ note, onOpenChange }: NoteEditorDialogProps) 
               id="note-content"
               autoFocus
               rows={10}
-              maxLength={MAX_LENGTH}
+              maxLength={NOTE_MAX_LENGTH}
               placeholder="Tulis catatan, ide, atau hal yang perlu ditindaklanjuti..."
               value={content}
               onChange={(event) => setContent(event.target.value)}
@@ -86,10 +85,10 @@ export function NoteEditorDialog({ note, onOpenChange }: NoteEditorDialogProps) 
               ) : null}
               <p
                 className={`text-muted-foreground ml-auto text-xs ${
-                  content.length > MAX_LENGTH ? 'text-destructive' : ''
+                  content.length > NOTE_MAX_LENGTH ? 'text-destructive' : ''
                 }`}
               >
-                {content.length.toLocaleString('id-ID')} / {MAX_LENGTH.toLocaleString('id-ID')}
+                {content.length.toLocaleString('id-ID')} / {NOTE_MAX_LENGTH.toLocaleString('id-ID')}
               </p>
             </div>
           </Field>

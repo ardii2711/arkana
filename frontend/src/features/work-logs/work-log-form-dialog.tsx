@@ -27,7 +27,9 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { getErrorMessage } from '@/lib/api-error';
-import { WORK_CATEGORIES, WORK_CATEGORY_LABELS, type WorkLog } from './work-log.api';
+import { NAME_MAX_LENGTH, TITLE_MAX_LENGTH } from '@/lib/limits';
+import { WORK_CATEGORIES, WORK_CATEGORY_LABELS } from '@/lib/work-category';
+import type { WorkLog } from './work-log.api';
 import { workLogSchema, type WorkLogFormValues } from './work-log.schemas';
 import { useCreateWorkLog, useUpdateWorkLog } from './use-work-logs';
 
@@ -97,7 +99,7 @@ export function WorkLogFormDialog({ workLog, onOpenChange }: WorkLogFormDialogPr
                   <Input
                     {...field}
                     id="work-log-name"
-                    maxLength={200}
+                    maxLength={TITLE_MAX_LENGTH}
                     placeholder="Contoh: Rapat koordinasi penyusunan laporan bulanan"
                     aria-invalid={fieldState.invalid}
                     disabled={mutation.isPending}
@@ -183,7 +185,7 @@ export function WorkLogFormDialog({ workLog, onOpenChange }: WorkLogFormDialogPr
                     <Input
                       {...field}
                       id="work-log-target"
-                      maxLength={100}
+                      maxLength={NAME_MAX_LENGTH}
                       placeholder="Contoh: 1 dokumen"
                       aria-invalid={fieldState.invalid}
                       disabled={mutation.isPending}
@@ -202,7 +204,7 @@ export function WorkLogFormDialog({ workLog, onOpenChange }: WorkLogFormDialogPr
                     <Input
                       {...field}
                       id="work-log-realisasi"
-                      maxLength={100}
+                      maxLength={NAME_MAX_LENGTH}
                       placeholder="Contoh: 1 dokumen"
                       aria-invalid={fieldState.invalid}
                       disabled={mutation.isPending}

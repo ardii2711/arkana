@@ -30,8 +30,9 @@ import {
 } from '@/components/ui/input-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
+import { NAME_MAX_LENGTH } from '@/lib/limits';
 import { getInitials } from '@/lib/initials';
-import { witaShortDate } from '@/features/schedules/schedule.format';
+import { formatDate } from '@/lib/date';
 import { useSession } from '@/features/auth/use-auth';
 import { USER_STATUS_BADGES, USER_STATUS_LABELS, type AdminAccount } from './users.api';
 import { UserEditDialog } from './user-edit-dialog';
@@ -127,7 +128,7 @@ function UsersAdmin() {
           <InputGroup>
             <InputGroupInput
               value={searchDraft}
-              maxLength={100}
+              maxLength={NAME_MAX_LENGTH}
               placeholder="Cari nama atau email"
               aria-label="Cari nama atau email"
               onChange={(event) => setSearchDraft(event.target.value)}
@@ -227,7 +228,7 @@ function UsersAdmin() {
                       </Badge>
                     </td>
                     <td className="text-muted-foreground border-t px-3 py-2.5 whitespace-nowrap">
-                      {witaShortDate(account.createdAt)}
+                      {formatDate(account.createdAt)}
                     </td>
                     <td className="border-t px-3 py-2.5">
                       <div className="flex justify-end gap-1.5">
@@ -285,7 +286,7 @@ function UsersAdmin() {
                           {USER_STATUS_LABELS[account.status]}
                         </Badge>
                         <span className="text-muted-foreground text-xs">
-                          Terdaftar {witaShortDate(account.createdAt)}
+                          Terdaftar {formatDate(account.createdAt)}
                         </span>
                       </div>
                       {account.role !== 'ADMIN' ? (

@@ -40,12 +40,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PasswordInput } from '@/components/shared/password-input';
-import { UserAvatar } from '@/components/shared/user-avatar';
+import { UserAvatar } from '@/features/profile/user-avatar';
 import { getErrorMessage } from '@/lib/api-error';
+import { formatFileSize } from '@/lib/file-format';
+import { AVATAR_MAX_BYTES } from '@/lib/limits';
 import { getDisplayName } from '@/lib/display-name';
 import type { SessionUser } from '@/features/auth/auth.api';
 import { useChangePassword, useSession } from '@/features/auth/use-auth';
-import { AVATAR_ACCEPT, AVATAR_EXTENSIONS, AVATAR_MAX_BYTES } from './profile.api';
+import { AVATAR_ACCEPT, AVATAR_EXTENSIONS } from './profile.api';
 import {
   NONE_VALUE,
   PNS_GOLONGAN,
@@ -93,7 +95,7 @@ function IdentityCard({ user }: { user: SessionUser }) {
     }
 
     if (file.size > AVATAR_MAX_BYTES) {
-      toast.error('Ukuran avatar maksimal 2 MB');
+      toast.error(`Ukuran avatar maksimal ${formatFileSize(AVATAR_MAX_BYTES)}`);
       event.target.value = '';
       return;
     }

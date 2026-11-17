@@ -45,6 +45,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
+import { NAME_MAX_LENGTH } from '@/lib/limits';
 import { fileExtension, formatFileSize } from '@/lib/file-format';
 import {
   downloadArchiveFile,
@@ -55,7 +56,8 @@ import {
 } from './archive.api';
 import { ArchiveFileDetail } from './archive-file-detail';
 import { ArchiveFileEditDialog } from './archive-file-edit-dialog';
-import { buildFolderTree, flattenFolders, formatDocumentDate } from './archive.util';
+import { formatDate } from '@/lib/date';
+import { buildFolderTree, flattenFolders } from './archive.util';
 import { useArchiveFiles, useDeleteArchiveFile } from './use-archive';
 
 const PAGE_SIZE = 20;
@@ -144,7 +146,7 @@ export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFiles
             onChange={(event) => setSearchDraft(event.target.value)}
             placeholder="Cari nama atau deskripsi"
             aria-label="Cari dokumen"
-            maxLength={100}
+            maxLength={NAME_MAX_LENGTH}
             className="min-w-0"
           />
           <Button type="submit" variant="outline" size="icon" aria-label="Cari dokumen">
@@ -275,7 +277,7 @@ export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFiles
                     <p className="text-muted-foreground truncate text-xs">
                       {fileExtension(file.originalName)} · {formatFileSize(file.size)}
                       {file.folderName ? ` · ${file.folderName}` : ''}
-                      {file.documentDate ? ` · ${formatDocumentDate(file.documentDate)}` : ''}
+                      {file.documentDate ? ` · ${formatDate(file.documentDate)}` : ''}
                     </p>
                     {file.description ? (
                       <p className="text-muted-foreground line-clamp-2 text-xs">

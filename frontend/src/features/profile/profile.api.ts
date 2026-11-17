@@ -2,7 +2,6 @@ import { api } from '@/lib/api';
 import type { ApiSuccess } from '@/types/api';
 import type { SessionUser } from '@/features/auth/auth.api';
 
-export const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 export const AVATAR_ACCEPT = 'image/jpeg,image/png,image/webp';
 export const AVATAR_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'] as const;
 

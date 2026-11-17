@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { formatDate } from '@/lib/date';
 
 export type DateRangeValue = {
   from: string;
@@ -29,10 +30,10 @@ function toDate(value: string) {
 function formatLabel(value: DateRangeValue) {
   if (!value.from) return null;
 
-  const start = format(toDate(value.from), 'd MMM yyyy', { locale: localeId });
+  const start = formatDate(value.from);
   if (!value.to) return start;
 
-  return `${start} – ${format(toDate(value.to), 'd MMM yyyy', { locale: localeId })}`;
+  return `${start} – ${formatDate(value.to)}`;
 }
 
 export function DateRangePicker({ id, value, onChange }: DateRangePickerProps) {

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { TITLE_MAX_LENGTH } from '@/lib/limits';
+
 import { SCHEDULE_CATEGORIES, SCHEDULE_STATUSES } from './schedule.api';
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -7,9 +9,13 @@ const TIME = /^\d{2}:\d{2}$/;
 
 export const scheduleFormSchema = z
   .object({
-    title: z.string().trim().min(1, 'Judul wajib diisi').max(200, 'Judul maksimal 200 karakter'),
+    title: z
+      .string()
+      .trim()
+      .min(1, 'Judul wajib diisi')
+      .max(TITLE_MAX_LENGTH, 'Judul maksimal 200 karakter'),
     description: z.string().trim().max(2_000, 'Deskripsi maksimal 2.000 karakter'),
-    location: z.string().trim().max(200, 'Tempat maksimal 200 karakter'),
+    location: z.string().trim().max(TITLE_MAX_LENGTH, 'Tempat maksimal 200 karakter'),
     category: z.enum(SCHEDULE_CATEGORIES, { error: 'Kategori wajib dipilih' }),
     status: z.enum(SCHEDULE_STATUSES, { error: 'Status wajib dipilih' }),
     allDay: z.boolean(),

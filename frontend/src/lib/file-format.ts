@@ -1,5 +1,3 @@
-export const MAX_FILE_BYTES = 5 * 1024 * 1024;
-
 export const ALLOWED_FILE_EXTENSIONS = [
   'jpg',
   'jpeg',

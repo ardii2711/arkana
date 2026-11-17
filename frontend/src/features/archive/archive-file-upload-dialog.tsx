@@ -27,13 +27,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { getErrorMessage } from '@/lib/api-error';
-import {
-  FILE_ACCEPT,
-  MAX_FILE_BYTES,
-  fileExtension,
-  formatFileSize,
-  isAllowedFile,
-} from '@/lib/file-format';
+import { BODY_MAX_LENGTH, MAX_FILE_BYTES, TITLE_MAX_LENGTH } from '@/lib/limits';
+import { FILE_ACCEPT, fileExtension, formatFileSize, isAllowedFile } from '@/lib/file-format';
 import type { ArchiveFolder } from './archive.api';
 import { buildFolderTree, flattenFolders } from './archive.util';
 import { useUploadArchiveFile } from './use-archive';
@@ -80,7 +75,7 @@ export function ArchiveFileUploadDialog({
     }
 
     if (file.size > MAX_FILE_BYTES) {
-      setError('Ukuran file melebihi batas 5 MB.');
+      setError(`Ukuran file melebihi batas ${formatFileSize(MAX_FILE_BYTES)}.`);
       return;
     }
 
@@ -120,7 +115,8 @@ export function ArchiveFileUploadDialog({
         <DialogHeader>
           <DialogTitle>Unggah dokumen</DialogTitle>
           <DialogDescription>
-            Maksimal 5 MB per file. Format: JPG, PNG, WEBP, HEIC, PDF, DOC, DOCX, XLS, XLSX.
+            Maksimal {formatFileSize(MAX_FILE_BYTES)} per file. Format: JPG, PNG, WEBP, HEIC, PDF,
+            DOC, DOCX, XLS, XLSX.
           </DialogDescription>
         </DialogHeader>
 
@@ -175,7 +171,7 @@ export function ArchiveFileUploadDialog({
               <FieldLabel htmlFor="archive-upload-name">Nama dokumen</FieldLabel>
               <Input
                 id="archive-upload-name"
-                maxLength={200}
+                maxLength={TITLE_MAX_LENGTH}
                 placeholder="Kosongkan untuk memakai nama file"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
@@ -218,7 +214,7 @@ export function ArchiveFileUploadDialog({
               <Textarea
                 id="archive-upload-description"
                 rows={3}
-                maxLength={5000}
+                maxLength={BODY_MAX_LENGTH}
                 placeholder="Keterangan singkat dokumen"
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}

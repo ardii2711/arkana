@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
 import { getInitials } from '@/lib/initials';
-import { witaShortDate } from '@/features/schedules/schedule.format';
+import { formatDate } from '@/lib/date';
 import { useAdminDashboard } from './use-dashboard';
 import { useResendInvitation } from '@/features/users/use-users';
 
@@ -140,7 +140,7 @@ export function AdminDashboard() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{invitation.name}</p>
                     <p className="text-muted-foreground truncate text-xs">
-                      {invitation.email} · diundang {witaShortDate(invitation.createdAt)}
+                      {invitation.email} · diundang {formatDate(invitation.createdAt)}
                     </p>
                   </div>
                   <Button

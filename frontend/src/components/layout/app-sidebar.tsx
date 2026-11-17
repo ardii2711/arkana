@@ -16,7 +16,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { UserAvatar } from '@/components/shared/user-avatar';
+import { UserAvatar } from '@/features/profile/user-avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,

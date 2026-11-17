@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { NAME_MAX_LENGTH } from '@/lib/limits';
+
 export const PNS_GOLONGAN = [
   'I/a',
   'I/b',
@@ -44,16 +46,16 @@ export const ALL_GOLONGAN = [...PNS_GOLONGAN, ...PPPK_GOLONGAN] as readonly stri
 export const NONE_VALUE = '__none__';
 
 export const profileFormSchema = z.object({
-  name: z.string().trim().min(1, 'Nama wajib diisi').max(100, 'Maksimal 100 karakter'),
+  name: z.string().trim().min(1, 'Nama wajib diisi').max(NAME_MAX_LENGTH, 'Maksimal 100 karakter'),
   titleBefore: z.string().trim().max(50, 'Maksimal 50 karakter'),
-  titleAfter: z.string().trim().max(100, 'Maksimal 100 karakter'),
+  titleAfter: z.string().trim().max(NAME_MAX_LENGTH, 'Maksimal 100 karakter'),
   nip: z
     .string()
     .trim()
     .regex(/^(\d{18})?$/, 'NIP harus 18 digit angka'),
   employeeStatus: z.string(),
   golongan: z.string(),
-  position: z.string().trim().max(100, 'Maksimal 100 karakter'),
+  position: z.string().trim().max(NAME_MAX_LENGTH, 'Maksimal 100 karakter'),
   unit: z.string().trim().max(150, 'Maksimal 150 karakter'),
 });
 

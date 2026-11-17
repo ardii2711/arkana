@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
 import type { ApiSuccess } from '@/types/api';
-import type { WorkCategory } from './work-log.api';
+import type { WorkCategory } from '@/lib/work-category';
 import type { WorkLogFile } from './work-log-file.api';
 
 export type PublicWorkLog = {

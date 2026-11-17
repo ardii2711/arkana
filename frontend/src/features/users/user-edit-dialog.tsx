@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { getErrorMessage } from '@/lib/api-error';
+import { NAME_MAX_LENGTH } from '@/lib/limits';
 import type { AdminAccount } from './users.api';
 import { editUserSchema, type EditUserFormValues } from './users.schemas';
 import { useUpdateUser } from './use-users';
@@ -94,7 +95,7 @@ export function UserEditDialog({ account, onOpenChange }: UserEditDialogProps) {
                   <Input
                     {...field}
                     id="edit-name"
-                    maxLength={100}
+                    maxLength={NAME_MAX_LENGTH}
                     aria-invalid={fieldState.invalid}
                     disabled={update.isPending}
                   />

@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Note } from './note.api';
-import { formatNoteTimestamp } from './note.format';
+import { formatDateTime } from '@/lib/date';
 import { useDeleteNote, useToggleNotePin } from './use-notes';
 
 type NoteCardProps = {
@@ -40,9 +40,7 @@ export function NoteCard({ note, onEdit }: NoteCardProps) {
         </button>
 
         <div className="mt-auto flex items-center justify-between gap-2">
-          <span className="text-muted-foreground text-xs">
-            {formatNoteTimestamp(note.updatedAt)}
-          </span>
+          <span className="text-muted-foreground text-xs">{formatDateTime(note.updatedAt)}</span>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"

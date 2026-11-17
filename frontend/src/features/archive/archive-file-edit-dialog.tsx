@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { getErrorMessage } from '@/lib/api-error';
+import { BODY_MAX_LENGTH, TITLE_MAX_LENGTH } from '@/lib/limits';
 import type { ArchiveFile, ArchiveFolder } from './archive.api';
 import { fileMetaSchema, type FileMetaFormValues } from './archive.schemas';
 import { buildFolderTree, flattenFolders } from './archive.util';
@@ -104,7 +105,7 @@ export function ArchiveFileEditDialog({ file, folders, onOpenChange }: ArchiveFi
                   <Input
                     {...field}
                     id="archive-edit-name"
-                    maxLength={200}
+                    maxLength={TITLE_MAX_LENGTH}
                     aria-invalid={fieldState.invalid}
                     disabled={update.isPending}
                   />
@@ -169,7 +170,7 @@ export function ArchiveFileEditDialog({ file, folders, onOpenChange }: ArchiveFi
                     {...field}
                     id="archive-edit-description"
                     rows={3}
-                    maxLength={5000}
+                    maxLength={BODY_MAX_LENGTH}
                     aria-invalid={form.formState.errors.description ? true : undefined}
                     disabled={update.isPending}
                   />

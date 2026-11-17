@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatActivityDate } from '@/features/work-logs/work-log.format';
+import { formatDate } from '@/lib/date';
 import type { ReportRow } from './report.api';
 
 function Cell({ children }: { children: ReactNode }) {
@@ -63,7 +63,7 @@ export function ReportTable({ rows }: { rows: ReportRow[] }) {
             {rows.map((row) => (
               <tr key={row.no} className="align-top">
                 <Cell>{row.no}</Cell>
-                <Cell>{formatActivityDate(row.date)}</Cell>
+                <Cell>{formatDate(row.date)}</Cell>
                 <Cell>{row.actionPlan}</Cell>
                 <Cell>{row.target || '-'}</Cell>
                 <Cell>{row.realisasi || '-'}</Cell>
@@ -92,7 +92,7 @@ export function ReportTable({ rows }: { rows: ReportRow[] }) {
                   {row.category}
                 </Badge>
               </div>
-              <p className="text-muted-foreground">{formatActivityDate(row.date)}</p>
+              <p className="text-muted-foreground">{formatDate(row.date)}</p>
               <dl className="grid grid-cols-[6rem_minmax(0,1fr)] gap-x-2 gap-y-1">
                 <dt className="text-muted-foreground">Target</dt>
                 <dd>{row.target || '-'}</dd>

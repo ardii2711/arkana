@@ -34,19 +34,9 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
-import {
-  FILE_ACCEPT,
-  MAX_FILE_BYTES,
-  fileExtension,
-  formatFileSize,
-  isAllowedFile,
-} from '@/lib/file-format';
-import {
-  MAX_FILES_PER_WORK_LOG,
-  MAX_TOTAL_BYTES_PER_WORK_LOG,
-  downloadWorkLogFile,
-  type WorkLogFile,
-} from './work-log-file.api';
+import { MAX_FILE_BYTES, MAX_FILES_PER_WORK_LOG, MAX_TOTAL_BYTES_PER_WORK_LOG } from '@/lib/limits';
+import { FILE_ACCEPT, fileExtension, formatFileSize, isAllowedFile } from '@/lib/file-format';
+import { downloadWorkLogFile, type WorkLogFile } from './work-log-file.api';
 import { FileTypeIcon } from '@/components/shared/file-type-icon';
 import {
   useDeleteWorkLogFile,
@@ -114,13 +104,15 @@ export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
 
     const oversized = incoming.find((file) => file.size > MAX_FILE_BYTES);
     if (oversized) {
-      toast.error(`${oversized.name} melebihi batas 5 MB.`);
+      toast.error(`${oversized.name} melebihi batas ${formatFileSize(MAX_FILE_BYTES)}.`);
       return;
     }
 
     const incomingBytes = incoming.reduce((total, file) => total + file.size, 0);
     if (usedBytes + incomingBytes > MAX_TOTAL_BYTES_PER_WORK_LOG) {
-      toast.error('Total bukti dukung kegiatan melebihi 50 MB.');
+      toast.error(
+        `Total bukti dukung kegiatan melebihi ${formatFileSize(MAX_TOTAL_BYTES_PER_WORK_LOG)}.`,
+      );
       return;
     }
 
@@ -181,7 +173,8 @@ export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
           <h2 className="font-heading text-lg font-semibold tracking-tight">Bukti dukung</h2>
           <p className="text-muted-foreground text-sm">
             {files.length} file · {formatFileSize(usedBytes)} dari{' '}
-            {formatFileSize(MAX_TOTAL_BYTES_PER_WORK_LOG)} · maks 5 MB per file
+            {formatFileSize(MAX_TOTAL_BYTES_PER_WORK_LOG)} · maks {formatFileSize(MAX_FILE_BYTES)}{' '}
+            per file
           </p>
         </div>
 

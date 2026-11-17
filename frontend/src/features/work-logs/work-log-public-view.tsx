@@ -20,10 +20,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
 import { downloadBlob } from '@/lib/download';
 import { fileExtension, formatFileSize } from '@/lib/file-format';
-import { WORK_CATEGORY_LABELS } from './work-log.api';
+import { WORK_CATEGORY_LABELS } from '@/lib/work-category';
 import { FileTypeIcon } from '@/components/shared/file-type-icon';
 import type { WorkLogFile } from './work-log-file.api';
-import { formatActivityDate } from './work-log.format';
+import { formatDate } from '@/lib/date';
 import { fetchPublicWorkLogFileBlob } from './work-log-public.api';
 import { usePublicWorkLog, usePublicWorkLogFileBlob } from './use-work-log-public';
 
@@ -87,9 +87,7 @@ export function WorkLogPublicView({ token }: { token: string }) {
             </h1>
             <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
               <Badge variant="secondary">{WORK_CATEGORY_LABELS[query.data.category]}</Badge>
-              <time dateTime={query.data.activityDate}>
-                {formatActivityDate(query.data.activityDate)}
-              </time>
+              <time dateTime={query.data.activityDate}>{formatDate(query.data.activityDate)}</time>
             </div>
           </div>
 
