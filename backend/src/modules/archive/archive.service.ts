@@ -5,6 +5,7 @@ import { receiveMultipart } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { deleteObjects, mapStorageError, storageError } from '../../lib/storage.js';
+import { dateOnlyUtc } from '../../lib/wita.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
 import type { Request } from 'express';
@@ -350,10 +351,6 @@ function baseName(filename: string): string {
   return withoutExtension || filename;
 }
 
-function toDateOnly(value: string): Date {
-  return new Date(`${value}T00:00:00.000Z`);
-}
-
 export async function createArchiveFile(userId: string, req: Request) {
   const used = await prisma.archiveFile.aggregate({ where: { userId }, _sum: { size: true } });
   const remaining = ARCHIVE_QUOTA_BYTES - (used._sum.size ?? 0);
@@ -391,7 +388,7 @@ export async function createArchiveFile(userId: string, req: Request) {
         folderId: input.folderId ?? null,
         name: input.name ?? baseName(file.originalName),
         description: input.description ?? null,
-        documentDate: input.documentDate ? toDateOnly(input.documentDate) : null,
+        documentDate: input.documentDate ? dateOnlyUtc(input.documentDate) : null,
         ...file,
       },
       select: fileSelect,
@@ -438,7 +435,7 @@ export async function updateArchiveFile(userId: string, fileId: string, input: U
       ...(input.description !== undefined && { description: input.description }),
       ...(input.folderId !== undefined && { folderId: input.folderId }),
       ...(input.documentDate !== undefined && {
-        documentDate: input.documentDate ? toDateOnly(input.documentDate) : null,
+        documentDate: input.documentDate ? dateOnlyUtc(input.documentDate) : null,
       }),
     },
     select: fileSelect,

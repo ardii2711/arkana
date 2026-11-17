@@ -1,4 +1,4 @@
-import { WITA_TIME_ZONE, todayWita } from '../../lib/wita.js';
+import { WITA_TIME_ZONE, dateOnlyUtc, todayWita } from '../../lib/wita.js';
 import type { ReportPeriod } from './report.schema.js';
 
 const MONTHS = [
@@ -39,12 +39,8 @@ export function formatDateTimeWita(now: Date = new Date()): string {
   }).format(now)} WITA`;
 }
 
-function parseDate(value: string): Date {
-  return new Date(`${value}T00:00:00.000Z`);
-}
-
 function addDays(value: string, days: number): string {
-  const date = parseDate(value);
+  const date = dateOnlyUtc(value);
   date.setUTCDate(date.getUTCDate() + days);
 
   return date.toISOString().slice(0, 10);
@@ -76,7 +72,7 @@ export function resolveRange(input: {
       return { from: base, to: base, label: formatDateLabel(base) };
 
     case 'weekly': {
-      const weekDay = parseDate(base).getUTCDay();
+      const weekDay = dateOnlyUtc(base).getUTCDay();
       const from = addDays(base, -((weekDay + 6) % 7));
       const to = addDays(from, 6);
 

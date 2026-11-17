@@ -1,7 +1,7 @@
 import type { WorkLog } from '../../generated/prisma/client.js';
 import { prisma } from '../../lib/prisma.js';
 import { deleteObjects, storageError } from '../../lib/storage.js';
-import { todayWita } from '../../lib/wita.js';
+import { dateOnlyUtc, todayWita } from '../../lib/wita.js';
 import { ApiError } from '../../utils/api-error.js';
 import type {
   CreateWorkLogInput,
@@ -38,12 +38,8 @@ const workLogSelect = {
   updatedAt: true,
 } as const;
 
-function toDateOnly(value: string): Date {
-  return new Date(`${value}T00:00:00.000Z`);
-}
-
 function today(): Date {
-  return toDateOnly(todayWita());
+  return dateOnlyUtc(todayWita());
 }
 
 function toItem(row: WorkLogRow) {
@@ -73,8 +69,8 @@ export async function listWorkLogs(userId: string, query: ListWorkLogsQuery) {
     ...(query.category && { category: query.category }),
     ...((query.from || query.to) && {
       activityDate: {
-        ...(query.from && { gte: toDateOnly(query.from) }),
-        ...(query.to && { lte: toDateOnly(query.to) }),
+        ...(query.from && { gte: dateOnlyUtc(query.from) }),
+        ...(query.to && { lte: dateOnlyUtc(query.to) }),
       },
     }),
     ...(query.search && {
@@ -115,7 +111,7 @@ export async function createWorkLog(userId: string, input: CreateWorkLogInput) {
     data: {
       ...rest,
       userId,
-      activityDate: activityDate ? toDateOnly(activityDate) : today(),
+      activityDate: activityDate ? dateOnlyUtc(activityDate) : today(),
     },
     select: workLogSelect,
   });
@@ -132,7 +128,7 @@ export async function updateWorkLog(userId: string, id: string, input: UpdateWor
     where: { id },
     data: {
       ...rest,
-      ...(activityDate && { activityDate: toDateOnly(activityDate) }),
+      ...(activityDate && { activityDate: dateOnlyUtc(activityDate) }),
     },
     select: workLogSelect,
   });

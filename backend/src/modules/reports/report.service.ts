@@ -1,13 +1,10 @@
 import { env } from '../../config/env.js';
 import { prisma } from '../../lib/prisma.js';
+import { dateOnlyUtc } from '../../lib/wita.js';
 import type { AuthUser } from '../../types/auth.js';
 import { formatDateTimeWita, resolveRange } from './report.period.js';
 import { CATEGORY_LABELS, summarizeEvidence, type ReportData } from './report.rows.js';
 import type { ReportQuery } from './report.schema.js';
-
-function toDbDate(value: string): Date {
-  return new Date(`${value}T00:00:00.000Z`);
-}
 
 function evidenceUrl(publicToken: string): string {
   const base = (env.PUBLIC_WEB_URL ?? env.CORS_ORIGIN).replace(/\/+$/, '');
@@ -21,7 +18,7 @@ export async function buildReport(user: AuthUser, query: ReportQuery): Promise<R
   const workLogs = await prisma.workLog.findMany({
     where: {
       userId: user.id,
-      activityDate: { gte: toDbDate(range.from), lte: toDbDate(range.to) },
+      activityDate: { gte: dateOnlyUtc(range.from), lte: dateOnlyUtc(range.to) },
       ...(query.category && { category: query.category }),
       ...(query.onlyWithEvidence === 'true' && { files: { some: {} } }),
     },

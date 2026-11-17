@@ -537,7 +537,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. Phase 11 selesai — P11.8b sudah ter-commit pada `e4b13f0`.
 2. `PROGRESS.md` sebelumnya menyebut P11.9 sebagai task berikutnya, tetapi `ROADMAP.md` tidak memiliki P11.9. Fase berikutnya sesuai roadmap adalah Phase 12 (P12.1 Functional & Integration Testing). Menunggu keputusan pengguna sebelum melanjutkan.
-3. Perbaikan hasil audit kode 16 November 2026 dikerjakan bertahap dengan urutan A → B → C → E → F → D → G → H, satu commit per item. Item E.1, A.1, A.2, migration unique index folder root, dan B.1 selesai; item B.2 (helper date-only) berikutnya.
+3. Perbaikan hasil audit kode 16 November 2026 dikerjakan bertahap dengan urutan A → B → C → E → F → D → G → H, satu commit per item. Item E.1, A.1, A.2, migration unique index folder root, B.1, dan B.2 selesai; item B.3 (select profil bersama) berikutnya.
 
 ## Aturan Pembaruan
 

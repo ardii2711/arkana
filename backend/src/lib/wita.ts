@@ -14,6 +14,10 @@ export function endOfDayWita(value: string): Date {
   return new Date(`${value}T23:59:59.999${WITA_OFFSET}`);
 }
 
+export function dateOnlyUtc(value: string): Date {
+  return new Date(`${value}T00:00:00.000Z`);
+}
+
 export function addDaysWita(value: string, days: number): string {
   const date = new Date(`${value}T00:00:00.000Z`);
   date.setUTCDate(date.getUTCDate() + days);
