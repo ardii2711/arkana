@@ -1,13 +1,17 @@
 import type { RequestHandler } from 'express';
 
+import { receiveMultipart } from '../../lib/multipart.js';
+import { mapStorageError } from '../../lib/storage.js';
+import { ApiError } from '../../utils/api-error.js';
 import { currentUser } from '../../utils/current-user.js';
 import { sendSuccess } from '../../utils/api-response.js';
 import { sendFileContent } from '../../utils/file-response.js';
 import {
+  completeWorkLogFileUpload,
   deleteWorkLogFile,
   getWorkLogFileContent,
   listWorkLogFiles,
-  uploadWorkLogFile,
+  prepareWorkLogFileUpload,
 } from './work-log-file.service.js';
 import type {
   CreateWorkLogInput,
@@ -55,8 +59,18 @@ export const listWorkLogFilesHandler: RequestHandler = async (req, res) => {
 };
 
 export const uploadWorkLogFileHandler: RequestHandler = async (req, res) => {
+  const userId = currentUser(req).id;
   const { id } = res.locals.input.params as { id: string };
-  const file = await uploadWorkLogFile(currentUser(req).id, id, req);
+  const config = await prepareWorkLogFileUpload(userId, id);
+  const received = await receiveMultipart(req, { ...config, fileRequired: true }).catch(
+    mapStorageError,
+  );
+
+  if (!received.file) {
+    throw new ApiError(400, 'FILE_REQUIRED', 'File wajib diunggah');
+  }
+
+  const file = await completeWorkLogFileUpload(id, received.file);
   sendSuccess(res, { file }, 201);
 };
 

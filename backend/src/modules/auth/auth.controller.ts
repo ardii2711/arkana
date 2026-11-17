@@ -4,6 +4,7 @@ import { env } from '../../config/env.js';
 import { logger } from '../../lib/logger.js';
 import { ApiError } from '../../utils/api-error.js';
 import { sendSuccess } from '../../utils/api-response.js';
+import { currentUser } from '../../utils/current-user.js';
 import {
   OAUTH_STATE_COOKIE,
   OAUTH_VERIFIER_COOKIE,
@@ -129,13 +130,10 @@ export const resetPasswordHandler: RequestHandler = async (_req, res) => {
 };
 
 export const changePasswordHandler: RequestHandler = async (req, res) => {
-  if (!req.user) {
-    throw new ApiError(401, 'UNAUTHENTICATED', 'Silakan login terlebih dahulu');
-  }
-
   const { currentPassword, newPassword } = res.locals.input.body as ChangePasswordInput;
+  const userId = currentUser(req).id;
   const refreshToken = req.cookies?.[REFRESH_COOKIE] as string | undefined;
 
-  await changePassword(req.user.id, currentPassword, newPassword, refreshToken);
+  await changePassword(userId, currentPassword, newPassword, refreshToken);
   sendSuccess(res, { changed: true });
 };

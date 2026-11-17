@@ -1,10 +1,13 @@
 import type { RequestHandler } from 'express';
 
 import { sendSuccess } from '../../utils/api-response.js';
+import { ApiError } from '../../utils/api-error.js';
+import { receiveMultipart } from '../../lib/multipart.js';
 import { currentUser } from '../../utils/current-user.js';
 import { sendFileContent } from '../../utils/file-response.js';
+import { mapStorageError } from '../../lib/storage.js';
 import {
-  createArchiveFile,
+  completeArchiveUpload,
   createArchiveFolder,
   deleteArchiveFile,
   deleteArchiveFolder,
@@ -12,15 +15,18 @@ import {
   getArchiveFileContent,
   listArchiveFiles,
   listArchiveFolders,
+  prepareArchiveUpload,
   updateArchiveFile,
   updateArchiveFolder,
 } from './archive.service.js';
 import type {
+  CreateFileFields,
   CreateFolderInput,
   ListFilesQuery,
   UpdateFileInput,
   UpdateFolderInput,
 } from './archive.schema.js';
+import { createFileFieldsSchema } from './archive.schema.js';
 
 export const listFoldersHandler: RequestHandler = async (req, res) => {
   sendSuccess(res, await listArchiveFolders(currentUser(req).id));
@@ -50,7 +56,22 @@ export const listFilesHandler: RequestHandler = async (req, res) => {
 };
 
 export const createFileHandler: RequestHandler = async (req, res) => {
-  sendSuccess(res, { file: await createArchiveFile(currentUser(req).id, req) }, 201);
+  const userId = currentUser(req).id;
+  const config = await prepareArchiveUpload(userId);
+  const received = await receiveMultipart(req, { ...config, fileRequired: true }).catch(
+    mapStorageError,
+  );
+
+  if (!received.file) {
+    throw new ApiError(400, 'FILE_REQUIRED', 'File wajib diunggah');
+  }
+
+  const values = Object.fromEntries(
+    Object.entries(received.fields).filter(([, value]) => value !== ''),
+  );
+  const input: CreateFileFields = createFileFieldsSchema.parse(values);
+
+  sendSuccess(res, { file: await completeArchiveUpload(userId, input, received.file) }, 201);
 };
 
 export const getFileHandler: RequestHandler = async (req, res) => {

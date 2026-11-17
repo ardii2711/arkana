@@ -7,7 +7,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
 - **Task aktif:** tidak ada — Phase 11 selesai
-- **Task berikutnya:** Audit batch 2 — layering backend (A.4.1, A.4.2, A.4.5, A.4.6)
+- **Task berikutnya:** Audit batch 3 — ekstraksi lib frontend (B.3, B.4, B.5.3)
 - **Update terakhir:** 17 November 2026
 
 ## Kesiapan Proyek
@@ -537,7 +537,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. Phase 11 selesai — P11.8b sudah ter-commit pada `e4b13f0`.
 2. `PROGRESS.md` sebelumnya menyebut P11.9 sebagai task berikutnya, tetapi `ROADMAP.md` tidak memiliki P11.9. Fase berikutnya sesuai roadmap adalah Phase 12 (P12.1 Functional & Integration Testing). Menunggu keputusan pengguna sebelum melanjutkan.
-3. Perbaikan hasil audit kode 16 November 2026 dikerjakan bertahap dengan urutan batch (satu batch satu commit), sesuai kesepakatan 17 November 2026: (1) backend dedupe helper — **selesai dikerjakan**; (2) layering backend; (3) ekstraksi lib frontend; (4a) komponen feedback shared; (4b) komponen file & dashboard shared; (5) mati & konsistensi frontend; (6) pecah komponen besar. Item audit A.3.13, A.4.3, A.4.4, A.5, A.4.8, B.5.2, A.6.2, B.3.4, B.3.5, B.5.8, B.6.1 diterima sebagai keputusan, dicatat di `AUDIT.md`, dan tidak dikerjakan. `AUDIT.md` dihapus item yang sudah selesai tetapi **tidak di-commit**; dokumen itu tetap berisi temuan yang menunggu pengerjaan.
+3. Perbaikan hasil audit (16 November 2026) dikerjakan bertahap per kesepakatan 17 November 2026 — batch 1 (backend dedupe) selesai dikerjakan. Rincian status audit mengacu pada `AUDIT.md`.
 
 ## Aturan Pembaruan
 

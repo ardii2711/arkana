@@ -2,14 +2,13 @@ import type { ArchiveFolder } from '../../generated/prisma/client.js';
 import { readFileContent } from '../../lib/file-content.js';
 import { stripExtension } from '../../lib/file-name.js';
 import { MAX_FILE_BYTES, ARCHIVE_QUOTA_BYTES, isPreviewable } from '../../lib/file-rules.js';
-import { receiveMultipart } from '../../lib/multipart.js';
+import type { ReceivedFile } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { deleteObjects, mapStorageError, storageError } from '../../lib/storage.js';
 import { dateOnlyUtc, dateKey } from '../../lib/wita.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
-import type { Request } from 'express';
 import {
   MAX_FOLDER_LEVEL,
   descendantIds,
@@ -24,8 +23,6 @@ import type {
   UpdateFileInput,
   UpdateFolderInput,
 } from './archive.schema.js';
-import { createFileFieldsSchema } from './archive.schema.js';
-
 const DEFAULT_FOLDERS = [
   'SK & Kepegawaian',
   'Pendidikan',
@@ -352,7 +349,7 @@ function documentName(filename: string): string {
   return withoutExtension || filename;
 }
 
-export async function createArchiveFile(userId: string, req: Request) {
+export async function prepareArchiveUpload(userId: string) {
   const used = await prisma.archiveFile.aggregate({ where: { userId }, _sum: { size: true } });
   const remaining = ARCHIVE_QUOTA_BYTES - (used._sum.size ?? 0);
 
@@ -364,20 +361,18 @@ export async function createArchiveFile(userId: string, req: Request) {
     );
   }
 
-  const { fields, file } = await receiveMultipart(req, {
+  return {
     maxBytes: Math.min(MAX_FILE_BYTES, remaining),
     prefix: `archive/${userId}`,
-    fileRequired: true,
-    fields: ['folderId', 'name', 'description', 'documentDate'],
-  }).catch(mapStorageError);
+    fields: ['folderId', 'name', 'description', 'documentDate'] as const,
+  };
+}
 
-  if (!file) {
-    throw new ApiError(400, 'FILE_REQUIRED', 'File wajib diunggah');
-  }
-
-  const values = Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== ''));
-  const input: CreateFileFields = createFileFieldsSchema.parse(values);
-
+export async function completeArchiveUpload(
+  userId: string,
+  input: CreateFileFields,
+  file: ReceivedFile,
+) {
   if (input.folderId) {
     await findOwnedFolder(userId, input.folderId);
   }

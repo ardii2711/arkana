@@ -8,7 +8,7 @@ import { ApiError } from '../utils/api-error.js';
 import { canonicalMimeType, extensionOf, isAllowedUpload } from './file-rules.js';
 import { uploadObject } from './storage.js';
 
-interface ReceivedFile {
+export interface ReceivedFile {
   key: string;
   size: number;
   originalName: string;

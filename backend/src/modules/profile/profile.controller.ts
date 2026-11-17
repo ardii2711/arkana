@@ -1,6 +1,8 @@
 import type { RequestHandler } from 'express';
 
 import { sendSuccess } from '../../utils/api-response.js';
+import { ApiError } from '../../utils/api-error.js';
+import { receiveMultipart } from '../../lib/multipart.js';
 import { currentUser } from '../../utils/current-user.js';
 import { sendFileContent } from '../../utils/file-response.js';
 import type {
@@ -9,6 +11,8 @@ import type {
   VerifyEmailChangeInput,
 } from './profile.schema.js';
 import {
+  avatarFileError,
+  avatarUploadConfig,
   deleteAvatar,
   getAvatar,
   requestEmailChange,
@@ -36,7 +40,18 @@ export const verifyEmailChangeHandler: RequestHandler = async (req, res) => {
 };
 
 export const uploadAvatarHandler: RequestHandler = async (req, res) => {
-  const result = await uploadAvatar(currentUser(req).id, req);
+  const userId = currentUser(req).id;
+  const received = await receiveMultipart(req, avatarUploadConfig(userId)).catch(
+    (error: unknown): never => {
+      throw avatarFileError(error);
+    },
+  );
+
+  if (!received.file) {
+    throw new ApiError(400, 'FILE_REQUIRED', 'File avatar wajib diunggah');
+  }
+
+  const result = await uploadAvatar(userId, received.file);
   sendSuccess(res, result, 201);
 };
 

@@ -1,9 +1,7 @@
-import type { Request } from 'express';
-
 import { notifyEmailChanged, sendEmailChangeLink } from '../../lib/account-mail.js';
 import { canonicalMimeType, extensionOf } from '../../lib/file-rules.js';
 import { logger } from '../../lib/logger.js';
-import { receiveMultipart } from '../../lib/multipart.js';
+import type { ReceivedFile } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
 import { deleteObjects, downloadObject } from '../../lib/storage.js';
@@ -135,7 +133,7 @@ export async function verifyEmailChange(token: string) {
   );
 }
 
-function avatarFileError(error: unknown): ApiError {
+export function avatarFileError(error: unknown): ApiError {
   if (error instanceof ApiError && error.code === 'FILE_TOO_LARGE') {
     return new ApiError(400, 'AVATAR_TOO_LARGE', 'Ukuran avatar maksimal 2 MB');
   }
@@ -147,24 +145,11 @@ function avatarFileError(error: unknown): ApiError {
   return error as ApiError;
 }
 
-export async function uploadAvatar(userId: string, req: Request) {
-  let file;
+export function avatarUploadConfig(userId: string) {
+  return { maxBytes: AVATAR_MAX_BYTES, prefix: `avatars/${userId}`, fileRequired: true };
+}
 
-  try {
-    const received = await receiveMultipart(req, {
-      maxBytes: AVATAR_MAX_BYTES,
-      prefix: `avatars/${userId}`,
-      fileRequired: true,
-    });
-    file = received.file;
-  } catch (error) {
-    throw avatarFileError(error);
-  }
-
-  if (!file) {
-    throw new ApiError(400, 'FILE_REQUIRED', 'File avatar wajib diunggah');
-  }
-
+export async function uploadAvatar(userId: string, file: ReceivedFile) {
   const extension = extensionOf(file.originalName) ?? '';
 
   if (!AVATAR_EXTENSIONS.has(extension)) {

@@ -5,6 +5,14 @@ declare global {
     interface Request {
       user?: AuthUser;
     }
+
+    interface Locals {
+      input: {
+        body?: unknown;
+        query?: unknown;
+        params?: unknown;
+      };
+    }
   }
 }
 

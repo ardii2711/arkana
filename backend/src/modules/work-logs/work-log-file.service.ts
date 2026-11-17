@@ -1,10 +1,9 @@
 import { readFileContent } from '../../lib/file-content.js';
-import { receiveMultipart } from '../../lib/multipart.js';
+import type { ReceivedFile } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
 import { deleteObjects, mapStorageError, storageError } from '../../lib/storage.js';
 import { ApiError } from '../../utils/api-error.js';
 import type { FileContent } from '../../utils/file-response.js';
-import type { Request } from 'express';
 import {
   MAX_FILE_BYTES,
   MAX_FILES_PER_WORK_LOG,
@@ -51,7 +50,7 @@ export async function listWorkLogFiles(userId: string, workLogId: string) {
   return files.map(toFileItem);
 }
 
-export async function uploadWorkLogFile(userId: string, workLogId: string, req: Request) {
+export async function prepareWorkLogFileUpload(userId: string, workLogId: string) {
   await findOwnedWorkLog(userId, workLogId);
 
   const existing = await prisma.workLogFile.aggregate({
@@ -80,16 +79,13 @@ export async function uploadWorkLogFile(userId: string, workLogId: string, req: 
 
   // ponytail: batas dihitung sebelum upload; cukup untuk satu pengguna. Ganti ke
   // penghitungan transaksional bila upload paralel menjadi masalah.
-  const { file } = await receiveMultipart(req, {
+  return {
     maxBytes: Math.min(MAX_FILE_BYTES, remaining),
     prefix: `work-logs/${userId}/${workLogId}`,
-    fileRequired: true,
-  }).catch(mapStorageError);
+  };
+}
 
-  if (!file) {
-    throw new ApiError(400, 'FILE_REQUIRED', 'File wajib diunggah');
-  }
-
+export async function completeWorkLogFileUpload(workLogId: string, file: ReceivedFile) {
   try {
     const created = await prisma.workLogFile.create({
       data: { workLogId, ...file },
