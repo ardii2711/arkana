@@ -7,8 +7,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
 - **Task aktif:** tidak ada — Phase 11 selesai
-- **Task berikutnya:** Commit audit batch 4 — backend tidy (menunggu pengguna); lalu batch 5 (frontend mati & konsistensi) sesuai rencana audit yang disetujui 17 Nov 2026
-- **Update terakhir:** 17 November 2026
+- **Task berikutnya:** Commit audit batch 5 — frontend mati & konsistensi (menunggu pengguna); lalu batch 6 (shared component frontend) dan batch 7 (pecah komponen besar)
+- **Update terakhir:** 18 November 2026
 
 ## Kesiapan Proyek
 
@@ -480,7 +480,19 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah.
 - Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `format:check`, `build`): lulus; route `/verifikasi-email` dan `/profil` tersedia di build.
 
-### Audit batch 4 — Backend tidy (implementasi selesai, menunggu commit)
+### Audit batch 5 — Frontend mati & konsistensi (implementasi selesai, menunggu commit)
+
+- B.1.1: `frontend/src/components/shared/module-placeholder.tsx` dihapus (nol impor).
+- B.1.2: `zustand` dilepas dari `dependencies` frontend (tidak diimpor; server state tetap di TanStack Query). `package-lock.json` frontend perlu disinkronkan pengguna lewat `npm install`.
+- B.1.3 tidak dikerjakan atas keputusan pengguna (`shadcn` CLI tetap di `dependencies`).
+- B.5.4: `ROLE_LABELS` ditambahkan ke `features/users/users.api.ts`; `profile-view.tsx` memakai `ROLE_LABELS` + `USER_STATUS_LABELS` dari sana, definisi lokal dihapus.
+- B.5.5: `app-shell.tsx` dan `dashboard-view.tsx` memakai `getErrorMessage(session.error)` alih-alih pesan hardcoded.
+- B.5.6: formatter `Intl.DateTimeFormat` pada `schedule-view.tsx` diangkat ke module scope.
+- Skip dengan alasan: B.1.4 (micro-export, nilai nol), B.1.5 (`cn` paket resmi shadcn; kedua jalur sama fungsi), B.5.1 (notes satu field, validasi manual memadai), B.5.7 (aria skeleton, kosmetik).
+- Pemeriksaan statis: `lint`, `typecheck`, `build` lulus. `format:check` gagal pada checkout Windows ini karena `core.autocrlf=true` (semua file CRLF, Prettier `endOfLine: lf`) — kondisi lama, bukan akibat perubahan; file yang diubah lolos `prettier --check --end-of-line auto`.
+- Tanpa perubahan backend, schema, migration, atau env.
+
+### Audit batch 4 — Backend tidy (DONE, commit `cef7d02`)
 
 - Audit temuan A.3.13, A.4.3, A.4.4, A.6.2 dieksekusi. A.5 diputuskan tidak dikerjakan (opsional, YAGNI — nilai nyaris tidak pernah berubah).
 - A.3.13: verifikasi — bentuk helper `notFound()`/`fileNotFound()`/`folderNotFound()` sudah seragam di seluruh modul (`NotFound` lokal `new ApiError(404, 'NOT_FOUND', …)`); tanpa ekstraksi generik (over-engineering).
@@ -488,7 +500,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - A.4.4: kontrak tertulis di `ARCHITECTURE.md` §4.2 — `lib/` = infrastruktur + domain murni (tanpa Express, tidak boleh impor `utils/`); `utils/` = lapisan HTTP/framework (boleh impor `lib/`). `lib/api-error.ts` dipindah dari `utils/` (impor disesuaikan di seluruh src + scripts); interface `FileContent` dipindah dari `utils/file-response.ts` ke `lib/file-content.ts`; `file-response.ts` tinggal mengirim konten ke `Response`. Tidak ada lagi impor `lib → utils`.
 - A.6.2: shim di `work-log-file.rules.ts` dihapus — file kini hanya berisi `MAX_FILES_PER_WORK_LOG` dan `MAX_TOTAL_BYTES_PER_WORK_LOG`; `check-work-log-file-rules.ts` impor helper dari `lib/file-rules.js` langsung.
 - Pemeriksaan statis backend: `typecheck`, `lint`, `format:check`, `build`, `check:file-rules` lulus.
-- Tanpa dependency, migration, atau env baru. `AUDIT.md` (tidak di-commit) item terkait sudah dihapus.
+- Tanpa dependency, migration, atau env baru. Temuan audit terkait sudah ditutup.
 
 ### Audit batch 3 — Ekstraksi lib frontend (DONE, commit `6885f98`)
 
@@ -498,7 +510,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `note.format.ts`, `work-log.format.ts` dihapus; `schedule.format.ts` hanya menyisakan helper khusus schedule; konstanta `MAX_FILE_BYTES` dipindah dari `lib/file-format.ts` ke `lib/limits.ts`.
 - String pesan batas file dibangun dari `formatFileSize` + konstanta.
 - Pemeriksaan statis: `lint`, `typecheck`, `format:check`, `build` lulus.
-- `docs/AUDIT.md` (tidak di-commit) item terkait sudah dihapus; batch ini belum di-commit pengguna.
+- Temuan audit terkait sudah ditutup; batch ini ter-commit pada `6885f98`.
 
 ### Temuan Di Luar Scope
 
@@ -557,7 +569,8 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. Phase 11 selesai — P11.8b sudah ter-commit pada `e4b13f0`.
 2. `PROGRESS.md` sebelumnya menyebut P11.9 sebagai task berikutnya, tetapi `ROADMAP.md` tidak memiliki P11.9. Fase berikutnya sesuai roadmap adalah Phase 12 (P12.1 Functional & Integration Testing). Menunggu keputusan pengguna sebelum melanjutkan.
-3. Perbaikan hasil audit (16 November 2026) dikerjakan bertahap per kesepakatan 17 November 2026 — batch 1–3 ter-commit (backend dedupe, HTTP keluar dari service, ekstraksi lib frontend); batch 4 (backend tidy) selesai dikerjakan, menunggu commit. Rincian status audit mengacu pada `AUDIT.md`.
+3. Perbaikan hasil audit (16 November 2026) dikerjakan bertahap per kesepakatan 17 November 2026 — batch 1–3 ter-commit (backend dedupe, HTTP keluar dari service, ekstraksi lib frontend); batch 4 (backend tidy) ter-commit `cef7d02`; batch 5 (frontend mati & konsistensi) selesai dikerjakan, menunggu commit.
+4. Sisa audit yang belum dikerjakan: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6). `docs/AUDIT.md` dihapus setelah temuan yang dipakai dipindahkan ke sini.
 
 ## Aturan Pembaruan
 

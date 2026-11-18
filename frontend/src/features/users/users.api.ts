@@ -11,6 +11,11 @@ export const USER_STATUS_LABELS: Record<UserStatus, string> = {
   INACTIVE: 'Nonaktif',
 };
 
+export const ROLE_LABELS = {
+  ADMIN: 'Admin',
+  USER: 'User',
+} as const;
+
 export const USER_STATUS_BADGES = {
   ACTIVE: 'default',
   INVITED: 'secondary',

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useSession } from '@/features/auth/use-auth';
+import { getErrorMessage } from '@/lib/api-error';
 
 export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -29,7 +30,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="w-full max-w-sm space-y-3">
           <Alert variant="destructive">
             <TriangleAlertIcon />
-            <AlertDescription>Tidak dapat memuat sesi. Periksa koneksi Anda.</AlertDescription>
+            <AlertDescription>{getErrorMessage(session.error)}</AlertDescription>
           </Alert>
           <Button className="w-full" onClick={() => session.refetch()}>
             Coba lagi

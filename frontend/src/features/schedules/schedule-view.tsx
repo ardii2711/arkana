@@ -14,6 +14,12 @@ import { useSchedules } from './use-schedules';
 
 type ListView = 'upcoming' | 'day';
 
+const dayTabFormatter = new Intl.DateTimeFormat('id-ID', {
+  timeZone: 'Asia/Makassar',
+  day: 'numeric',
+  month: 'long',
+});
+
 export function ScheduleView() {
   const today = currentWitaDate();
   const [selectedDate, setSelectedDate] = useState(today);
@@ -45,11 +51,7 @@ export function ScheduleView() {
   const dayTabLabel =
     selectedDate === today
       ? 'Hari ini'
-      : new Intl.DateTimeFormat('id-ID', {
-          timeZone: 'Asia/Makassar',
-          day: 'numeric',
-          month: 'long',
-        }).format(new Date(`${selectedDate}T00:00:00.000+08:00`));
+      : dayTabFormatter.format(new Date(`${selectedDate}T00:00:00.000+08:00`));
 
   function openForm(schedule: Schedule | null) {
     setEditing(schedule);

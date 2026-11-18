@@ -47,6 +47,7 @@ import { AVATAR_MAX_BYTES } from '@/lib/limits';
 import { getDisplayName } from '@/lib/display-name';
 import type { SessionUser } from '@/features/auth/auth.api';
 import { useChangePassword, useSession } from '@/features/auth/use-auth';
+import { ROLE_LABELS, USER_STATUS_LABELS } from '@/features/users/users.api';
 import { AVATAR_ACCEPT, AVATAR_EXTENSIONS } from './profile.api';
 import {
   NONE_VALUE,
@@ -65,17 +66,6 @@ import {
   useUpdateProfile,
   useUploadAvatar,
 } from './use-profile';
-
-const ROLE_LABELS = {
-  ADMIN: 'Admin',
-  USER: 'User',
-} as const;
-
-const STATUS_LABELS = {
-  ACTIVE: 'Aktif',
-  INVITED: 'Diundang',
-  INACTIVE: 'Nonaktif',
-} as const;
 
 function IdentityCard({ user }: { user: SessionUser }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -124,7 +114,7 @@ function IdentityCard({ user }: { user: SessionUser }) {
             <span className="text-muted-foreground text-sm break-all">{user.email}</span>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <Badge variant="secondary">{ROLE_LABELS[user.role]}</Badge>
-              <Badge variant="outline">{STATUS_LABELS[user.status]}</Badge>
+              <Badge variant="outline">{USER_STATUS_LABELS[user.status]}</Badge>
             </div>
           </div>
         </div>

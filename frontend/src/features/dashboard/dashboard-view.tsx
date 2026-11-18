@@ -5,6 +5,7 @@ import { Loader2Icon, TriangleAlertIcon } from 'lucide-react';
 import { AdminDashboard } from './admin-dashboard';
 import { UserDashboard } from './user-dashboard';
 import { useSession } from '@/features/auth/use-auth';
+import { getErrorMessage } from '@/lib/api-error';
 
 export function DashboardView() {
   const session = useSession();
@@ -22,7 +23,7 @@ export function DashboardView() {
     return (
       <div className="text-muted-foreground flex items-center gap-2 text-sm">
         <TriangleAlertIcon aria-hidden="true" className="size-4" />
-        Tidak dapat memuat sesi.
+        {session.isError ? getErrorMessage(session.error) : 'Tidak dapat memuat sesi.'}
       </div>
     );
   }
