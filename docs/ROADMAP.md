@@ -412,6 +412,13 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Acceptance Criteria:** Pencarian dan filter berjalan tanpa tombol submit; aksi hanya tersedia untuk akun User; penghapusan hanya dapat dijalankan setelah email diketik persis; foto profil tampil bila tersedia.
 - **Dependencies:** P11.10a.
 
+### P11.11 — UI Polish Halaman
+
+- **Objective:** Menyempurnakan tampilan dan interaksi halaman aplikasi tanpa mengubah kebutuhan produk yang telah disepakati.
+- **Scope:** Perbaikan per halaman secara berurutan: Kegiatan (daftar, detail, bukti dukung), Dashboard, Arsip, Laporan, Agenda, Catatan, Profil dan Akun, autentikasi dan halaman publik, serta halaman publik bukti dukung. Informasi yang dibutuhkan tampilan boleh ditambah melalui perubahan API kecil bila belum tersedia.
+- **Acceptance Criteria:** Setiap halaman memakai pola informasi, filter, dan aksi yang konsisten; pemeriksaan statis lulus; perilaku diverifikasi pengguna.
+- **Dependencies:** P11.10b.
+
 ## Phase 12 — Final Integration & Production Release
 
 **Tujuan:** Memastikan seluruh aplikasi siap digunakan.
@@ -421,7 +428,7 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Objective:** Memastikan seluruh alur aplikasi berjalan terintegrasi antara frontend, backend, database, email, dan R2.
 - **Scope:** Uji seluruh alur utama frontend dan backend; integrasi database, email, dan R2; autentikasi, otorisasi, dan kepemilikan data; upload, preview, download, dan tautan publik; seluruh modul dan alur lintas fitur.
 - **Acceptance Criteria:** Seluruh alur utama berjalan dan tidak ada kegagalan kritis.
-- **Dependencies:** Seluruh task implementasi P1.1–P11.10b.
+- **Dependencies:** Seluruh task implementasi P1.1–P11.11.
 
 ### P12.2 — Security & Performance Verification
 

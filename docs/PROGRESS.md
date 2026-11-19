@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** UI Polish — Kegiatan & Detail Kegiatan (implementasi selesai, menunggu commit)
-- **Task berikutnya:** UI polish halaman lain satu per satu; audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
+- **Task aktif:** P11.11 — UI Polish, halaman Kegiatan & Detail Kegiatan selesai (commit `5f13a42`)
+- **Task berikutnya:** UI polish halaman berikutnya satu per satu; audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
 - **Update terakhir:** 19 November 2026
 
 ## Kesiapan Proyek
@@ -63,6 +63,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.10a — Backend Admin Accounts:** `DONE` (commit `a284143`).
 - **P11.10b — Frontend Halaman Akun Admin:** `DONE` (commit `a284143`).
 - **Bugfix — Object URL avatar & pratinjau:** `DONE` (commit `a284143`).
+- **P11.11 — UI Polish, halaman Kegiatan & Detail Kegiatan:** `DONE` (commit `5f13a42`).
 
 ## Hasil Berjalan
 
@@ -528,7 +529,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa dependency, migration, atau env baru.
 - Pemeriksaan statis: `lint`, `typecheck`, `build` frontend dan backend lulus; file yang diubah lolos `prettier --check --end-of-line auto` (kondisi `format:check` repo tetap terpengaruh `core.autocrlf`).
 
-### UI Polish — Kegiatan & Detail Kegiatan (implementasi selesai, menunggu commit)
+### UI Polish — Kegiatan & Detail Kegiatan (DONE, commit `5f13a42`)
 
 - Backend: `GET /work-logs` dan `GET /work-logs/:id` menyertakan `fileCount` (`_count.files`).
 - Toolbar daftar: chip periode `Hari ini | Minggu ini | Bulan ini | Semua` (default Hari ini) + pencarian realtime (debounce 300 ms); filter kategori dan rentang tanggal dihapus dari halaman.
@@ -623,6 +624,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Penghapusan akun User oleh Admin bersifat permanen, tanpa email notifikasi; objek R2 dihapus lebih dulu, lalu record database melalui cascade.
 - Admin hanya dapat menampilkan foto profil User pada daftar akun; tidak ada hak ubah atau hapus.
 - Halaman akun Admin memakai pencarian realtime (debounce 300 ms), filter status, aksi dropdown, dan konfirmasi hapus dengan mengetik email akun.
+- Daftar Kegiatan default periode `Hari ini`; pilihan periode `Minggu ini`, `Bulan ini`, dan `Semua`. Selama pencarian aktif, periode diabaikan agar data lama tetap terjangkau.
+- Filter dan pagination halaman Kegiatan disimpan di URL (`periode`, `q`, `page`).
+- Baris daftar Kegiatan menampilkan jumlah bukti dukung (`fileCount` dari API); kegiatan tanpa bukti dukung ditandai eksplisit.
+- Unggah file memakai satu dialog bersama `components/shared/file-upload-dialog.tsx` (pilih → unggah → selesai) dengan `AbortController`, retry otomatis sekali untuk kegagalan jaringan/5xx, dan retry manual. Bukti dukung adalah konsumen pertama; Arsip menyusul.
 
 ## Urutan Pengembangan
 
@@ -637,7 +642,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
 1. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
-2. Fokus berikutnya: UI polish seluruh halaman (dimulai dari dashboard), satu halaman per task.
+2. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); lanjut halaman lain satu per satu sesuai `ROADMAP.md` P11.11.
 3. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
 4. Phase 12 (P12.1 Functional & Integration Testing dan seterusnya) dijadwalkan setelah UI final.
 

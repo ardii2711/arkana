@@ -67,7 +67,7 @@ Pencatatan pekerjaan dilakukan secara manual. Setiap aktivitas menjadi satu cata
 
 Informasi catatan:
 
-- Tanggal kegiatan (otomatis menggunakan tanggal hari ini, tetapi dapat diubah).
+- Tanggal kegiatan (otomatis menggunakan tanggal hari ini dan tidak diubah dari antarmuka).
 - Nama kegiatan.
 - Uraian pekerjaan.
 - Hasil atau output.
