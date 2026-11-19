@@ -370,13 +370,19 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Acceptance Criteria:** Admin dapat mengelola akun tanpa akses ke konten pribadi User.
 - **Dependencies:** P2.2, P2.5, P8.2.
 
-### P11.8 — Profil Pengguna
+### P11.8a — Backend Profil Pengguna
 
-- **Objective:** Memungkinkan User mengubah informasi profilnya sendiri.
-- **Scope:** Backend: endpoint pembaruan profil milik sendiri (`requireRole('USER')`), validasi input, dan notifikasi email bila alamat email berubah sesuai pola `P2.5`. Frontend: form edit profil pada `/profil` beserta feedback hasil operasi, memakai kembali komponen form yang sudah ada.
+- **Objective:** Menyediakan endpoint pembaruan profil milik sendiri beserta verifikasi email baru.
+- **Scope:** `PATCH /profile` (data kepegawaian), `POST /profile/email` + verifikasi token, unggah/hapus avatar, perluasan `GET /auth/me`.
+- **Acceptance Criteria:** User dapat mengubah profil dan emailnya dengan verifikasi, avatar dapat diunggah/dihapus, dan sesi aktif memuat data terbaru.
+- **Dependencies:** P10.2.
+
+### P11.8b — Frontend Profil Pengguna
+
+- **Objective:** Menyediakan antarmuka pengelolaan profil pada `/profil`.
+- **Scope:** Form kelengkapan profil, kelola avatar, perubahan email beserta halaman verifikasi, dan ganti password.
 - **Acceptance Criteria:** User dapat mengubah profilnya sendiri dan perubahan terekam pada sesi yang aktif.
-- **Dependencies:** P10.2; P11.1a untuk pola feature frontend.
-- **Blocker:** Field yang boleh diubah (nama, email, atau keduanya) dan syarat verifikasi email baru harus disepakati sebelum implementasi.
+- **Dependencies:** P11.8a.
 
 ### P11.9a — Restrukturisasi Route Dashboard
 
@@ -415,7 +421,7 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Objective:** Memastikan seluruh alur aplikasi berjalan terintegrasi antara frontend, backend, database, email, dan R2.
 - **Scope:** Uji seluruh alur utama frontend dan backend; integrasi database, email, dan R2; autentikasi, otorisasi, dan kepemilikan data; upload, preview, download, dan tautan publik; seluruh modul dan alur lintas fitur.
 - **Acceptance Criteria:** Seluruh alur utama berjalan dan tidak ada kegagalan kritis.
-- **Dependencies:** Seluruh task implementasi P1.1–P11.8.
+- **Dependencies:** Seluruh task implementasi P1.1–P11.10b.
 
 ### P12.2 — Security & Performance Verification
 
