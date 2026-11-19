@@ -6,9 +6,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** tidak ada — Phase 11 selesai
-- **Task berikutnya:** Commit audit batch 5 — frontend mati & konsistensi (menunggu pengguna); lalu batch 6 (shared component frontend) dan batch 7 (pecah komponen besar)
-- **Update terakhir:** 18 November 2026
+- **Task aktif:** tidak ada — Phase 11 dan audit batch 5 selesai
+- **Task berikutnya:** perbaikan UI per halaman (menunggu diskusi pengguna); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
+- **Update terakhir:** 19 November 2026
 
 ## Kesiapan Proyek
 
@@ -480,10 +480,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah.
 - Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `format:check`, `build`): lulus; route `/verifikasi-email` dan `/profil` tersedia di build.
 
-### Audit batch 5 — Frontend mati & konsistensi (implementasi selesai, menunggu commit)
+### Audit batch 5 — Frontend mati & konsistensi (DONE, commit `30ec979`)
 
 - B.1.1: `frontend/src/components/shared/module-placeholder.tsx` dihapus (nol impor).
-- B.1.2: `zustand` dilepas dari `dependencies` frontend (tidak diimpor; server state tetap di TanStack Query). `package-lock.json` frontend perlu disinkronkan pengguna lewat `npm install`.
+- B.1.2: `zustand` dilepas dari `dependencies` frontend (tidak diimpor; server state tetap di TanStack Query). `package-lock.json` frontend sudah tersinkron (tidak lagi memuat `zustand`).
 - B.1.3 tidak dikerjakan atas keputusan pengguna (`shadcn` CLI tetap di `dependencies`).
 - B.5.4: `ROLE_LABELS` ditambahkan ke `features/users/users.api.ts`; `profile-view.tsx` memakai `ROLE_LABELS` + `USER_STATUS_LABELS` dari sana, definisi lokal dihapus.
 - B.5.5: `app-shell.tsx` dan `dashboard-view.tsx` memakai `getErrorMessage(session.error)` alih-alih pesan hardcoded.
@@ -569,8 +569,9 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. Phase 11 selesai — P11.8b sudah ter-commit pada `e4b13f0`.
 2. `PROGRESS.md` sebelumnya menyebut P11.9 sebagai task berikutnya, tetapi `ROADMAP.md` tidak memiliki P11.9. Fase berikutnya sesuai roadmap adalah Phase 12 (P12.1 Functional & Integration Testing). Menunggu keputusan pengguna sebelum melanjutkan.
-3. Perbaikan hasil audit (16 November 2026) dikerjakan bertahap per kesepakatan 17 November 2026 — batch 1–3 ter-commit (backend dedupe, HTTP keluar dari service, ekstraksi lib frontend); batch 4 (backend tidy) ter-commit `cef7d02`; batch 5 (frontend mati & konsistensi) selesai dikerjakan, menunggu commit.
-4. Sisa audit yang belum dikerjakan: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6). `docs/AUDIT.md` dihapus setelah temuan yang dipakai dipindahkan ke sini.
+3. Perbaikan hasil audit (16 November 2026) dikerjakan bertahap per kesepakatan 17 November 2026 — batch 1–3 ter-commit (backend dedupe, HTTP keluar dari service, ekstraksi lib frontend); batch 4 (backend tidy) ter-commit `cef7d02`; batch 5 (frontend mati & konsistensi) ter-commit `30ec979`.
+4. Fokus berikutnya (disepakati 19 November 2026): perbaikan UI per halaman, satu halaman per task, urutan dan detail ditentukan pengguna melalui diskusi. Tidak ada task aktif sampai halaman pertama disetujui.
+5. Sisa audit yang belum dikerjakan dan **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6). `docs/AUDIT.md` dihapus setelah temuan yang dipakai dipindahkan ke sini.
 
 ## Aturan Pembaruan
 
