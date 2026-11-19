@@ -52,8 +52,8 @@ type NavItem = {
 const userNav: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/kegiatan', label: 'Kegiatan', icon: ClipboardListIcon },
-  { href: '/arsip', label: 'Arsip', icon: ArchiveIcon },
   { href: '/laporan', label: 'Laporan', icon: FileTextIcon },
+  { href: '/arsip', label: 'Arsip', icon: ArchiveIcon },
   { href: '/agenda', label: 'Agenda', icon: CalendarDaysIcon },
   { href: '/catatan', label: 'Catatan', icon: StickyNoteIcon },
 ];

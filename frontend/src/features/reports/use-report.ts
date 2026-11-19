@@ -16,11 +16,10 @@ import {
 
 const rootKey = ['reports'] as const;
 
-export function useReport(params: ReportParams, enabled: boolean) {
+export function useReport(params: ReportParams) {
   return useQuery({
     queryKey: [...rootKey, 'work-logs', params],
     queryFn: () => fetchReport(params),
-    enabled,
     placeholderData: keepPreviousData,
   });
 }

@@ -1,8 +1,7 @@
-import type { WorkCategory } from '@/lib/work-category';
 import { api } from '@/lib/api';
 import type { ApiSuccess } from '@/types/api';
 
-export const REPORT_PERIODS = ['daily', 'weekly', 'monthly', 'yearly', 'custom'] as const;
+export const REPORT_PERIODS = ['daily', 'weekly', 'monthly', 'yearly'] as const;
 
 export type ReportPeriod = (typeof REPORT_PERIODS)[number];
 
@@ -11,19 +10,12 @@ export const REPORT_PERIOD_LABELS: Record<ReportPeriod, string> = {
   weekly: 'Mingguan',
   monthly: 'Bulanan',
   yearly: 'Tahunan',
-  custom: 'Rentang khusus',
 };
 
 export type ReportFormat = 'xlsx' | 'pdf';
 
 export type ReportParams = {
   period: ReportPeriod;
-  date?: string;
-  from?: string;
-  to?: string;
-  category?: WorkCategory;
-  groupBy?: 'category';
-  onlyWithEvidence?: boolean;
 };
 
 export type ReportRow = {
@@ -48,15 +40,7 @@ export type ReportData = {
 };
 
 function toQuery(params: ReportParams) {
-  return {
-    period: params.period,
-    date: params.date || undefined,
-    from: params.from || undefined,
-    to: params.to || undefined,
-    category: params.category || undefined,
-    groupBy: params.groupBy,
-    onlyWithEvidence: params.onlyWithEvidence ? 'true' : undefined,
-  };
+  return { period: params.period };
 }
 
 export async function fetchReport(params: ReportParams): Promise<ReportData> {

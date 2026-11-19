@@ -134,9 +134,8 @@ Menyediakan rekap pekerjaan berdasarkan:
 - Mingguan (Senin–Minggu).
 - Bulanan.
 - Tahunan.
-- Rentang tanggal khusus.
 
-Batas periode dihitung berdasarkan zona waktu Asia/Makassar (WITA) atas tanggal kegiatan.
+Batas periode dihitung berdasarkan zona waktu Asia/Makassar (WITA) atas tanggal kegiatan. Periode mengikuti periode berjalan (tanggal hari ini); pemilihan tanggal acuan, rentang tanggal khusus, dan filter kategori tidak disediakan.
 
 Rekap disusun mengikuti kebutuhan pengisian e-Kinerja (myASN) dengan kolom: nomor, tanggal, Rencana Aksi, Target, Realisasi, Bukti Dukung, Link, dan Kategori.
 
@@ -144,8 +143,8 @@ Rekap disusun mengikuti kebutuhan pengisian e-Kinerja (myASN) dengan kolom: nomo
 - Target dan Realisasi berupa teks bebas yang diisi pengguna dan bersifat opsional.
 - Bukti Dukung merupakan ringkasan nama file: tanpa file ditampilkan `-`; satu file ditampilkan tanpa ekstensi; lebih dari satu file digabung dengan pemisah `;` dan dipotong 255 karakter disertai jumlah file tersisa.
 - Link menggunakan tautan publik permanen kegiatan.
-- Pengelompokan berdasarkan kategori didukung dan kategori ditampilkan sebagai kolom.
-- Baris tanpa bukti dukung tetap disertakan dan dapat disaring.
+- Kategori ditampilkan sebagai kolom.
+- Baris tanpa bukti dukung tetap disertakan.
 
 Ekspor tersedia dalam format XLSX dan PDF.
 

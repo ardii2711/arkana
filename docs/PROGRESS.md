@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.11 — UI Polish, halaman Kegiatan & Detail Kegiatan selesai (commit `5f13a42`)
-- **Task berikutnya:** UI polish halaman berikutnya satu per satu; audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
+- **Task aktif:** P11.11 — UI Polish, halaman Kegiatan, Detail Kegiatan, dan Laporan selesai (halaman Laporan menunggu commit)
+- **Task berikutnya:** UI polish halaman berikutnya satu per satu (Arsip, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
 - **Update terakhir:** 19 November 2026
 
 ## Kesiapan Proyek
@@ -64,6 +64,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.10b — Frontend Halaman Akun Admin:** `DONE` (commit `a284143`).
 - **Bugfix — Object URL avatar & pratinjau:** `DONE` (commit `a284143`).
 - **P11.11 — UI Polish, halaman Kegiatan & Detail Kegiatan:** `DONE` (commit `5f13a42`).
+- **P11.11 — UI Polish, halaman Laporan:** `DONE` (menunggu commit).
 
 ## Hasil Berjalan
 
@@ -547,6 +548,24 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa dependency, migration, atau env baru.
 - Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `build`): lulus.
 
+### UI Polish — Laporan (DONE, menunggu commit)
+
+- Sidebar User: urutan menu menjadi Dashboard · Kegiatan · Laporan · Arsip · Agenda · Catatan.
+- Filter disederhanakan menjadi satu kontrol: chip periode (`Harian | Mingguan | Bulanan | Tahunan`, default Bulanan). Filter tanggal acuan, rentang khusus, kategori, pengelompokan, dan bukti dukung dihapus — periode mengikuti periode berjalan WITA, backend memakai `todayWita()` saat `date` tidak dikirim sehingga tidak ada perubahan backend.
+- `report-filter-bar.tsx` ditulis ulang sebagai toolbar (tanpa `Card`), pola chip sama dengan halaman Kegiatan; `isReportReady` dan pemakaian `DatePicker`/`DateRangePicker` dihapus.
+- URL state dipertahankan (`period`) dan menambah `page`; `period=custom` lama jatuh ke default bulanan.
+- Pagination klien 20 baris per halaman + ringkasan "Menampilkan X–Y dari N kegiatan"; ekspor tetap memakai seluruh baris.
+- Aksi ekspor menjadi satu tombol `Ekspor` berisi `Excel (.xlsx)` dan `PDF (.pdf)`, spinner saat proses, nonaktif saat data sedang dimuat ulang.
+- Error query mendapat tombol `Coba lagi`; empty state memakai `Card` putus-putus dengan CTA `Catat kegiatan`.
+- Tabel hanya tampil `lg` ke atas (kartu di bawahnya), header `scope="col"` + `aria-label`.
+- Kolom Bukti Dukung dibatasi `line-clamp-2` + `title`; ekspor tetap teks penuh.
+- Kolom Link kini berisi dua aksi ikon: `Salin tautan` (clipboard + toast, pola halaman detail Kegiatan) dan `Buka tautan` (tab baru). Kartu mobile memakai dua tombol yang sama.
+- Ringkasan periode menampilkan `N kegiatan · <waktu dibuat>` tanpa kata "dibuat".
+- `useReport` tidak lagi memakai parameter `enabled`; `ReportParams` membuang `date`/`from`/`to`/`category`.
+- `PROJECT.md` §5.4 disesuaikan: periode harian, mingguan, bulanan, tahunan; tanggal acuan, rentang khusus, dan filter kategori tidak disediakan.
+- Tanpa perubahan backend, schema, migration, env, atau dependency baru.
+- Pemeriksaan statis frontend (`typecheck`, `lint`, `build`): lulus; build memuat route `/laporan`.
+
 ### Audit batch 5 — Frontend mati & konsistensi (DONE, commit `30ec979`)
 
 - B.1.1: `frontend/src/components/shared/module-placeholder.tsx` dihapus (nol impor).
@@ -589,6 +608,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pengingat dan notifikasi agenda ditangguhkan: perlu keputusan kanal (email/in-app), mekanisme penjadwalan, dan penanganan multi-instance sebelum dijadwalkan sebagai task roadmap baru.
 - ~~Perlindungan CSRF belum diimplementasikan.~~ Mitigasi saat ini `sameSite=lax` dan topologi same-site (subdomain satu domain induk); token CSRF belum diperlukan selama topologi ini dipakai.
 - Health check belum memeriksa koneksi database maupun R2; relevan untuk verifikasi deployment di P12.
+- `GET /api/reports/work-logs` dan `/export` masih menerima `period=custom`, `date`, `from`/`to`, `category`, `groupBy`, serta `onlyWithEvidence`; UI tidak lagi menawarkannya. Diselaraskan hanya jika API ikut disederhanakan.
+- Pagination laporan bersifat klien; respons API tetap memuat seluruh baris periode karena dipakai ekspor. Backend pagination dipertimbangkan bila volume data per periode besar.
 
 ## Keputusan Teknis Kumulatif
 
@@ -628,6 +649,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Filter dan pagination halaman Kegiatan disimpan di URL (`periode`, `q`, `page`).
 - Baris daftar Kegiatan menampilkan jumlah bukti dukung (`fileCount` dari API); kegiatan tanpa bukti dukung ditandai eksplisit.
 - Unggah file memakai satu dialog bersama `components/shared/file-upload-dialog.tsx` (pilih → unggah → selesai) dengan `AbortController`, retry otomatis sekali untuk kegagalan jaringan/5xx, dan retry manual. Bukti dukung adalah konsumen pertama; Arsip menyusul.
+- Laporan memakai periode berjalan (harian/mingguan/bulanan/tahunan) tanpa pemilih tanggal acuan, rentang khusus, filter kategori, pengelompokan, dan filter bukti dukung; pagination tampilan 20 baris dipertahankan. Ekspor selalu memuat seluruh baris periode.
 
 ## Urutan Pengembangan
 
@@ -642,7 +664,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
 1. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
-2. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); lanjut halaman lain satu per satu sesuai `ROADMAP.md` P11.11.
+2. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (menunggu commit); lanjut halaman lain satu per satu sesuai `ROADMAP.md` P11.11.
 3. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
 4. Phase 12 (P12.1 Functional & Integration Testing dan seterusnya) dijadwalkan setelah UI final.
 
