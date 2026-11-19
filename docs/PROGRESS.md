@@ -6,7 +6,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.11 — UI Polish, halaman Kegiatan, Detail Kegiatan, Laporan, dan Arsip selesai
+- **Task aktif:** P11.12a & P11.12b — implementasi selesai, menunggu commit gabungan (keputusan pengguna: satu commit)
 - **Task berikutnya:** UI polish halaman berikutnya satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
 - **Update terakhir:** 19 November 2026
 
@@ -616,6 +616,26 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan statis: `lint`, `typecheck`, `format:check`, `build` lulus.
 - Temuan audit terkait sudah ditutup; batch ini ter-commit pada `6885f98`.
 
+### P11.12a — Brand Assets & Penempatan Logo (IMPLEMENTED, menunggu commit)
+
+- Aset SVG resmi disalin ke `frontend/public/brand/` (light/dark horizontal tanpa tagline, icon full-color light/dark, vertical dark card, favicon light/dark, app-icon 192/512, apple-touch-icon) plus satu varian baru `arkana-logo-horizontal-dark.svg` (lockup gelap tanpa tagline untuk navbar).
+- `scripts/generate-brand-assets.mjs` (`sharp`, script `brand:assets`) meng-generate `favicon-32.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `og-image.png` (1200×630, logo di atas `#0B2D52`).
+- Root `metadata`: `metadataBase` dari `NEXT_PUBLIC_SITE_URL` (opsional, fallback `http://localhost:3000`), title template `%s · ARKANA`, icons (SVG light/dark + PNG 32), apple icon, `openGraph` + `twitter` dengan OG image; `viewport.themeColor` light `#F8FAFC` / dark `#071E3A`; `app/manifest.ts` (`manifest.webmanifest`); env `NEXT_PUBLIC_SITE_URL` opsional ditambahkan ke schema Zod dan `.env.example`.
+- Title halaman diubah dari `... · ARKANA` menjadi `...` agar template root bekerja; halaman publik `/` memakai `title.absolute`.
+- Logo dipasang di sidebar (ikon, expandable), header publik, layout autentikasi (panel brand `dark-card` di desktop, logo horizontal di mobile), dan halaman publik bukti dukung; placeholder teks "A" dihapus seluruhnya.
+- `BrandLogo` (`components/shared/brand-logo.tsx`) — varian `icon`/`wordmark`/`lockup` (ikon + wordmark flex horizontal, `tone: 'auto' | 'dark'`); `ARKANA-Logo-Pack/` ditambahkan ke `.gitignore` (tidak di-commit).
+- Logo wordmark baru: crop presisi (bbox alpha via `sharp`) dari file resmi — `arkana-wordmark.svg`/`arkana-wordmark-dark.svg` (ARKANA + akronim, dipakai di header aplikasi saat sidebar tertutup) dan `arkana-wordmark-only.svg`/`arkana-wordmark-only-dark.svg` (hanya tulisan ARKANA, dipakai pada lockup di samping ikon). Deploy dipakai pada sidebar, header publik, header aplikasi, auth (mobile + panel brand desktop `tone="dark"`), dan halaman publik bukti dukung.
+- Header aplikasi adaptif: sidebar expanded → ikon buka/tutup sidebar; collapsed → wordmark ARKANA + akronim saja (tanpa ikon); logo sidebar/header selalu flex horizontal `items-center`; header publik menampilkan lockup di kiri, toggle di kanan. Semua header `h-15` (60px), konten terpusat vertikal; header sidebar `h-15` + `items-center` agar sejajar dengan header (tengah 30px).
+- `.gitignore`, `docs/ROADMAP.md` (task P11.12a/P11.12b + Phase 12 heading dipulihkan setelah sempat tertimpa), dan `docs/PROJECT.md` (§ tema terang/gelap) diperbarui.
+
+### P11.12b — Palet Tema & Dark Mode (IMPLEMENTED, menunggu commit)
+
+- Token `:root`/`.dark` `globals.css` diganti palet brand: light (`--background #F8FAFC`, foreground/card navy, primary `#0B2D52`, ring `#1E6BB8`, sidebar surface putih), dark (`--background #071E3A`, kartu `#0B2D52`, primary teal `#14BBA6` dengan foreground `#062144`, sidebar `#051A31`); `color-scheme` diset per mode.
+- `ThemeToggle` — tombol langsung (bukan dropdown): klik mengganti Terang ↔ Gelap berdasarkan `resolvedTheme`; default tetap mengikuti sistem; UI hanya dua mode (tanpa opsi Sistem); setelah diklik tema menjadi eksplisit.
+- `next-themes` (`attribute="class"`, `defaultTheme="system"`, `disableTransitionOnChange`) via `components/shared/theme-provider.tsx` di root layout; `Toaster` sonner ikut `resolvedTheme`.
+- Sidebar: `SidebarTrigger` header kini tooltip "Tutup sidebar" + kursor `ew-resize`; header aplikasi menampilkan trigger saat sidebar terbuka dan lockup saat tertutup (swap via `useSidebar().state`, mobile selalu trigger); header sidebar expanded menampilkan lockup; hover logo di mode collapsed menampilkan ikon `PanelLeftOpenIcon`, tooltip "Buka sidebar", klik membuka sidebar.
+- Catatan: toggle tema sengaja TIDAK diletakkan di sidebar (sesuai keputusan: header kanan).
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
@@ -685,10 +705,11 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
-2. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (commit `75693f2`); UI polish halaman Arsip selesai (commit `103a2a0`); lanjut halaman lain satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung).
-3. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
-4. Phase 12 (P12.1 Functional & Integration Testing dan seterusnya) dijadwalkan setelah UI final.
+1. **Menunggu commit:** P11.12a & P11.12b (implementasi selesai, verifikasi statis lulus). Keputusan pengguna: digabung menjadi satu commit (file bercampur brand+tema, pemisahan file-level tidak bersih).
+2. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
+3. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (commit `75693f2`); UI polish halaman Arsip selesai (commit `103a2a0`); lanjut halaman lain satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung).
+4. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
+5. Phase 12 (P12.1 Functional & Integration Testing dan seterusnya) dijadwalkan setelah UI final.
 
 ## Aturan Pembaruan
 

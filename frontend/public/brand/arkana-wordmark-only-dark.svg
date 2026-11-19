@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="283.4 31.5 404.85 60.75" width="404.85" height="60.75" fill="none">
+  <title>ARKANA (Wordmark, Dark)</title>
+  <defs>
+    <linearGradient id="dr_ic_pillar" x1="10" y1="145" x2="105" y2="25" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B8DDFB"/>
+      <stop offset="50%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E6F5FF"/>
+    </linearGradient>
+    <linearGradient id="dr_ic_ribbon" x1="75" y1="18" x2="182" y2="92" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#DDF3FF"/>
+      <stop offset="45%" stop-color="#6FE3FA"/>
+      <stop offset="100%" stop-color="#19C4E6"/>
+    </linearGradient>
+    <linearGradient id="dr_ic_ribbon_shadow" x1="145" y1="78" x2="175" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0E6BA8" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#0B538A" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="dr_ic_wave1" x1="65" y1="148" x2="195" y2="105" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7ADBF7"/>
+      <stop offset="45%" stop-color="#D9F8FF"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
+    </linearGradient>
+    <linearGradient id="dr_ic_wave2" x1="72" y1="152" x2="205" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#149CE0"/>
+      <stop offset="50%" stop-color="#22D3C5"/>
+      <stop offset="100%" stop-color="#6CF2E0"/>
+    </linearGradient>
+    <linearGradient id="dr_ic_pixels" x1="185" y1="58" x2="215" y2="106" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38D6F5"/>
+      <stop offset="100%" stop-color="#22D3C5"/>
+    </linearGradient>
+  </defs>
+  
+  
+  <path d="M 283.50 92.00 L 312.00 32.00 L 321.00 32.00 L 349.50 92.00 L 336.50 92.00 L 316.50 49.00 L 296.50 92.00 Z M 361.50 32.00 L 392.00 32.00 C 405.50 32.00, 413.00 39.00, 413.00 50.00 C 413.00 60.50, 406.00 67.50, 394.50 68.50 L 414.50 92.00 L 400.50 92.00 L 378.00 64.00 L 378.00 58.50 L 391.00 58.50 C 397.50 58.50, 401.00 55.00, 401.00 50.00 C 401.00 45.00, 397.50 42.00, 391.00 42.00 L 373.50 42.00 L 373.50 92.00 L 361.50 92.00 Z M 424.50 32.00 L 436.50 32.00 L 436.50 59.00 L 464.00 32.00 L 478.50 32.00 L 451.50 59.00 L 479.00 92.00 L 464.00 92.00 L 442.50 67.00 L 436.50 72.50 L 436.50 92.00 L 424.50 92.00 Z M 486.00 92.00 L 514.50 32.00 L 523.50 32.00 L 552.00 92.00 L 539.00 92.00 L 519.00 49.00 L 499.00 92.00 Z M 561.50 32.00 L 573.00 32.00 L 600.50 72.50 L 600.50 32.00 L 612.50 32.00 L 612.50 92.00 L 601.00 92.00 L 573.00 51.00 L 573.00 92.00 L 561.50 92.00 Z M 622.50 92.00 L 651.00 32.00 L 660.00 32.00 L 688.50 92.00 L 675.50 92.00 L 655.50 49.00 L 635.50 92.00 Z" fill="#FFFFFF"/>
+  
+</svg>

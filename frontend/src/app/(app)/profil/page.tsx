@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { ProfileView } from '@/features/profile/profile-view';
 
 export const metadata: Metadata = {
-  title: 'Profil · ARKANA',
+  title: 'Profil',
 };
 
 export default function ProfilePage() {

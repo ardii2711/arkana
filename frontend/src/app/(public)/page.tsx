@@ -15,7 +15,7 @@ import type { Metadata } from 'next';
 import { PublicSessionCta } from './public-session-cta';
 
 export const metadata: Metadata = {
-  title: 'ARKANA — Arsip, Rekam Kinerja, dan Agenda',
+  title: { absolute: 'ARKANA — Arsip, Rekam Kinerja, dan Agenda' },
   description:
     'ARKANA membantu ASN mencatat pekerjaan, mengelola bukti dukung dan arsip pribadi, menyusun laporan kinerja, serta mengatur agenda dan catatan dalam satu tempat.',
 };
@@ -84,11 +84,11 @@ export default function PublicHomePage() {
       <section className="relative overflow-hidden border-b">
         <div
           aria-hidden="true"
-          className="[background-image:linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] pointer-events-none absolute inset-0 [background-size:56px_56px] opacity-50 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]"
+          className="bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] pointer-events-none absolute inset-0 bg-size-[56px_56px] opacity-50 mask-[radial-gradient(ellipse_at_center,black,transparent_70%)]"
         />
         <div
           aria-hidden="true"
-          className="bg-primary/5 pointer-events-none absolute -top-48 left-1/2 size-[32rem] -translate-x-1/2 rounded-full blur-3xl"
+          className="bg-primary/5 pointer-events-none absolute -top-48 left-1/2 size-128 -translate-x-1/2 rounded-full blur-3xl"
         />
 
         <div className="relative mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28">

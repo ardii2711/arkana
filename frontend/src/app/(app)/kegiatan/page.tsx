@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { WorkLogList } from '@/features/work-logs/work-log-list';
 
 export const metadata: Metadata = {
-  title: 'Kegiatan · ARKANA',
+  title: 'Kegiatan',
 };
 
 export default function WorkLogPage() {

@@ -9,6 +9,7 @@ Aplikasi web untuk membantu ASN mengelola catatan pekerjaan, bukti dukung, arsip
 - **Nama aplikasi:** ARKANA
 - **Kepanjangan:** Arsip, Rekam Kinerja, dan Agenda
 - **Karakter brand:** Independen, modern, dan profesional.
+- **Tema:** Antarmuka menyediakan tema terang dan gelap; mengikuti preferensi sistem dengan pilihan manual (Terang/Gelap/Sistem).
 
 ARKANA merupakan nama brand aplikasi yang tidak terbatas pada lingkungan ASN dan dapat dikembangkan untuk kebutuhan pengelolaan pekerjaan serta produktivitas yang lebih luas.
 

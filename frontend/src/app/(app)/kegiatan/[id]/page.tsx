@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { WorkLogDetail } from '@/features/work-logs/work-log-detail';
 
 export const metadata: Metadata = {
-  title: 'Detail Kegiatan · ARKANA',
+  title: 'Detail Kegiatan',
 };
 
 export default async function WorkLogDetailPage({ params }: PageProps<'/kegiatan/[id]'>) {

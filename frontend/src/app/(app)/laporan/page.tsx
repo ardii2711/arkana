@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ReportView } from '@/features/reports/report-view';
 
 export const metadata: Metadata = {
-  title: 'Laporan · ARKANA',
+  title: 'Laporan',
 };
 
 export default function ReportPage() {

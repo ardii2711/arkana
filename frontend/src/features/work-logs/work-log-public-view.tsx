@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BrandLogo } from '@/components/shared/brand-logo';
 import { useObjectUrl } from '@/hooks/use-object-url';
 import { getErrorMessage } from '@/lib/api-error';
 import { downloadBlob } from '@/lib/download';
@@ -46,7 +47,7 @@ export function WorkLogPublicView({ token }: { token: string }) {
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
       <header className="mb-8 space-y-1">
-        <p className="font-heading text-lg font-semibold tracking-tight">ARKANA</p>
+        <BrandLogo variant="lockup" iconClassName="h-8" wordmarkClassName="h-5" />
         <p className="text-muted-foreground text-sm">Bukti dukung kegiatan</p>
       </header>
 

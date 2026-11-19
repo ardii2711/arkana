@@ -1,20 +1,23 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { BrandLogo } from '@/components/shared/brand-logo';
+import { ThemeToggle } from '@/components/shared/theme-toggle';
+
 import { PublicSessionCta } from './public-session-cta';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="bg-background/80 sticky top-0 z-10 border-b backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="bg-primary text-primary-foreground font-heading flex size-8 items-center justify-center rounded-lg text-sm font-semibold">
-              A
-            </span>
-            <span className="font-heading font-semibold">ARKANA</span>
+        <div className="mx-auto flex h-15 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+          <Link href="/" aria-label="ARKANA" className="flex items-center">
+            <BrandLogo variant="lockup" iconClassName="h-7.5" wordmarkClassName="h-4" />
           </Link>
-          <PublicSessionCta size="sm" />
+          <div className="flex items-center gap-1.5">
+            <ThemeToggle />
+            <PublicSessionCta size="sm" />
+          </div>
         </div>
       </header>
 

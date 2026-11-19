@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { WorkLogPublicView } from '@/features/work-logs/work-log-public-view';
 
 export const metadata: Metadata = {
-  title: 'Bukti Dukung · ARKANA',
+  title: 'Bukti Dukung',
   robots: { index: false, follow: false },
 };
 

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <title>ARKANA - Favicon Transparent Background</title>
+  <defs>
+    <linearGradient id="favt_ic_pillar" x1="10" y1="145" x2="105" y2="25" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#062144"/>
+      <stop offset="55%" stop-color="#0B2D52"/>
+      <stop offset="100%" stop-color="#0E447E"/>
+    </linearGradient>
+    <linearGradient id="favt_ic_ribbon" x1="75" y1="20" x2="180" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0E59A8"/>
+      <stop offset="48%" stop-color="#0B93D6"/>
+      <stop offset="100%" stop-color="#0A64B4"/>
+    </linearGradient>
+    <linearGradient id="favt_ic_ribbon_shadow" x1="145" y1="78" x2="175" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#072D5C" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#06264F" stop-opacity="0.72"/>
+    </linearGradient>
+    <linearGradient id="favt_ic_wave1" x1="65" y1="148" x2="195" y2="105" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0B4C91"/>
+      <stop offset="40%" stop-color="#0D8ED6"/>
+      <stop offset="100%" stop-color="#22D1C2"/>
+    </linearGradient>
+    <linearGradient id="favt_ic_wave2" x1="72" y1="152" x2="205" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0A3F7A"/>
+      <stop offset="45%" stop-color="#0FA7B8"/>
+      <stop offset="100%" stop-color="#2CE0CA"/>
+    </linearGradient>
+    <linearGradient id="favt_ic_pixels" x1="185" y1="58" x2="215" y2="106" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0E72BE"/>
+      <stop offset="100%" stop-color="#17B4C4"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(3, 10) scale(0.268)">
+    <path d="M 5 149 L 38 149 C 43 149, 47 146, 50 141 L 101 55 C 104 51, 107 50, 111 50 C 114 50, 116 51, 118 53 C 111 37, 103 23, 94 19 C 86 16, 78 18, 72 22 L 1 142 C -0.5 145, 1 149, 5 149 Z" fill="url(#favt_ic_pillar)"/>
+    <path d="M 72 22 C 80 6, 89 0, 103 0 L 117 0 C 128 0, 135 6, 142 18 L 184 94 C 169 92, 156 90, 145 88 C 137 86, 133 82, 129 75 L 118 53 C 111 38, 103 23, 94 19 C 86 16, 78 18, 72 22 Z" fill="url(#favt_ic_ribbon)"/>
+    <path d="M 131 78 C 136 85, 142 88, 154 90 C 165 92, 175 93, 184 94 L 177 81 C 165 85, 148 84, 131 78 Z" fill="url(#favt_ic_ribbon_shadow)"/>
+    <path d="M 63 153 C 77 133, 89 112, 97 101 C 104 93, 111 92, 121 92 C 146 93, 172 99, 193 110 L 199 121 C 175 113, 145 110, 125 113 C 107 116, 87 138, 63 153 Z" fill="url(#favt_ic_wave1)"/>
+    <path d="M 69 154 C 96 144, 115 120, 139 118 C 164 116, 188 125, 208 135 C 183 132, 159 134, 135 142 C 111 151, 89 157, 69 154 Z" fill="url(#favt_ic_wave2)"/>
+    <g fill="url(#favt_ic_pixels)">
+      <rect x="186" y="58" width="14" height="14" rx="2.2"/>
+      <rect x="185" y="78" width="6" height="6" rx="1.2"/>
+      <rect x="202" y="78" width="13.5" height="13.5" rx="2.2"/>
+      <rect x="195" y="87" width="2.8" height="2.8" rx="0.8"/>
+      <rect x="197.5" y="97.5" width="8.5" height="8.5" rx="1.5"/>
+    </g>
+  </g>
+</svg>

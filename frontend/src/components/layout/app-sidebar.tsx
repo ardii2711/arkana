@@ -17,6 +17,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { UserAvatar } from '@/features/profile/user-avatar';
+import { BrandLogo } from '@/components/shared/brand-logo';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,28 +72,38 @@ function isActivePath(pathname: string, href: string) {
 export function AppSidebar({ user }: { user: SessionUser }) {
   const pathname = usePathname();
   const logout = useLogout();
-  const { setOpenMobile } = useSidebar();
+  const { setOpenMobile, state, toggleSidebar } = useSidebar();
   const items = user.role === 'ADMIN' ? adminNav : userNav;
   const displayName = getDisplayName(user);
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="h-15 flex-row items-center gap-0 py-0">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild tooltip="ARKANA">
-              <Link href="/dashboard">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground font-heading flex aspect-square size-8 items-center justify-center rounded-lg text-sm font-semibold">
-                  A
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                  <span className="font-heading truncate font-semibold">ARKANA</span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    Arsip, Rekam Kinerja, Agenda
-                  </span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
+            {state === 'collapsed' ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <SidebarMenuButton
+                    size="lg"
+                    aria-label="Buka sidebar"
+                    className="cursor-ew-resize justify-center"
+                    onClick={toggleSidebar}
+                  >
+                    <BrandLogo variant="icon" className="h-6 w-auto" />
+                  </SidebarMenuButton>
+                </TooltipTrigger>
+                <TooltipContent side="right" align="center">
+                  Buka sidebar
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <SidebarMenuButton size="lg" asChild>
+                <Link href="/dashboard" aria-label="ARKANA — Dashboard">
+                  <BrandLogo variant="lockup" iconClassName="h-7.5" wordmarkClassName="h-4" />
+                </Link>
+              </SidebarMenuButton>
+            )}
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

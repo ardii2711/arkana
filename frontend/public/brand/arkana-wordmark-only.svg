@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="283.4 31.5 404.85 60.75" width="404.85" height="60.75" fill="none">
+  <title>ARKANA (Wordmark)</title>
+  <defs>
+    <linearGradient id="hdr_fc_pillar" x1="10" y1="145" x2="105" y2="25" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#062144"/>
+      <stop offset="55%" stop-color="#0B2D52"/>
+      <stop offset="100%" stop-color="#0E447E"/>
+    </linearGradient>
+    <linearGradient id="hdr_fc_ribbon" x1="75" y1="20" x2="180" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0E59A8"/>
+      <stop offset="48%" stop-color="#0B93D6"/>
+      <stop offset="100%" stop-color="#0A64B4"/>
+    </linearGradient>
+    <linearGradient id="hdr_fc_ribbon_shadow" x1="145" y1="78" x2="175" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#072D5C" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#06264F" stop-opacity="0.72"/>
+    </linearGradient>
+    <linearGradient id="hdr_fc_wave1" x1="65" y1="148" x2="195" y2="105" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0B4C91"/>
+      <stop offset="40%" stop-color="#0D8ED6"/>
+      <stop offset="100%" stop-color="#22D1C2"/>
+    </linearGradient>
+    <linearGradient id="hdr_fc_wave2" x1="72" y1="152" x2="205" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0A3F7A"/>
+      <stop offset="45%" stop-color="#0FA7B8"/>
+      <stop offset="100%" stop-color="#2CE0CA"/>
+    </linearGradient>
+    <linearGradient id="hdr_fc_pixels" x1="185" y1="58" x2="215" y2="106" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0E72BE"/>
+      <stop offset="100%" stop-color="#17B4C4"/>
+    </linearGradient>
+    <linearGradient id="hdr_wm_grad" x1="283.5" y1="32" x2="688.5" y2="92" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#072245"/>
+      <stop offset="50%" stop-color="#0B2D52"/>
+      <stop offset="100%" stop-color="#0E3B6B"/>
+    </linearGradient>
+  </defs>
+  
+  
+  
+  
+  
+  <path d="M 283.50 92.00 L 312.00 32.00 L 321.00 32.00 L 349.50 92.00 L 336.50 92.00 L 316.50 49.00 L 296.50 92.00 Z M 361.50 32.00 L 392.00 32.00 C 405.50 32.00, 413.00 39.00, 413.00 50.00 C 413.00 60.50, 406.00 67.50, 394.50 68.50 L 414.50 92.00 L 400.50 92.00 L 378.00 64.00 L 378.00 58.50 L 391.00 58.50 C 397.50 58.50, 401.00 55.00, 401.00 50.00 C 401.00 45.00, 397.50 42.00, 391.00 42.00 L 373.50 42.00 L 373.50 92.00 L 361.50 92.00 Z M 424.50 32.00 L 436.50 32.00 L 436.50 59.00 L 464.00 32.00 L 478.50 32.00 L 451.50 59.00 L 479.00 92.00 L 464.00 92.00 L 442.50 67.00 L 436.50 72.50 L 436.50 92.00 L 424.50 92.00 Z M 486.00 92.00 L 514.50 32.00 L 523.50 32.00 L 552.00 92.00 L 539.00 92.00 L 519.00 49.00 L 499.00 92.00 Z M 561.50 32.00 L 573.00 32.00 L 600.50 72.50 L 600.50 32.00 L 612.50 32.00 L 612.50 92.00 L 601.00 92.00 L 573.00 51.00 L 573.00 92.00 L 561.50 92.00 Z M 622.50 92.00 L 651.00 32.00 L 660.00 32.00 L 688.50 92.00 L 675.50 92.00 L 655.50 49.00 L 635.50 92.00 Z" fill="url(#hdr_wm_grad)"/>
+  
+  
+</svg>

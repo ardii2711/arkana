@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArchiveView } from '@/features/archive/archive-view';
 
 export const metadata: Metadata = {
-  title: 'Arsip — ARKANA',
+  title: 'Arsip',
 };
 
 export default function ArchivePage() {

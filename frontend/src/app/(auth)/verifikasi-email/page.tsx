@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { VerifyEmailForm } from '@/features/profile/verify-email-form';
 
 export const metadata: Metadata = {
-  title: 'Verifikasi email — ARKANA',
+  title: 'Verifikasi email',
 };
 
 export default function VerifyEmailPage() {

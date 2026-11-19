@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { ActivateForm } from '@/features/auth/activate-form';
 
 export const metadata: Metadata = {
-  title: 'Aktivasi akun · ARKANA',
+  title: 'Aktivasi akun',
 };
 
 export default function ActivatePage() {

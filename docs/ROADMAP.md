@@ -419,6 +419,20 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Acceptance Criteria:** Setiap halaman memakai pola informasi, filter, dan aksi yang konsisten; pemeriksaan statis lulus; perilaku diverifikasi pengguna.
 - **Dependencies:** P11.10b.
 
+### P11.12a — Brand Assets & Penempatan Logo
+
+- **Objective:** Menerapkan identitas merek ARKANA (logo, favicon, Open Graph, manifest) pada antarmuka.
+- **Scope:** Aset logo SVG disalin ke `public/brand` (termasuk wordmark `ARKANA` + "Arsip, Rekam Kinerja, dan Agenda" versi terang/gelap, di-crop presisi dari lockup resmi pack); favicon (SVG light/dark + PNG), apple touch icon, ikon PWA, banner Open Graph, `app/manifest.ts`, metadata root (title template, `metadataBase`, icons, `openGraph`, `twitter`); lockup ikon + wordmark pada sidebar, header publik, header aplikasi, layout autentikasi (panel brand desktop `tone="dark"`), dan halaman publik bukti dukung; aset PNG digenerate oleh `scripts/generate-brand-assets.mjs`.
+- **Acceptance Criteria:** Favicon dan logo tampil sesuai tema terang/gelap; sidebar dan halaman autentikasi memakai logo resmi; build memuat asset dan route `manifest.webmanifest`; pemeriksaan statis lulus.
+- **Dependencies:** P11.10b.
+
+### P11.12b — Palet Tema & Dark Mode
+
+- **Objective:** Menyelaraskan tema antarmuka dengan palet merek ARKANA dan menyediakan mode gelap.
+- **Scope:** Token `:root`/`.dark` `globals.css` memakai palet brand (navy `#0B2D52`, biru `#1E6BB8`, teal `#14BBA6`, background `#F8FAFC`/`#071E3A`, surface `#0B2D52`, `#E2E8F0`); `next-themes` dengan `defaultTheme="system"`; toggle langsung Terang/Gelap (tanpa opsi Sistem di UI) pada header aplikasi (kanan), header publik, dan layout autentikasi; `Toaster` mengikuti tema; sidebar/header: logo lockup (ikon + wordmark) selalu horizontal `items-center`, header aplikasi menampilkan ikon buka/tutup sidebar saat terbuka dan lockup saat tertutup; sidebar collapsed menampilkan logo ikon dengan hover `PanelLeftOpenIcon` + tooltip "Buka sidebar".
+- **Acceptance Criteria:** Seluruh antarmuka mengikuti tema terang/gelap dengan konsisten dan mengikuti preferensi sistem; toggle tersedia pada lokasi yang disepakati; pemeriksaan statis lulus.
+- **Dependencies:** P11.12a.
+
 ## Phase 12 — Final Integration & Production Release
 
 **Tujuan:** Memastikan seluruh aplikasi siap digunakan.
@@ -428,7 +442,7 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Objective:** Memastikan seluruh alur aplikasi berjalan terintegrasi antara frontend, backend, database, email, dan R2.
 - **Scope:** Uji seluruh alur utama frontend dan backend; integrasi database, email, dan R2; autentikasi, otorisasi, dan kepemilikan data; upload, preview, download, dan tautan publik; seluruh modul dan alur lintas fitur.
 - **Acceptance Criteria:** Seluruh alur utama berjalan dan tidak ada kegagalan kritis.
-- **Dependencies:** Seluruh task implementasi P1.1–P11.11.
+- **Dependencies:** Seluruh task implementasi P1.1–P11.12b.
 
 ### P12.2 — Security & Performance Verification
 

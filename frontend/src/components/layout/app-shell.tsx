@@ -4,10 +4,13 @@ import { Loader2Icon, TriangleAlertIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 
+import { BrandLogo } from '@/components/shared/brand-logo';
 import { AppSidebar } from '@/components/layout/app-sidebar';
+import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import Link from 'next/link';
+import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useSession } from '@/features/auth/use-auth';
 import { getErrorMessage } from '@/lib/api-error';
@@ -49,13 +52,31 @@ export function AppShell({ children }: { children: ReactNode }) {
       <SidebarProvider>
         <AppSidebar user={session.data} />
         <SidebarInset className="min-w-0">
-          <header className="bg-background/80 sticky top-0 z-10 flex h-14 shrink-0 items-center border-b px-4 backdrop-blur md:px-6">
-            <SidebarTrigger />
-          </header>
+          <AppHeader />
           <div className="flex-1 p-4 md:p-6">{children}</div>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
+  );
+}
+
+function AppHeader() {
+  const { isMobile, state } = useSidebar();
+  const showTrigger = isMobile || state === 'expanded';
+
+  return (
+    <header className="bg-background/80 sticky top-0 z-10 flex h-15 shrink-0 items-center gap-2 border-b px-4 backdrop-blur md:px-6">
+      {showTrigger ? (
+        <SidebarTrigger />
+      ) : (
+        <Link href="/dashboard" aria-label="ARKANA — Dashboard">
+          <BrandLogo variant="wordmarkOnly" className="h-4 w-auto" />
+        </Link>
+      )}
+      <div className="ml-auto">
+        <ThemeToggle />
+      </div>
+    </header>
   );
 }
 
