@@ -155,6 +155,14 @@ export async function listArchiveFolders(userId: string) {
     prisma.archiveFile.aggregate({ where: { userId }, _sum: { size: true } }),
   ]);
 
+  // Badge folder memakai total subtree agar konsisten dengan daftar dokumen
+  // yang ikut menampilkan isi subfolder.
+  const nodes: FolderNode[] = folders.map((folder) => ({
+    id: folder.id,
+    parentId: folder.parentId,
+  }));
+  const directCounts = new Map(folders.map((folder) => [folder.id, folder._count.files]));
+
   return {
     folders: folders.map((folder) => ({
       id: folder.id,
@@ -162,7 +170,10 @@ export async function listArchiveFolders(userId: string) {
       parentId: folder.parentId,
       createdAt: folder.createdAt,
       updatedAt: folder.updatedAt,
-      fileCount: folder._count.files,
+      fileCount: descendantIds(nodes, folder.id).reduce(
+        (total, id) => total + (directCounts.get(id) ?? 0),
+        0,
+      ),
     })),
     usage: { usedBytes: used._sum.size ?? 0, quotaBytes: ARCHIVE_QUOTA_BYTES },
   };
@@ -303,13 +314,16 @@ export async function listArchiveFiles(userId: string, query: ListFilesQuery) {
           ? { NOT: [{ mimeType: { startsWith: 'image/' } }, { mimeType: 'application/pdf' }] }
           : {};
 
-  const where = {
-    userId,
-    ...(query.folderId === 'root'
+  const folderFilter =
+    query.folderId === 'root'
       ? { folderId: null }
       : query.folderId
-        ? { folderId: query.folderId }
-        : {}),
+        ? { folderId: { in: descendantIds(await loadFolderNodes(userId), query.folderId) } }
+        : {};
+
+  const where = {
+    userId,
+    ...folderFilter,
     ...typeFilter,
     ...(query.search && {
       OR: [
@@ -372,11 +386,11 @@ export async function completeArchiveUpload(
   input: CreateFileFields,
   file: ReceivedFile,
 ) {
-  if (input.folderId) {
-    await findOwnedFolder(userId, input.folderId);
-  }
-
   try {
+    if (input.folderId) {
+      await findOwnedFolder(userId, input.folderId);
+    }
+
     const created = await prisma.archiveFile.create({
       data: {
         userId,

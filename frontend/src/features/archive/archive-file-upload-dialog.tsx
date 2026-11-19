@@ -1,11 +1,10 @@
 'use client';
 
-import { Loader2Icon, TriangleAlertIcon, UploadIcon } from 'lucide-react';
+import { CheckCircle2Icon, Loader2Icon, UploadCloudIcon, XIcon } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { toast } from 'sonner';
 
 import { DatePicker } from '@/components/shared/date-picker';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FileTypeIcon } from '@/components/shared/file-type-icon';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -26,14 +25,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { getErrorMessage } from '@/lib/api-error';
+import { useObjectUrl } from '@/hooks/use-object-url';
+import { getErrorMessage, toApiError } from '@/lib/api-error';
 import { BODY_MAX_LENGTH, MAX_FILE_BYTES, TITLE_MAX_LENGTH } from '@/lib/limits';
 import { FILE_ACCEPT, fileExtension, formatFileSize, isAllowedFile } from '@/lib/file-format';
+import { cn } from '@/lib/utils';
 import type { ArchiveFolder } from './archive.api';
-import { buildFolderTree, flattenFolders } from './archive.util';
+import { ARCHIVE_ROOT, buildFolderTree, flattenFolders } from './archive.util';
 import { useUploadArchiveFile } from './use-archive';
 
-const NO_FOLDER = 'none';
+const PREVIEWABLE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 type ArchiveFileUploadDialogProps = {
   folders: ArchiveFolder[];
@@ -41,6 +42,29 @@ type ArchiveFileUploadDialogProps = {
   remainingBytes: number;
   onOpenChange: (open: boolean) => void;
 };
+
+function Thumb({ file }: { file: File }) {
+  const url = useObjectUrl(PREVIEWABLE_TYPES.includes(file.type) ? file : undefined);
+
+  if (!url) {
+    return (
+      <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center rounded-lg [&_svg]:size-5">
+        <FileTypeIcon mimeType={file.type} />
+      </div>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={url} alt="" className="size-12 shrink-0 rounded-lg object-cover" />
+  );
+}
+
+function canRetry(error: unknown) {
+  const status = toApiError(error).status;
+
+  return status === null || status >= 500;
+}
 
 export function ArchiveFileUploadDialog({
   folders,
@@ -50,57 +74,81 @@ export function ArchiveFileUploadDialog({
 }: ArchiveFileUploadDialogProps) {
   const upload = useUploadArchiveFile();
   const inputRef = useRef<HTMLInputElement>(null);
+  const controllerRef = useRef<AbortController | null>(null);
+  const folderOptions = flattenFolders(buildFolderTree(folders));
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [documentDate, setDocumentDate] = useState('');
-  const [folderId, setFolderId] = useState(defaultFolderId ?? NO_FOLDER);
+  const [folderId, setFolderId] = useState(defaultFolderId ?? ARCHIVE_ROOT);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const uploading = upload.isPending;
-  const folderOptions = flattenFolders(buildFolderTree(folders));
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const fileError = !file
+    ? null
+    : !isAllowedFile(file)
+      ? 'Format file tidak didukung.'
+      : file.size > MAX_FILE_BYTES
+        ? `Ukuran file melebihi batas ${formatFileSize(MAX_FILE_BYTES)}.`
+        : file.size > remainingBytes
+          ? 'Sisa kuota arsip tidak mencukupi untuk file ini.'
+          : null;
+
+  function pick(next: File | null) {
+    setFile(next);
     setError(null);
+  }
 
-    if (!file) {
-      setError('Pilih file yang akan diunggah.');
-      return;
-    }
+  async function send(attempt = 0) {
+    if (!file || fileError) return;
 
-    if (!isAllowedFile(file)) {
-      setError('Format file tidak didukung.');
-      return;
-    }
-
-    if (file.size > MAX_FILE_BYTES) {
-      setError(`Ukuran file melebihi batas ${formatFileSize(MAX_FILE_BYTES)}.`);
-      return;
-    }
-
-    if (file.size > remainingBytes) {
-      setError('Sisa kuota arsip tidak mencukupi untuk file ini.');
-      return;
-    }
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setError(null);
+    setProgress(0);
 
     try {
-      setProgress(0);
       await upload.mutateAsync({
         input: {
           file,
+          folderId: folderId === ARCHIVE_ROOT ? null : folderId,
           name: name.trim() || undefined,
           description: description.trim() || undefined,
           documentDate: documentDate || undefined,
-          folderId: folderId === NO_FOLDER ? undefined : folderId,
         },
         onProgress: setProgress,
+        signal: controller.signal,
       });
-      toast.success('Dokumen diunggah.');
-      onOpenChange(false);
+
+      setDone(true);
     } catch (uploadError) {
+      if (controller.signal.aborted) {
+        setProgress(0);
+        return;
+      }
+
+      if (attempt === 0 && canRetry(uploadError)) {
+        await send(1);
+        return;
+      }
+
       setError(getErrorMessage(uploadError));
+    } finally {
+      controllerRef.current = null;
     }
+  }
+
+  function reset() {
+    setFile(null);
+    setName('');
+    setDescription('');
+    setDocumentDate('');
+    setProgress(0);
+    setError(null);
+    setDone(false);
   }
 
   return (
@@ -113,49 +161,90 @@ export function ArchiveFileUploadDialog({
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Unggah dokumen</DialogTitle>
+          <DialogTitle>{done ? 'Dokumen tersimpan' : 'Unggah dokumen'}</DialogTitle>
           <DialogDescription>
-            Maksimal {formatFileSize(MAX_FILE_BYTES)} per file. Format: JPG, PNG, WEBP, HEIC, PDF,
-            DOC, DOCX, XLS, XLSX.
+            {done
+              ? 'Dokumen sudah masuk ke arsip Anda.'
+              : `Maksimal ${formatFileSize(MAX_FILE_BYTES)} per file. Format: JPG, PNG, WEBP, HEIC, PDF, DOC, DOCX, XLS, XLSX.`}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={(event) => void handleSubmit(event)} noValidate className="space-y-4">
+        {done ? (
+          <div className="flex items-center gap-3 rounded-xl border p-4">
+            <CheckCircle2Icon
+              aria-hidden="true"
+              className="size-5 shrink-0 text-emerald-600 dark:text-emerald-400"
+            />
+            <p className="min-w-0 truncate text-sm font-medium">{file?.name}</p>
+          </div>
+        ) : (
           <FieldGroup className="gap-4">
-            {error ? (
-              <Alert variant="destructive">
-                <TriangleAlertIcon />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            ) : null}
-
-            <Field>
-              <FieldLabel htmlFor="archive-upload-file">File</FieldLabel>
+            <div
+              onDragOver={(event) => {
+                event.preventDefault();
+                setDragging(true);
+              }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(event) => {
+                event.preventDefault();
+                setDragging(false);
+                if (uploading) return;
+                pick(event.dataTransfer.files?.[0] ?? null);
+              }}
+              className={cn(
+                'flex flex-col items-center gap-2 rounded-xl border border-dashed p-6 text-center',
+                dragging && 'bg-muted/60 border-primary',
+              )}
+            >
+              {file ? (
+                <div className="flex w-full min-w-0 items-center gap-3 text-left">
+                  <Thumb file={file} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{file.name}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {fileExtension(file.name)} · {formatFileSize(file.size)}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Hapus file terpilih"
+                    disabled={uploading}
+                    onClick={() => pick(null)}
+                  >
+                    <XIcon />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <UploadCloudIcon aria-hidden="true" className="text-muted-foreground size-5" />
+                  <p className="text-sm">Tarik file ke sini atau</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => inputRef.current?.click()}
+                  >
+                    Pilih file
+                  </Button>
+                </>
+              )}
               <input
                 ref={inputRef}
-                id="archive-upload-file"
                 type="file"
                 accept={FILE_ACCEPT}
                 className="sr-only"
-                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+                aria-label="Pilih file"
+                onChange={(event) => {
+                  pick(event.target.files?.[0] ?? null);
+                  event.target.value = '';
+                }}
               />
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={uploading}
-                  onClick={() => inputRef.current?.click()}
-                >
-                  <UploadIcon />
-                  Pilih file
-                </Button>
-                <p className="text-muted-foreground min-w-0 truncate text-sm">
-                  {file
-                    ? `${file.name} · ${fileExtension(file.name)} · ${formatFileSize(file.size)}`
-                    : 'Belum ada file dipilih'}
-                </p>
-              </div>
-            </Field>
+            </div>
+
+            {fileError ? <p className="text-destructive text-sm">{fileError}</p> : null}
+            {error ? <p className="text-destructive text-sm">{error}</p> : null}
 
             {uploading ? (
               <div className="space-y-1.5">
@@ -183,10 +272,10 @@ export function ArchiveFileUploadDialog({
               <FieldLabel htmlFor="archive-upload-folder">Folder</FieldLabel>
               <Select value={folderId} onValueChange={setFolderId} disabled={uploading}>
                 <SelectTrigger id="archive-upload-folder" className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Pilih folder" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={NO_FOLDER}>Tanpa folder</SelectItem>
+                  <SelectItem value={ARCHIVE_ROOT}>Arsip utama</SelectItem>
                   {folderOptions.map((node) => (
                     <SelectItem key={node.folder.id} value={node.folder.id}>
                       {'— '.repeat(node.depth)}
@@ -222,28 +311,42 @@ export function ArchiveFileUploadDialog({
               />
             </Field>
           </FieldGroup>
+        )}
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={uploading}
-              onClick={() => onOpenChange(false)}
-            >
-              Batal
-            </Button>
-            <Button type="submit" disabled={uploading}>
-              {uploading ? (
-                <>
-                  <Loader2Icon aria-hidden="true" className="animate-spin" />
-                  Mengunggah…
-                </>
-              ) : (
-                'Unggah'
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
+        <DialogFooter>
+          {done ? (
+            <>
+              <Button variant="outline" onClick={reset}>
+                Unggah lagi
+              </Button>
+              <Button onClick={() => onOpenChange(false)}>Tutup</Button>
+            </>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => (uploading ? controllerRef.current?.abort() : onOpenChange(false))}
+              >
+                {uploading ? 'Batalkan unggahan' : 'Batal'}
+              </Button>
+              <Button
+                type="button"
+                disabled={!file || fileError !== null || uploading}
+                onClick={() => void send()}
+              >
+                {uploading ? (
+                  <>
+                    <Loader2Icon aria-hidden="true" className="animate-spin" />
+                    Mengunggah…
+                  </>
+                ) : (
+                  'Unggah'
+                )}
+              </Button>
+            </>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

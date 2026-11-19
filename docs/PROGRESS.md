@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.11 — UI Polish, halaman Kegiatan, Detail Kegiatan, dan Laporan selesai (halaman Laporan menunggu commit)
-- **Task berikutnya:** UI polish halaman berikutnya satu per satu (Arsip, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
+- **Task aktif:** P11.11 — UI Polish, halaman Kegiatan, Detail Kegiatan, Laporan, dan Arsip selesai (halaman Arsip menunggu commit)
+- **Task berikutnya:** UI polish halaman berikutnya satu per satu (Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
 - **Update terakhir:** 19 November 2026
 
 ## Kesiapan Proyek
@@ -64,7 +64,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.10b — Frontend Halaman Akun Admin:** `DONE` (commit `a284143`).
 - **Bugfix — Object URL avatar & pratinjau:** `DONE` (commit `a284143`).
 - **P11.11 — UI Polish, halaman Kegiatan & Detail Kegiatan:** `DONE` (commit `5f13a42`).
-- **P11.11 — UI Polish, halaman Laporan:** `DONE` (menunggu commit).
+- **P11.11 — UI Polish, halaman Laporan:** `DONE` (commit `75693f2`).
+- **P11.11 — UI Polish, halaman Arsip:** `DONE` (menunggu commit).
 
 ## Hasil Berjalan
 
@@ -548,7 +549,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa dependency, migration, atau env baru.
 - Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `build`): lulus.
 
-### UI Polish — Laporan (DONE, menunggu commit)
+### UI Polish — Laporan (DONE, commit `75693f2`)
 
 - Sidebar User: urutan menu menjadi Dashboard · Kegiatan · Laporan · Arsip · Agenda · Catatan.
 - Filter disederhanakan menjadi satu kontrol: chip periode (`Harian | Mingguan | Bulanan | Tahunan`, default Bulanan). Filter tanggal acuan, rentang khusus, kategori, pengelompokan, dan bukti dukung dihapus — periode mengikuti periode berjalan WITA, backend memakai `todayWita()` saat `date` tidak dikirim sehingga tidak ada perubahan backend.
@@ -565,6 +566,23 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `PROJECT.md` §5.4 disesuaikan: periode harian, mingguan, bulanan, tahunan; tanggal acuan, rentang khusus, dan filter kategori tidak disediakan.
 - Tanpa perubahan backend, schema, migration, env, atau dependency baru.
 - Pemeriksaan statis frontend (`typecheck`, `lint`, `build`): lulus; build memuat route `/laporan`.
+
+### UI Polish — Arsip (DONE, menunggu commit)
+
+- Backend: `GET /archive/files` dengan `folderId` uuid kini menampilkan folder tersebut beserta seluruh turunannya (maks 3 level, `descendantIds`); `GET /archive/folders` mengembalikan `fileCount` sebagai total subtree. Tanpa migration; `docs/API.md` §6 diperbarui.
+- Filter dan halaman disimpan di URL (`folder`, `q`, `jenis`, `page`). Filter urutan dan tombol reset dihapus; `PROJECT.md` §5.3 disesuaikan (urutan tetap waktu unggah terbaru).
+- Toolbar mengikuti pola Kegiatan/Laporan: pencarian debounce 300 ms dengan tombol hapus, filter jenis berkas berupa `Select` (default "Semua jenis"). Placeholder pencarian menyesuaikan cakupan folder.
+- Breadcrumb folder di atas daftar (`Semua dokumen / folder / subfolder`) dengan segmen leluhur dapat diklik dan segmen aktif `aria-current="page"`.
+- Tree folder collapsible: chevron `aria-expanded` + `aria-controls`, default tertutup, leluhur folder aktif otomatis terbuka, anak diindentasi dengan garis panduan. Aksi `…` per folder muncul saat hover/fokus (selalu terlihat di layar sentuh). Entri "Tanpa folder" dihapus dari tree; dokumen pada level root ditampilkan di "Semua dokumen".
+- Backend: `POST /archive/files` menerima `folderId` opsional dan `PATCH /archive/files/:id` menerima `folderId: null`; keduanya berarti arsip utama. Validasi kepemilikan folder tetap berlaku dan objek R2 dibersihkan bila validasi gagal.
+- Baris dokumen kini membuka dialog detail; ikon mata dihapus dan aksi tersisa satu menu `…` (Unduh, Ubah, Hapus). Setiap baris menampilkan jalur folder agar hasil subtree tidak ambigu.
+- Dialog detail: menambah tanggal unggah, jalur folder, aksi `Ubah`, dan state "Pratinjau tidak tersedia" dengan tombol unduh untuk format non-previewable.
+- Empty state menjadi pengganti tombol reset: CTA unggah, hapus pencarian, atau lihat semua dokumen sesuai konteks. Ringkasan pagination menyebut "(termasuk subfolder)" bila folder aktif punya anak.
+- Kuota dipindah dari kartu lebar menjadi progres ringkas di bawah deskripsi halaman.
+- Dialog unggah mengadopsi pola dialog bersama untuk satu file: drop zone, thumbnail, validasi inline (format, 5 MB, sisa kuota), progres, batalkan via `AbortController`, retry otomatis sekali untuk kegagalan jaringan/5xx, serta fase selesai dengan "Unggah lagi" yang mempertahankan folder terakhir. Pilihan folder memuat "Arsip utama" (level root); default folder aktif atau arsip utama.
+- Mobile: `Select` folder di toolbar dihapus; navigasi folder hanya lewat `Sheet`.
+- Tanpa dependency, migration, atau env baru.
+- Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `build`): lulus; `check:archive-folders` lulus; build memuat route `/arsip`.
 
 ### Audit batch 5 — Frontend mati & konsistensi (DONE, commit `30ec979`)
 
@@ -650,6 +668,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Baris daftar Kegiatan menampilkan jumlah bukti dukung (`fileCount` dari API); kegiatan tanpa bukti dukung ditandai eksplisit.
 - Unggah file memakai satu dialog bersama `components/shared/file-upload-dialog.tsx` (pilih → unggah → selesai) dengan `AbortController`, retry otomatis sekali untuk kegagalan jaringan/5xx, dan retry manual. Bukti dukung adalah konsumen pertama; Arsip menyusul.
 - Laporan memakai periode berjalan (harian/mingguan/bulanan/tahunan) tanpa pemilih tanggal acuan, rentang khusus, filter kategori, pengelompokan, dan filter bukti dukung; pagination tampilan 20 baris dipertahankan. Ekspor selalu memuat seluruh baris periode.
+- Arsip: memilih folder menampilkan dokumen folder tersebut beserta seluruh subfoldernya; `fileCount` pada daftar folder adalah total subtree. Filter dan halaman disimpan di URL (`folder`, `q`, `jenis`, `page`); filter urutan dihapus dan urutan tetap waktu unggah terbaru.
+- Arsip: baris dokumen membuka dialog detail; aksi per dokumen berada di satu menu `…` (Unduh, Ubah, Hapus). Dialog unggah hanya menerima satu file karena metadata melekat per dokumen; unggah massal bukan bagian P11.11.
+- Arsip: setiap dokumen disimpan pada "Arsip utama" (root) atau di dalam folder. Entri "Tanpa folder" dihapus dari tree, tetapi pilihan "Arsip utama" tersedia saat unggah dan ubah.
 
 ## Urutan Pengembangan
 
@@ -664,7 +685,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
 1. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
-2. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (menunggu commit); lanjut halaman lain satu per satu sesuai `ROADMAP.md` P11.11.
+2. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (commit `75693f2`); UI polish halaman Arsip selesai (menunggu commit); lanjut halaman lain satu per satu sesuai `ROADMAP.md` P11.11.
 3. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
 4. Phase 12 (P12.1 Functional & Integration Testing dan seterusnya) dijadwalkan setelah UI final.
 

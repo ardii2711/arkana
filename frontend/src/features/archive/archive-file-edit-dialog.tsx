@@ -31,10 +31,8 @@ import { getErrorMessage } from '@/lib/api-error';
 import { BODY_MAX_LENGTH, TITLE_MAX_LENGTH } from '@/lib/limits';
 import type { ArchiveFile, ArchiveFolder } from './archive.api';
 import { fileMetaSchema, type FileMetaFormValues } from './archive.schemas';
-import { buildFolderTree, flattenFolders } from './archive.util';
+import { ARCHIVE_ROOT, buildFolderTree, flattenFolders } from './archive.util';
 import { useUpdateArchiveFile } from './use-archive';
-
-const NO_FOLDER = 'none';
 
 type ArchiveFileEditDialogProps = {
   file: ArchiveFile;
@@ -53,7 +51,7 @@ export function ArchiveFileEditDialog({ file, folders, onOpenChange }: ArchiveFi
       name: file.name,
       description: file.description ?? '',
       documentDate: file.documentDate ?? '',
-      folderId: file.folderId ?? NO_FOLDER,
+      folderId: file.folderId ?? ARCHIVE_ROOT,
     },
   });
 
@@ -66,7 +64,7 @@ export function ArchiveFileEditDialog({ file, folders, onOpenChange }: ArchiveFi
           name: values.name,
           description: values.description || null,
           documentDate: values.documentDate || null,
-          folderId: values.folderId === NO_FOLDER ? null : values.folderId,
+          folderId: values.folderId === ARCHIVE_ROOT ? null : values.folderId,
         },
       },
       {
@@ -117,19 +115,23 @@ export function ArchiveFileEditDialog({ file, folders, onOpenChange }: ArchiveFi
             <Controller
               name="folderId"
               control={form.control}
-              render={({ field }) => (
-                <Field>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="archive-edit-folder">Folder</FieldLabel>
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
                     disabled={update.isPending}
                   >
-                    <SelectTrigger id="archive-edit-folder" className="w-full">
-                      <SelectValue />
+                    <SelectTrigger
+                      id="archive-edit-folder"
+                      className="w-full"
+                      aria-invalid={fieldState.invalid}
+                    >
+                      <SelectValue placeholder="Pilih folder" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={NO_FOLDER}>Tanpa folder</SelectItem>
+                      <SelectItem value={ARCHIVE_ROOT}>Arsip utama</SelectItem>
                       {folderOptions.map((node) => (
                         <SelectItem key={node.folder.id} value={node.folder.id}>
                           {'— '.repeat(node.depth)}
@@ -138,6 +140,7 @@ export function ArchiveFileEditDialog({ file, folders, onOpenChange }: ArchiveFi
                       ))}
                     </SelectContent>
                   </Select>
+                  {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
                 </Field>
               )}
             />

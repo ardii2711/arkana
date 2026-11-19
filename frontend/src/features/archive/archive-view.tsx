@@ -1,6 +1,7 @@
 'use client';
 
-import { FolderTreeIcon, TriangleAlertIcon, UploadIcon } from 'lucide-react';
+import { UploadIcon, TriangleAlertIcon } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -18,11 +19,20 @@ import { formatFileSize } from '@/lib/file-format';
 import { ArchiveFileUploadDialog } from './archive-file-upload-dialog';
 import { ArchiveFiles } from './archive-files';
 import { ArchiveFolderPanel } from './archive-folder-panel';
+import {
+  parseArchiveFilters,
+  parseArchivePage,
+  toArchiveSearch,
+  type ArchiveFilters,
+} from './archive.util';
 import { useArchiveFolders } from './use-archive';
 
 export function ArchiveView() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const filters = parseArchiveFilters(searchParams);
+  const page = parseArchivePage(searchParams);
   const query = useArchiveFolders();
-  const [folderId, setFolderId] = useState<string | undefined>(undefined);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [folderSheetOpen, setFolderSheetOpen] = useState(false);
 
@@ -30,12 +40,15 @@ export function ArchiveView() {
   const usage = query.data?.usage;
   const remainingBytes = usage ? usage.quotaBytes - usage.usedBytes : 0;
   const usedPercent = usage ? Math.min(100, (usage.usedBytes / usage.quotaBytes) * 100) : 0;
-  const currentFolderName =
-    folderId === undefined
-      ? 'Semua dokumen'
-      : folderId === 'root'
-        ? 'Tanpa folder'
-        : (folders.find((folder) => folder.id === folderId)?.name ?? 'Folder');
+  const defaultFolderId = filters.folder ?? null;
+
+  function navigate(next: ArchiveFilters, nextPage = 1) {
+    router.replace(toArchiveSearch(next, nextPage), { scroll: false });
+  }
+
+  function changeFolder(folder?: string) {
+    navigate({ ...filters, folder });
+  }
 
   return (
     <div className="w-full space-y-6">
@@ -45,6 +58,18 @@ export function ArchiveView() {
           <p className="text-muted-foreground text-sm">
             Simpan dan kelola dokumen pribadi dalam folder terstruktur.
           </p>
+          {usage ? (
+            <div className="flex items-center gap-2 pt-1">
+              <Progress
+                value={usedPercent}
+                className="h-1.5 w-28"
+                aria-label="Pemakaian kuota arsip"
+              />
+              <span className="text-muted-foreground text-xs tabular-nums">
+                {formatFileSize(usage.usedBytes)} dari {formatFileSize(usage.quotaBytes)}
+              </span>
+            </div>
+          ) : null}
         </div>
         <Button
           onClick={() => setUploadOpen(true)}
@@ -55,18 +80,6 @@ export function ArchiveView() {
           Unggah dokumen
         </Button>
       </div>
-
-      {usage ? (
-        <div className="space-y-2 rounded-xl border p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-            <span className="font-medium">Penyimpanan arsip</span>
-            <span className="text-muted-foreground tabular-nums">
-              {formatFileSize(usage.usedBytes)} dari {formatFileSize(usage.quotaBytes)}
-            </span>
-          </div>
-          <Progress value={usedPercent} aria-label="Pemakaian kuota arsip" />
-        </div>
-      ) : null}
 
       {query.isError ? (
         <div className="space-y-3">
@@ -84,23 +97,20 @@ export function ArchiveView() {
             <ArchiveFolderPanel
               folders={folders}
               isLoading={query.isPending}
-              selected={folderId}
-              onSelect={setFolderId}
+              selected={filters.folder}
+              onSelect={changeFolder}
             />
           </div>
 
-          <div className="min-w-0 space-y-3">
-            <div className="flex items-center gap-2 lg:hidden">
-              <Button variant="outline" onClick={() => setFolderSheetOpen(true)}>
-                <FolderTreeIcon />
-                Folder
-              </Button>
-              <span className="text-muted-foreground min-w-0 truncate text-sm">
-                {currentFolderName}
-              </span>
-            </div>
-
-            <ArchiveFiles folders={folders} folderId={folderId} onFolderChange={setFolderId} />
+          <div className="min-w-0">
+            <ArchiveFiles
+              folders={folders}
+              filters={filters}
+              page={page}
+              onNavigate={navigate}
+              onOpenFolders={() => setFolderSheetOpen(true)}
+              onUpload={() => setUploadOpen(true)}
+            />
           </div>
         </div>
       )}
@@ -115,9 +125,9 @@ export function ArchiveView() {
             <ArchiveFolderPanel
               folders={folders}
               isLoading={query.isPending}
-              selected={folderId}
-              onSelect={(id) => {
-                setFolderId(id);
+              selected={filters.folder}
+              onSelect={(folder) => {
+                changeFolder(folder);
                 setFolderSheetOpen(false);
               }}
             />
@@ -128,7 +138,7 @@ export function ArchiveView() {
       {uploadOpen ? (
         <ArchiveFileUploadDialog
           folders={folders}
-          defaultFolderId={folderId && folderId !== 'root' ? folderId : null}
+          defaultFolderId={defaultFolderId}
           remainingBytes={remainingBytes}
           onOpenChange={setUploadOpen}
         />

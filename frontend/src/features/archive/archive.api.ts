@@ -37,13 +37,11 @@ export type ArchiveFile = {
 };
 
 export type ArchiveFileType = 'image' | 'pdf' | 'document';
-export type ArchiveSort = 'recent' | 'name' | 'documentDate';
 
 export type ArchiveFileParams = {
   folderId?: string;
   search?: string;
   type?: ArchiveFileType;
-  sort: ArchiveSort;
   page: number;
   limit: number;
 };
@@ -88,7 +86,6 @@ export async function fetchArchiveFiles(params: ArchiveFileParams): Promise<Arch
       folderId: params.folderId || undefined,
       search: params.search || undefined,
       type: params.type || undefined,
-      sort: params.sort,
       page: params.page,
       limit: params.limit,
     },
@@ -98,27 +95,33 @@ export async function fetchArchiveFiles(params: ArchiveFileParams): Promise<Arch
 
 export type ArchiveFileUploadInput = {
   file: File;
+  folderId?: string | null;
   name?: string;
   description?: string;
   documentDate?: string;
-  folderId?: string | null;
+};
+
+export type ArchiveUploadOptions = {
+  onProgress?: (percent: number) => void;
+  signal?: AbortSignal;
 };
 
 export async function uploadArchiveFile(
   input: ArchiveFileUploadInput,
-  onProgress?: (percent: number) => void,
+  options: ArchiveUploadOptions = {},
 ): Promise<ArchiveFile> {
   const formData = new FormData();
   formData.append('file', input.file);
+  if (input.folderId) formData.append('folderId', input.folderId);
   if (input.name) formData.append('name', input.name);
   if (input.description) formData.append('description', input.description);
   if (input.documentDate) formData.append('documentDate', input.documentDate);
-  if (input.folderId) formData.append('folderId', input.folderId);
 
   const { data } = await api.post<ApiSuccess<{ file: ArchiveFile }>>('/archive/files', formData, {
+    signal: options.signal,
     onUploadProgress: (event) => {
-      if (!onProgress || !event.total) return;
-      onProgress(Math.round((event.loaded / event.total) * 100));
+      if (!options.onProgress || !event.total) return;
+      options.onProgress(Math.round((event.loaded / event.total) * 100));
     },
   });
 

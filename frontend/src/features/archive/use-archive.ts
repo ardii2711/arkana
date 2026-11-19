@@ -85,10 +85,12 @@ export function useUploadArchiveFile() {
     mutationFn: ({
       input,
       onProgress,
+      signal,
     }: {
       input: ArchiveFileUploadInput;
       onProgress?: (percent: number) => void;
-    }) => uploadArchiveFile(input, onProgress),
+      signal?: AbortSignal;
+    }) => uploadArchiveFile(input, { onProgress, signal }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: rootKey }),
   });
 }

@@ -5,7 +5,7 @@ import { ApiError } from '../../lib/api-error.js';
 import { receiveMultipart } from '../../lib/multipart.js';
 import { currentUser } from '../../utils/current-user.js';
 import { sendFileContent } from '../../utils/file-response.js';
-import { mapStorageError } from '../../lib/storage.js';
+import { mapStorageError, deleteObjects, storageError } from '../../lib/storage.js';
 import {
   completeArchiveUpload,
   createArchiveFolder,
@@ -20,7 +20,6 @@ import {
   updateArchiveFolder,
 } from './archive.service.js';
 import type {
-  CreateFileFields,
   CreateFolderInput,
   ListFilesQuery,
   UpdateFileInput,
@@ -69,9 +68,14 @@ export const createFileHandler: RequestHandler = async (req, res) => {
   const values = Object.fromEntries(
     Object.entries(received.fields).filter(([, value]) => value !== ''),
   );
-  const input: CreateFileFields = createFileFieldsSchema.parse(values);
+  const input = createFileFieldsSchema.safeParse(values);
 
-  sendSuccess(res, { file: await completeArchiveUpload(userId, input, received.file) }, 201);
+  if (!input.success) {
+    await deleteObjects([received.file.key]).catch(storageError);
+    throw input.error;
+  }
+
+  sendSuccess(res, { file: await completeArchiveUpload(userId, input.data, received.file) }, 201);
 };
 
 export const getFileHandler: RequestHandler = async (req, res) => {

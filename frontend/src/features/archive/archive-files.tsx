@@ -4,15 +4,17 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   DownloadIcon,
-  EyeIcon,
   FolderOpenIcon,
+  FolderTreeIcon,
   MoreHorizontalIcon,
   PencilIcon,
   SearchIcon,
   Trash2Icon,
   TriangleAlertIcon,
+  UploadIcon,
+  XIcon,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { FileTypeIcon } from '@/components/shared/file-type-icon';
@@ -35,7 +37,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group';
 import {
   Select,
   SelectContent,
@@ -45,68 +52,77 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
+import { formatDate } from '@/lib/date';
 import { NAME_MAX_LENGTH } from '@/lib/limits';
 import { fileExtension, formatFileSize } from '@/lib/file-format';
-import {
-  downloadArchiveFile,
-  type ArchiveFile,
-  type ArchiveFileType,
-  type ArchiveFolder,
-  type ArchiveSort,
-} from './archive.api';
+import { cn } from '@/lib/utils';
+import { downloadArchiveFile, type ArchiveFile, type ArchiveFolder } from './archive.api';
 import { ArchiveFileDetail } from './archive-file-detail';
 import { ArchiveFileEditDialog } from './archive-file-edit-dialog';
-import { formatDate } from '@/lib/date';
-import { buildFolderTree, flattenFolders } from './archive.util';
+import {
+  ARCHIVE_PAGE_SIZE,
+  ARCHIVE_TYPE_LABELS,
+  ARCHIVE_TYPES,
+  folderPath,
+  folderPathLabel,
+  toArchiveParams,
+  type ArchiveFilters,
+} from './archive.util';
 import { useArchiveFiles, useDeleteArchiveFile } from './use-archive';
 
-const PAGE_SIZE = 20;
-
-const TYPE_LABELS: Record<ArchiveFileType, string> = {
-  image: 'Gambar',
-  pdf: 'PDF',
-  document: 'Dokumen',
-};
+const SEARCH_DEBOUNCE_MS = 300;
 
 type ArchiveFilesProps = {
   folders: ArchiveFolder[];
-  folderId?: string;
-  onFolderChange: (folderId?: string) => void;
+  filters: ArchiveFilters;
+  page: number;
+  onNavigate: (filters: ArchiveFilters, page?: number) => void;
+  onOpenFolders: () => void;
+  onUpload: () => void;
 };
 
-export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFilesProps) {
-  const [type, setType] = useState<ArchiveFileType | 'ALL'>('ALL');
-  const [sort, setSort] = useState<ArchiveSort>('recent');
-  const [search, setSearch] = useState('');
-  const [searchDraft, setSearchDraft] = useState('');
-  const [page, setPage] = useState(1);
+export function ArchiveFiles({
+  folders,
+  filters,
+  page,
+  onNavigate,
+  onOpenFolders,
+  onUpload,
+}: ArchiveFilesProps) {
+  const [searchDraft, setSearchDraft] = useState(filters.search);
   const [detail, setDetail] = useState<ArchiveFile | null>(null);
   const [editing, setEditing] = useState<ArchiveFile | null>(null);
   const [deleting, setDeleting] = useState<ArchiveFile | null>(null);
+  const searchTimer = useRef<number | undefined>(undefined);
   const remove = useDeleteArchiveFile();
 
-  const query = useArchiveFiles({
-    folderId,
-    search,
-    type: type === 'ALL' ? undefined : type,
-    sort,
-    page,
-    limit: PAGE_SIZE,
-  });
+  const query = useArchiveFiles(toArchiveParams(filters, page));
+
+  useEffect(() => () => window.clearTimeout(searchTimer.current), []);
 
   const total = query.data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const firstItem = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const lastItem = Math.min(page * PAGE_SIZE, total);
-  const hasFilters = search !== '' || type !== 'ALL' || sort !== 'recent';
-  const folderOptions = flattenFolders(buildFolderTree(folders));
+  const totalPages = Math.max(1, Math.ceil(total / ARCHIVE_PAGE_SIZE));
+  const firstItem = total === 0 ? 0 : (page - 1) * ARCHIVE_PAGE_SIZE + 1;
+  const lastItem = Math.min(page * ARCHIVE_PAGE_SIZE, total);
+  const path = folderPath(folders, filters.folder);
+  const hasSubfolders =
+    filters.folder !== undefined && folders.some((folder) => folder.parentId === filters.folder);
+  const state = emptyState(filters);
 
-  function resetFilters() {
-    setType('ALL');
-    setSort('recent');
-    setSearch('');
-    setSearchDraft('');
-    setPage(1);
+  function changeSearch(value: string) {
+    setSearchDraft(value);
+    window.clearTimeout(searchTimer.current);
+
+    if (value.trim() === filters.search) return;
+
+    if (value.trim() === '') {
+      onNavigate({ ...filters, search: '' });
+      return;
+    }
+
+    searchTimer.current = window.setTimeout(() => {
+      onNavigate({ ...filters, search: value.trim() });
+    }, SEARCH_DEBOUNCE_MS);
   }
 
   function handleDelete() {
@@ -115,7 +131,7 @@ export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFiles
     remove.mutate(deleting.id, {
       onSuccess: () => {
         toast.success('Dokumen dihapus.');
-        if (page > 1 && query.data?.items.length === 1) setPage((current) => current - 1);
+        if (page > 1 && query.data?.items.length === 1) onNavigate(filters, page - 1);
         setDeleting(null);
       },
       onError: (error) => toast.error(getErrorMessage(error)),
@@ -132,92 +148,99 @@ export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFiles
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <form
-          className="flex min-w-0 flex-1 items-center gap-2"
-          onSubmit={(event) => {
-            event.preventDefault();
-            setSearch(searchDraft.trim());
-            setPage(1);
-          }}
-        >
-          <Input
-            value={searchDraft}
-            onChange={(event) => setSearchDraft(event.target.value)}
-            placeholder="Cari nama atau deskripsi"
-            aria-label="Cari dokumen"
-            maxLength={NAME_MAX_LENGTH}
-            className="min-w-0"
-          />
-          <Button type="submit" variant="outline" size="icon" aria-label="Cari dokumen">
-            <SearchIcon />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2">
+          <Button variant="outline" size="sm" className="lg:hidden" onClick={onOpenFolders}>
+            <FolderTreeIcon />
+            Folder
           </Button>
-        </form>
+          <nav aria-label="Lokasi folder" className="min-w-0">
+            <ol className="flex min-w-0 flex-wrap items-center gap-1 text-sm">
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate({ ...filters, folder: undefined }, 1)}
+                  aria-current={filters.folder === undefined ? 'page' : undefined}
+                  className={cn(
+                    'truncate rounded-sm outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50',
+                    filters.folder === undefined ? 'font-medium' : 'text-muted-foreground',
+                  )}
+                >
+                  Semua dokumen
+                </button>
+              </li>
+              {path.map((folder, index) => (
+                <li key={folder.id} className="flex min-w-0 items-center gap-1">
+                  <span aria-hidden="true" className="text-muted-foreground">
+                    /
+                  </span>
+                  {index === path.length - 1 ? (
+                    <span aria-current="page" className="truncate font-medium">
+                      {folder.name}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onNavigate({ ...filters, folder: folder.id }, 1)}
+                      className="text-muted-foreground truncate rounded-sm outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+                    >
+                      {folder.name}
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </nav>
+        </div>
 
-        <Select
-          value={type}
-          onValueChange={(value) => {
-            setType(value as ArchiveFileType | 'ALL');
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="w-32" aria-label="Filter jenis berkas">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Semua jenis</SelectItem>
-            {(Object.keys(TYPE_LABELS) as ArchiveFileType[]).map((value) => (
-              <SelectItem key={value} value={value}>
-                {TYPE_LABELS[value]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <label htmlFor="archive-search" className="sr-only">
+            Cari dokumen
+          </label>
+          <InputGroup className="w-full sm:w-64">
+            <InputGroupAddon align="inline-start">
+              <SearchIcon aria-hidden="true" />
+            </InputGroupAddon>
+            <InputGroupInput
+              id="archive-search"
+              value={searchDraft}
+              maxLength={NAME_MAX_LENGTH}
+              placeholder={filters.folder ? 'Cari di folder ini' : 'Cari nama atau deskripsi'}
+              onChange={(event) => changeSearch(event.target.value)}
+            />
+            {searchDraft ? (
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                  type="button"
+                  size="icon-xs"
+                  aria-label="Hapus pencarian"
+                  onClick={() => changeSearch('')}
+                >
+                  <XIcon />
+                </InputGroupButton>
+              </InputGroupAddon>
+            ) : null}
+          </InputGroup>
 
-        <Select
-          value={sort}
-          onValueChange={(value) => {
-            setSort(value as ArchiveSort);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="w-40" aria-label="Urutkan dokumen">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="recent">Terbaru diunggah</SelectItem>
-            <SelectItem value="name">Nama dokumen</SelectItem>
-            <SelectItem value="documentDate">Tanggal dokumen</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={folderId ?? 'all'}
-          onValueChange={(value) => {
-            onFolderChange(value === 'all' ? undefined : value);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="w-full lg:hidden" aria-label="Pilih folder">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua dokumen</SelectItem>
-            <SelectItem value="root">Tanpa folder</SelectItem>
-            {folderOptions.map((node) => (
-              <SelectItem key={node.folder.id} value={node.folder.id}>
-                {'— '.repeat(node.depth)}
-                {node.folder.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {hasFilters ? (
-          <Button variant="ghost" size="sm" onClick={resetFilters}>
-            Reset
-          </Button>
-        ) : null}
+          <Select
+            value={filters.type}
+            onValueChange={(value) =>
+              onNavigate({ ...filters, type: value as ArchiveFilters['type'] }, 1)
+            }
+          >
+            <SelectTrigger className="w-full sm:w-36" aria-label="Filter jenis berkas">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Semua jenis</SelectItem>
+              {ARCHIVE_TYPES.map((value) => (
+                <SelectItem key={value} value={value}>
+                  {ARCHIVE_TYPE_LABELS[value]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {query.isError ? (
@@ -244,88 +267,99 @@ export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFiles
         </ul>
       ) : total === 0 ? (
         <Card className="border border-dashed ring-0">
-          <CardContent className="flex min-h-48 flex-col items-center justify-center gap-3 py-10 text-center">
+          <CardContent className="flex min-h-48 flex-col items-center justify-center gap-4 py-10 text-center">
             <div className="bg-muted text-muted-foreground flex size-12 items-center justify-center rounded-xl">
-              <FolderOpenIcon aria-hidden="true" className="size-5" />
+              {state.search ? (
+                <SearchIcon aria-hidden="true" className="size-5" />
+              ) : (
+                <FolderOpenIcon aria-hidden="true" className="size-5" />
+              )}
             </div>
             <div className="space-y-1">
-              <p className="font-medium">
-                {hasFilters || folderId ? 'Tidak ada dokumen di sini' : 'Arsip masih kosong'}
-              </p>
-              <p className="text-muted-foreground max-w-sm text-sm">
-                {hasFilters || folderId
-                  ? 'Ubah folder, kata kunci, atau filter untuk melihat dokumen lain.'
-                  : 'Unggah dokumen pertama Anda untuk mulai mengarsipkan.'}
-              </p>
+              <p className="font-medium">{state.title}</p>
+              <p className="text-muted-foreground max-w-sm text-sm">{state.description}</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {state.search ? (
+                <Button variant="outline" onClick={() => changeSearch('')}>
+                  Hapus pencarian
+                </Button>
+              ) : (
+                <>
+                  <Button onClick={onUpload}>
+                    <UploadIcon />
+                    Unggah dokumen
+                  </Button>
+                  {filters.folder || filters.type !== 'ALL' ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => onNavigate({ folder: undefined, search: '', type: 'ALL' }, 1)}
+                    >
+                      Lihat semua dokumen
+                    </Button>
+                  ) : null}
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
       ) : (
         <>
-          <ul className="divide-y rounded-xl border">
+          <ul className="divide-y overflow-hidden rounded-xl border">
             {query.data.items.map((file) => (
-              <li
-                key={file.id}
-                className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex min-w-0 items-start gap-3">
-                  <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <li key={file.id} className="group flex items-center gap-1 pr-1">
+                <button
+                  type="button"
+                  onClick={() => setDetail(file)}
+                  aria-label={`Lihat ${file.name}`}
+                  className="hover:bg-muted/50 focus-visible:bg-muted/50 flex min-w-0 flex-1 items-start gap-3 rounded-lg p-3 text-left outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
+                >
+                  <span className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
                     <FileTypeIcon mimeType={file.mimeType} />
-                  </div>
-                  <div className="min-w-0 space-y-1">
-                    <p className="truncate text-sm font-medium">{file.name}</p>
-                    <p className="text-muted-foreground truncate text-xs">
+                  </span>
+                  <span className="min-w-0 flex-1 space-y-1">
+                    <span className="block truncate text-sm font-medium">{file.name}</span>
+                    <span className="text-muted-foreground block truncate text-xs">
                       {fileExtension(file.originalName)} · {formatFileSize(file.size)}
-                      {file.folderName ? ` · ${file.folderName}` : ''}
                       {file.documentDate ? ` · ${formatDate(file.documentDate)}` : ''}
-                    </p>
+                    </span>
+                    <span className="text-muted-foreground block truncate text-xs">
+                      {folderPathLabel(folders, file.folderId)}
+                    </span>
                     {file.description ? (
-                      <p className="text-muted-foreground line-clamp-2 text-xs">
+                      <span className="text-muted-foreground line-clamp-2 block text-xs">
                         {file.description}
-                      </p>
+                      </span>
                     ) : null}
-                  </div>
-                </div>
+                  </span>
+                </button>
 
-                <div className="flex shrink-0 items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Lihat ${file.name}`}
-                    onClick={() => setDetail(file)}
-                  >
-                    <EyeIcon />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Unduh ${file.name}`}
-                    onClick={() => void handleDownload(file)}
-                  >
-                    <DownloadIcon />
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Aksi lain untuk ${file.name}`}
-                      >
-                        <MoreHorizontalIcon />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onSelect={() => setEditing(file)}>
-                        <PencilIcon />
-                        Ubah
-                      </DropdownMenuItem>
-                      <DropdownMenuItem variant="destructive" onSelect={() => setDeleting(file)}>
-                        <Trash2Icon />
-                        Hapus
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Aksi untuk ${file.name}`}
+                      className="text-muted-foreground"
+                    >
+                      <MoreHorizontalIcon />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => void handleDownload(file)}>
+                      <DownloadIcon />
+                      Unduh
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setEditing(file)}>
+                      <PencilIcon />
+                      Ubah
+                    </DropdownMenuItem>
+                    <DropdownMenuItem variant="destructive" onSelect={() => setDeleting(file)}>
+                      <Trash2Icon />
+                      Hapus
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </li>
             ))}
           </ul>
@@ -333,13 +367,14 @@ export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFiles
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-muted-foreground text-sm">
               Menampilkan {firstItem}–{lastItem} dari {total} dokumen
+              {hasSubfolders ? ' (termasuk subfolder)' : ''}
             </p>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page <= 1 || query.isFetching}
-                onClick={() => setPage((current) => current - 1)}
+                onClick={() => onNavigate(filters, page - 1)}
               >
                 <ChevronLeftIcon />
                 Sebelumnya
@@ -351,7 +386,7 @@ export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFiles
                 variant="outline"
                 size="sm"
                 disabled={page >= totalPages || query.isFetching}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={() => onNavigate(filters, page + 1)}
               >
                 Berikutnya
                 <ChevronRightIcon />
@@ -363,8 +398,13 @@ export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFiles
 
       <ArchiveFileDetail
         file={detail}
+        folders={folders}
         onOpenChange={(open) => {
           if (!open) setDetail(null);
+        }}
+        onEdit={(file) => {
+          setDetail(null);
+          setEditing(file);
         }}
       />
 
@@ -388,7 +428,8 @@ export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFiles
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus dokumen?</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleting?.name} akan dihapus permanen dari arsip Anda.
+              {deleting?.name} ({formatFileSize(deleting?.size ?? 0)}) akan dihapus permanen dari
+              arsip Anda. Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -401,4 +442,36 @@ export function ArchiveFiles({ folders, folderId, onFolderChange }: ArchiveFiles
       </AlertDialog>
     </div>
   );
+}
+
+function emptyState(filters: ArchiveFilters) {
+  if (filters.search) {
+    return {
+      search: true,
+      title: 'Tidak ada dokumen yang cocok',
+      description: `Tidak ada nama atau deskripsi dokumen yang memuat "${filters.search}".`,
+    };
+  }
+
+  if (filters.type !== 'ALL') {
+    return {
+      search: false,
+      title: `Tidak ada dokumen ${ARCHIVE_TYPE_LABELS[filters.type].toLowerCase()}`,
+      description: 'Ubah jenis berkas atau lihat seluruh dokumen di arsip.',
+    };
+  }
+
+  if (filters.folder) {
+    return {
+      search: false,
+      title: 'Folder ini masih kosong',
+      description: 'Folder ini dan subfoldernya belum berisi dokumen.',
+    };
+  }
+
+  return {
+    search: false,
+    title: 'Arsip masih kosong',
+    description: 'Unggah dokumen pertama Anda untuk mulai mengarsipkan.',
+  };
 }

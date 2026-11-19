@@ -21,7 +21,7 @@ export const fileMetaSchema = z.object({
     .max(TITLE_MAX_LENGTH, 'Nama dokumen maksimal 200 karakter.'),
   description: z.string().trim().max(BODY_MAX_LENGTH, 'Deskripsi maksimal 5.000 karakter.'),
   documentDate: z.string(),
-  folderId: z.string(),
+  folderId: z.string().min(1, 'Folder wajib dipilih.'),
 });
 
 export type FileMetaFormValues = z.infer<typeof fileMetaSchema>;

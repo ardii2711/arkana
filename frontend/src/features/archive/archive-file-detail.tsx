@@ -1,6 +1,6 @@
 'use client';
 
-import { DownloadIcon, TriangleAlertIcon } from 'lucide-react';
+import { DownloadIcon, PencilIcon, TriangleAlertIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -16,17 +16,20 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useObjectUrl } from '@/hooks/use-object-url';
 import { getErrorMessage } from '@/lib/api-error';
+import { formatDate, formatDateTime } from '@/lib/date';
 import { fileExtension, formatFileSize } from '@/lib/file-format';
-import { downloadArchiveFile, type ArchiveFile } from './archive.api';
-import { formatDate } from '@/lib/date';
+import { downloadArchiveFile, type ArchiveFile, type ArchiveFolder } from './archive.api';
+import { folderPathLabel } from './archive.util';
 import { useArchiveFileBlob } from './use-archive';
 
 type ArchiveFileDetailProps = {
   file: ArchiveFile | null;
+  folders: ArchiveFolder[];
   onOpenChange: (open: boolean) => void;
+  onEdit: (file: ArchiveFile) => void;
 };
 
-export function ArchiveFileDetail({ file, onOpenChange }: ArchiveFileDetailProps) {
+export function ArchiveFileDetail({ file, folders, onOpenChange, onEdit }: ArchiveFileDetailProps) {
   const blob = useArchiveFileBlob(file?.id ?? '', file?.previewable ?? false);
   const url = useObjectUrl(blob.data);
 
@@ -60,12 +63,16 @@ export function ArchiveFileDetail({ file, onOpenChange }: ArchiveFileDetailProps
                 <dd>{formatFileSize(file.size)}</dd>
               </div>
               <div className="space-y-0.5">
-                <dt className="text-muted-foreground text-xs">Folder</dt>
-                <dd className="truncate">{file.folderName ?? 'Tanpa folder'}</dd>
-              </div>
-              <div className="space-y-0.5">
                 <dt className="text-muted-foreground text-xs">Tanggal dokumen</dt>
                 <dd>{file.documentDate ? formatDate(file.documentDate) : '-'}</dd>
+              </div>
+              <div className="space-y-0.5">
+                <dt className="text-muted-foreground text-xs">Diunggah</dt>
+                <dd>{formatDateTime(file.createdAt)}</dd>
+              </div>
+              <div className="col-span-2 space-y-0.5 sm:col-span-4">
+                <dt className="text-muted-foreground text-xs">Folder</dt>
+                <dd className="truncate">{folderPathLabel(folders, file.folderId)}</dd>
               </div>
             </dl>
 
@@ -97,13 +104,28 @@ export function ArchiveFileDetail({ file, onOpenChange }: ArchiveFileDetailProps
                   />
                 )
               ) : null
-            ) : null}
+            ) : (
+              <div className="bg-muted/40 flex flex-col items-center gap-2 rounded-lg border border-dashed p-6 text-center">
+                <p className="font-medium">Pratinjau tidak tersedia</p>
+                <p className="text-muted-foreground text-sm">
+                  Format {fileExtension(file.originalName)} perlu diunduh untuk dibuka.
+                </p>
+                <Button variant="outline" onClick={() => void handleDownload()}>
+                  <DownloadIcon />
+                  Unduh dokumen
+                </Button>
+              </div>
+            )}
           </div>
         ) : null}
 
         {file ? (
           <DialogFooter>
-            <Button variant="outline" onClick={() => void handleDownload()}>
+            <Button variant="outline" onClick={() => onEdit(file)}>
+              <PencilIcon />
+              Ubah
+            </Button>
+            <Button onClick={() => void handleDownload()}>
               <DownloadIcon />
               Unduh
             </Button>
