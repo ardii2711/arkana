@@ -6,7 +6,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.12a & P11.12b — implementasi selesai, menunggu commit gabungan (keputusan pengguna: satu commit)
+- **Task aktif:** Tidak ada — P11.12a & P11.12b ter-commit gabungan (commit `44e8ac2`)
 - **Task berikutnya:** UI polish halaman berikutnya satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
 - **Update terakhir:** 19 November 2026
 
@@ -66,6 +66,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.11 — UI Polish, halaman Kegiatan & Detail Kegiatan:** `DONE` (commit `5f13a42`).
 - **P11.11 — UI Polish, halaman Laporan:** `DONE` (commit `75693f2`).
 - **P11.11 — UI Polish, halaman Arsip:** `DONE` (commit `103a2a0`).
+- **P11.12a — Brand Assets & Penempatan Logo:** `DONE` (commit `44e8ac2`, digabung dengan P11.12b atas keputusan pengguna).
+- **P11.12b — Palet Tema & Dark Mode:** `DONE` (commit `44e8ac2`, digabung dengan P11.12a atas keputusan pengguna).
 
 ## Hasil Berjalan
 
@@ -616,7 +618,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan statis: `lint`, `typecheck`, `format:check`, `build` lulus.
 - Temuan audit terkait sudah ditutup; batch ini ter-commit pada `6885f98`.
 
-### P11.12a — Brand Assets & Penempatan Logo (IMPLEMENTED, menunggu commit)
+### P11.12a — Brand Assets & Penempatan Logo (DONE, commit `44e8ac2`)
 
 - Aset SVG resmi disalin ke `frontend/public/brand/` (light/dark horizontal tanpa tagline, icon full-color light/dark, vertical dark card, favicon light/dark, app-icon 192/512, apple-touch-icon) plus satu varian baru `arkana-logo-horizontal-dark.svg` (lockup gelap tanpa tagline untuk navbar).
 - `scripts/generate-brand-assets.mjs` (`sharp`, script `brand:assets`) meng-generate `favicon-32.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `og-image.png` (1200×630, logo di atas `#0B2D52`).
@@ -628,7 +630,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Header aplikasi adaptif: sidebar expanded → ikon buka/tutup sidebar; collapsed → wordmark ARKANA + akronim saja (tanpa ikon); logo sidebar/header selalu flex horizontal `items-center`; header publik menampilkan lockup di kiri, toggle di kanan. Semua header `h-15` (60px), konten terpusat vertikal; header sidebar `h-15` + `items-center` agar sejajar dengan header (tengah 30px).
 - `.gitignore`, `docs/ROADMAP.md` (task P11.12a/P11.12b + Phase 12 heading dipulihkan setelah sempat tertimpa), dan `docs/PROJECT.md` (§ tema terang/gelap) diperbarui.
 
-### P11.12b — Palet Tema & Dark Mode (IMPLEMENTED, menunggu commit)
+### P11.12b — Palet Tema & Dark Mode (DONE, commit `44e8ac2`)
 
 - Token `:root`/`.dark` `globals.css` diganti palet brand: light (`--background #F8FAFC`, foreground/card navy, primary `#0B2D52`, ring `#1E6BB8`, sidebar surface putih), dark (`--background #071E3A`, kartu `#0B2D52`, primary teal `#14BBA6` dengan foreground `#062144`, sidebar `#051A31`); `color-scheme` diset per mode.
 - `ThemeToggle` — tombol langsung (bukan dropdown): klik mengganti Terang ↔ Gelap berdasarkan `resolvedTheme`; default tetap mengikuti sistem; UI hanya dua mode (tanpa opsi Sistem); setelah diklik tema menjadi eksplisit.
@@ -705,7 +707,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. **Menunggu commit:** P11.12a & P11.12b (implementasi selesai, verifikasi statis lulus). Keputusan pengguna: digabung menjadi satu commit (file bercampur brand+tema, pemisahan file-level tidak bersih).
+1. P11.12a & P11.12b "Brand Identity & Dark Mode" ter-commit gabungan (`44e8ac2`, keputusan pengguna: satu commit karena file bercampur brand+tema).
 2. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
 3. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (commit `75693f2`); UI polish halaman Arsip selesai (commit `103a2a0`); lanjut halaman lain satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung).
 4. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
