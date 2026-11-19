@@ -114,6 +114,8 @@ frontend/
 
 `app/` menangani routing dan komposisi halaman. Logic dan komponen khusus fitur ditempatkan di `features/`.
 
+Route group App Router: `(public)` untuk halaman publik tanpa sesi (`/`), `(auth)` untuk autentikasi, dan `(app)` untuk area privat dengan `AppShell`. Halaman publik bukti dukung (`/p/evidence/[token]`) berada di luar ketiga group tersebut.
+
 ## 4. Backend Architecture
 
 ### 4.1 Architecture Pattern

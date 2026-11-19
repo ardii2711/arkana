@@ -44,13 +44,13 @@ export function LoginForm() {
   });
 
   useEffect(() => {
-    if (session.data) router.replace('/');
+    if (session.data) router.replace('/dashboard');
   }, [session.data, router]);
 
   function onSubmit(values: LoginValues) {
     setFormError(null);
     login.mutate(values, {
-      onSuccess: () => router.replace('/'),
+      onSuccess: () => router.replace('/dashboard'),
       onError: (error) => setFormError(getErrorMessage(error)),
     });
   }

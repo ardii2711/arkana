@@ -62,7 +62,7 @@ export function UsersView() {
           Halaman ini hanya dapat diakses oleh Admin ARKANA.
         </p>
         <Button asChild variant="outline">
-          <Link href="/">Kembali ke Dashboard</Link>
+          <Link href="/dashboard">Kembali ke Dashboard</Link>
         </Button>
       </div>
     );

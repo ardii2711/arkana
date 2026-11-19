@@ -217,6 +217,14 @@ Menampilkan ringkasan aktivitas dan akses cepat. Isi dashboard berbeda untuk Use
 - Perhitungan periode dan hari mengikuti zona waktu WITA (Asia/Makassar).
 - Grafik hanya bersifat ringkasan; tidak menyediakan analisis atau rekomendasi otomatis.
 
+### 5.8. Halaman Publik
+
+Halaman utama `/` dapat diakses tanpa login dan berisi informasi umum tentang ARKANA: tujuan aplikasi, modul yang tersedia, serta ketentuan privasi data.
+
+- Tidak menampilkan data pengguna mana pun.
+- Menyediakan akses menuju halaman masuk; pengguna dengan sesi aktif diarahkan menuju dashboard.
+- Dashboard berada pada halaman terpisah dan hanya dapat diakses setelah login.
+
 ## 6. Business Rules
 
 - Setiap aktivitas pekerjaan dicatat sebagai satu record tersendiri.
@@ -231,6 +239,7 @@ Menampilkan ringkasan aktivitas dan akses cepat. Isi dashboard berbeda untuk Use
 - Tautan publik bersifat permanen selama aplikasi dan data terkait tersedia.
 - Penonaktifan akun tidak otomatis menghilangkan riwayat pekerjaan dan dokumen pengguna.
 - Dashboard hanya merangkum data milik pengguna yang sedang login; Admin tidak memperoleh ringkasan konten pribadi User.
+- Halaman publik hanya menampilkan informasi umum aplikasi dan tidak memuat data pribadi pengguna.
 
 ## 7. Scope & Constraints
 

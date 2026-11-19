@@ -378,6 +378,20 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Dependencies:** P10.2; P11.1a untuk pola feature frontend.
 - **Blocker:** Field yang boleh diubah (nama, email, atau keduanya) dan syarat verifikasi email baru harus disepakati sebelum implementasi.
 
+### P11.9a — Restrukturisasi Route Dashboard
+
+- **Objective:** Memindahkan dashboard ke `/dashboard` dan membebaskan `/` untuk halaman publik tanpa mengubah perilaku modul lain.
+- **Scope:** Pindahkan route dashboard, sesuaikan navigasi sidebar dan logo, redirect login email/password serta Google OAuth, dan tautan internal menuju dashboard.
+- **Acceptance Criteria:** `/` tidak memerlukan sesi; `/dashboard` menampilkan dashboard dan mengalihkan ke `/login` tanpa sesi; login berakhir di `/dashboard`; build memuat route `/` dan `/dashboard`.
+- **Dependencies:** P11.8b.
+
+### P11.9b — Halaman Publik `/`
+
+- **Objective:** Menyediakan halaman publik di `/` yang menjelaskan ARKANA dan mengarahkan pengunjung ke login.
+- **Scope:** Header dan footer publik, hero, daftar modul, penjelasan privasi, CTA sesuai status sesi, serta metadata halaman. Tanpa data pengguna dan tanpa endpoint baru.
+- **Acceptance Criteria:** Halaman dapat dibuka tanpa sesi tanpa memuat data privat, responsif, CTA menampilkan "Buka Dashboard" untuk sesi aktif dan "Masuk" untuk tamu, serta metadata terisi.
+- **Dependencies:** P11.9a.
+
 ## Phase 12 — Final Integration & Production Release
 
 **Tujuan:** Memastikan seluruh aplikasi siap digunakan.

@@ -103,7 +103,7 @@ export const googleCallbackHandler: RequestHandler = async (req, res) => {
     const result = await loginWithGoogle(await exchangeGoogleCode(code, verifier));
 
     setAuthCookies(res, result.accessToken, result.refreshToken);
-    return res.redirect(env.CORS_ORIGIN);
+    return res.redirect(`${env.CORS_ORIGIN.replace(/\/+$/, '')}/dashboard`);
   } catch (err) {
     if (err instanceof ApiError) {
       logger.warn({ code: err.code }, 'Login Google ditolak');

@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** tidak ada — Phase 11 dan audit batch 5 selesai
-- **Task berikutnya:** perbaikan UI per halaman (menunggu diskusi pengguna); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
+- **Task aktif:** P11.9a + P11.9b — implementasi selesai, menunggu konfirmasi commit
+- **Task berikutnya:** perbaikan UI halaman dashboard (menunggu diskusi pengguna); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
 - **Update terakhir:** 19 November 2026
 
 ## Kesiapan Proyek
@@ -58,6 +58,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.7 — User Management:** `DONE` (commit `fc24f0a`).
 - **P11.8a — Backend Profil Pengguna:** `DONE` (commit `0e5ef6e`, migration `20261116064315_add_profile_fields`).
 - **P11.8b — Frontend Profil Pengguna:** `DONE` (commit `e4b13f0`).
+- **P11.9a — Restrukturisasi Route Dashboard:** implementasi selesai, menunggu commit.
+- **P11.9b — Halaman Publik `/`:** implementasi selesai, menunggu commit.
 
 ## Hasil Berjalan
 
@@ -480,6 +482,22 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah.
 - Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `format:check`, `build`): lulus; route `/verifikasi-email` dan `/profil` tersedia di build.
 
+### P11.9a — Restrukturisasi Route Dashboard (implementasi selesai, menunggu commit)
+
+- `/` dibebaskan untuk halaman publik; dashboard pindah dari `(app)/page.tsx` ke `frontend/src/app/(app)/dashboard/page.tsx`.
+- Sidebar: menu Dashboard (User dan Admin) menuju `/dashboard`, logo menuju `/dashboard`, dan `isActivePath` tidak lagi memiliki cabang khusus `/`.
+- Login email/password mengarah ke `/dashboard`; callback Google OAuth mengarah ke `${CORS_ORIGIN}/dashboard` dengan trailing slash dinormalisasi.
+- Tautan "Kembali ke Dashboard" pada halaman Akun menuju `/dashboard`.
+- `PROJECT.md` §5.8 dan §6, `ROADMAP.md` P11.9a–P11.9b, serta `ARCHITECTURE.md` §3.5 diperbarui.
+
+### P11.9b — Halaman Publik `/` (implementasi selesai, menunggu commit)
+
+- Route group `(public)`: `layout.tsx` (header logo + CTA, footer), `page.tsx` (hero, enam modul, privasi, CTA), dan `public-session-cta.tsx`.
+- CTA menampilkan "Buka Dashboard" untuk sesi aktif dan "Masuk" untuk tamu; landing tetap Server Component statis tanpa data privat.
+- Metadata `title` dan `description` terisi; halaman indexable (berbeda dari `/p/evidence/[token]` yang `noindex`).
+- Tanpa dependency, migration, atau env baru.
+- Pemeriksaan statis: `lint`, `typecheck`, `build` frontend dan backend lulus; file yang diubah lolos `prettier --check --end-of-line auto` (kondisi `format:check` repo tetap terpengaruh `core.autocrlf`).
+
 ### Audit batch 5 — Frontend mati & konsistensi (DONE, commit `30ec979`)
 
 - B.1.1: `frontend/src/components/shared/module-placeholder.tsx` dihapus (nol impor).
@@ -567,11 +585,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. Phase 11 selesai — P11.8b sudah ter-commit pada `e4b13f0`.
-2. `PROGRESS.md` sebelumnya menyebut P11.9 sebagai task berikutnya, tetapi `ROADMAP.md` tidak memiliki P11.9. Fase berikutnya sesuai roadmap adalah Phase 12 (P12.1 Functional & Integration Testing). Menunggu keputusan pengguna sebelum melanjutkan.
-3. Perbaikan hasil audit (16 November 2026) dikerjakan bertahap per kesepakatan 17 November 2026 — batch 1–3 ter-commit (backend dedupe, HTTP keluar dari service, ekstraksi lib frontend); batch 4 (backend tidy) ter-commit `cef7d02`; batch 5 (frontend mati & konsistensi) ter-commit `30ec979`.
-4. Fokus berikutnya (disepakati 19 November 2026): perbaikan UI per halaman, satu halaman per task, urutan dan detail ditentukan pengguna melalui diskusi. Tidak ada task aktif sampai halaman pertama disetujui.
-5. Sisa audit yang belum dikerjakan dan **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6). `docs/AUDIT.md` dihapus setelah temuan yang dipakai dipindahkan ke sini.
+1. P11.9a (restrukturisasi route dashboard) dan P11.9b (halaman publik `/`) selesai diimplementasikan, menunggu konfirmasi commit pengguna.
+2. Fokus berikutnya: perbaikan UI halaman dashboard, lalu halaman lain sesuai urutan yang disepakati pengguna (satu halaman per task).
+3. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
+4. Phase 12 (P12.1 Functional & Integration Testing dan seterusnya) dijadwalkan setelah UI final.
 
 ## Aturan Pembaruan
 

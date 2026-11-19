@@ -50,7 +50,7 @@ type NavItem = {
 };
 
 const userNav: NavItem[] = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboardIcon },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/kegiatan', label: 'Kegiatan', icon: ClipboardListIcon },
   { href: '/arsip', label: 'Arsip', icon: ArchiveIcon },
   { href: '/laporan', label: 'Laporan', icon: FileTextIcon },
@@ -59,12 +59,11 @@ const userNav: NavItem[] = [
 ];
 
 const adminNav: NavItem[] = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboardIcon },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/akun', label: 'Akun', icon: UsersIcon },
 ];
 
 function isActivePath(pathname: string, href: string) {
-  if (href === '/') return pathname === '/';
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -81,7 +80,7 @@ export function AppSidebar({ user }: { user: SessionUser }) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild tooltip="ARKANA">
-              <Link href="/">
+              <Link href="/dashboard">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground font-heading flex aspect-square size-8 items-center justify-center rounded-lg text-sm font-semibold">
                   A
                 </div>
