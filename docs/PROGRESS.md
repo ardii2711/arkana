@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.11 — UI Polish, halaman Kegiatan, Detail Kegiatan, Laporan, dan Arsip selesai (halaman Arsip menunggu commit)
-- **Task berikutnya:** UI polish halaman berikutnya satu per satu (Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
+- **Task aktif:** P11.11 — UI Polish, halaman Kegiatan, Detail Kegiatan, Laporan, dan Arsip selesai
+- **Task berikutnya:** UI polish halaman berikutnya satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
 - **Update terakhir:** 19 November 2026
 
 ## Kesiapan Proyek
@@ -65,7 +65,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **Bugfix — Object URL avatar & pratinjau:** `DONE` (commit `a284143`).
 - **P11.11 — UI Polish, halaman Kegiatan & Detail Kegiatan:** `DONE` (commit `5f13a42`).
 - **P11.11 — UI Polish, halaman Laporan:** `DONE` (commit `75693f2`).
-- **P11.11 — UI Polish, halaman Arsip:** `DONE` (menunggu commit).
+- **P11.11 — UI Polish, halaman Arsip:** `DONE` (commit `103a2a0`).
 
 ## Hasil Berjalan
 
@@ -567,7 +567,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa perubahan backend, schema, migration, env, atau dependency baru.
 - Pemeriksaan statis frontend (`typecheck`, `lint`, `build`): lulus; build memuat route `/laporan`.
 
-### UI Polish — Arsip (DONE, menunggu commit)
+### UI Polish — Arsip (DONE, commit `103a2a0`)
 
 - Backend: `GET /archive/files` dengan `folderId` uuid kini menampilkan folder tersebut beserta seluruh turunannya (maks 3 level, `descendantIds`); `GET /archive/folders` mengembalikan `fileCount` sebagai total subtree. Tanpa migration; `docs/API.md` §6 diperbarui.
 - Filter dan halaman disimpan di URL (`folder`, `q`, `jenis`, `page`). Filter urutan dan tombol reset dihapus; `PROJECT.md` §5.3 disesuaikan (urutan tetap waktu unggah terbaru).
@@ -628,6 +628,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Health check belum memeriksa koneksi database maupun R2; relevan untuk verifikasi deployment di P12.
 - `GET /api/reports/work-logs` dan `/export` masih menerima `period=custom`, `date`, `from`/`to`, `category`, `groupBy`, serta `onlyWithEvidence`; UI tidak lagi menawarkannya. Diselaraskan hanya jika API ikut disederhanakan.
 - Pagination laporan bersifat klien; respons API tetap memuat seluruh baris periode karena dipakai ekspor. Backend pagination dipertimbangkan bila volume data per periode besar.
+- Dashboard User belum merender grafik kegiatan per kategori bulan berjalan maupun tren 7/30 hari, padahal `PROJECT.md` §5.7 mewajibkannya; data `workLogCategories`/`workLogTrend` sudah tersedia di API. Diselesaikan pada UI polish Dashboard atau kebutuhan `PROJECT.md` direvisi.
 
 ## Keputusan Teknis Kumulatif
 
@@ -685,7 +686,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
 1. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
-2. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (commit `75693f2`); UI polish halaman Arsip selesai (menunggu commit); lanjut halaman lain satu per satu sesuai `ROADMAP.md` P11.11.
+2. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (commit `75693f2`); UI polish halaman Arsip selesai (commit `103a2a0`); lanjut halaman lain satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung).
 3. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
 4. Phase 12 (P12.1 Functional & Integration Testing dan seterusnya) dijadwalkan setelah UI final.
 
