@@ -49,15 +49,17 @@ Nilai `golongan` — PNS: `I/a` … `IV/e`; PPPK: `Golongan I` … `Golongan XVI
 
 ## 3. Endpoint Admin
 
-Role `ADMIN`. Respons daftar akun tidak memuat data pribadi User.
+Role `ADMIN`. Respons daftar akun tidak memuat data pribadi User; Admin hanya dapat menampilkan foto profil User pada daftar akun, tanpa hak mengubah atau menghapusnya.
 
-| Method | Endpoint                       | Keterangan                                                     |
-| ------ | ------------------------------ | -------------------------------------------------------------- |
-| GET    | `/users`                       | `page`, `limit` (maks 100), `search` (nama/email)              |
-| POST   | `/users/invite`                | Undang akun: `name`, `email`; `201`                            |
-| POST   | `/users/:id/resend-invitation` | Kirim ulang undangan untuk akun `INVITED`                      |
-| PATCH  | `/users/:id`                   | Ubah `name`, `email`, dan/atau `status`                        |
-| GET    | `/dashboard/admin`             | `accounts { active, invited, inactive }`, `pendingInvitations` |
+| Method | Endpoint                       | Keterangan                                                                                          |
+| ------ | ------------------------------ | --------------------------------------------------------------------------------------------------- |
+| GET    | `/users`                       | `page`, `limit` (maks 100), `search` (nama/email), `status` (`ACTIVE`\|`INVITED`\|`INACTIVE`). Item memuat `hasAvatar` dan `updatedAt` |
+| POST   | `/users/invite`                | Undang akun: `name`, `email`; `201`                                                                 |
+| POST   | `/users/:id/resend-invitation` | Kirim ulang undangan untuk akun `INVITED`                                                            |
+| PATCH  | `/users/:id`                   | Ubah `name`, `email`, dan/atau `status`                                                              |
+| GET    | `/users/:id/avatar`            | Stream foto profil akun `USER`; 404 `NOT_FOUND` bila belum ada atau target Admin                     |
+| DELETE | `/users/:id`                   | Hapus akun `USER` beserta seluruh data dan objek R2-nya; `204`. 403 `FORBIDDEN` untuk akun Admin      |
+| GET    | `/dashboard/admin`             | `accounts { active, invited, inactive }`, `pendingInvitations`                                       |
 
 ## 4. Dashboard User
 

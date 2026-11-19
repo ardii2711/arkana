@@ -1,16 +1,14 @@
 import { notifyEmailChanged, sendEmailChangeLink } from '../../lib/account-mail.js';
-import { canonicalMimeType, extensionOf } from '../../lib/file-rules.js';
+import { extensionOf } from '../../lib/file-rules.js';
 import { logger } from '../../lib/logger.js';
 import type { ReceivedFile } from '../../lib/multipart.js';
 import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
-import { deleteObjects, downloadObject } from '../../lib/storage.js';
-import { streamToBuffer } from '../../lib/stream.js';
+import { deleteObjects } from '../../lib/storage.js';
 import { TOKEN_TTL_MS } from '../../lib/token-ttl.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import { profileSelect, toAuthUser } from '../../lib/user-profile.js';
 import { ApiError } from '../../lib/api-error.js';
-import type { FileContent } from '../../lib/file-content.js';
 import type { UpdateProfileInput } from './profile.schema.js';
 
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
@@ -173,30 +171,6 @@ export async function uploadAvatar(userId: string, file: ReceivedFile) {
   }
 
   return { hasAvatar: true };
-}
-
-export async function getAvatar(userId: string): Promise<FileContent> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { avatarKey: true },
-  });
-
-  if (!user?.avatarKey) {
-    throw new ApiError(404, 'NOT_FOUND', 'Avatar belum diunggah');
-  }
-
-  const body = await streamToBuffer(await downloadObject(user.avatarKey));
-  const extension = extensionOf(user.avatarKey) ?? 'jpg';
-  const contentType = canonicalMimeType(extension) ?? 'image/jpeg';
-
-  return {
-    body,
-    contentType,
-    size: body.length,
-    originalName: `avatar.${extension}`,
-    inline: true,
-    converted: false,
-  };
 }
 
 export async function deleteAvatar(userId: string) {

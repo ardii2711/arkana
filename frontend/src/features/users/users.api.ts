@@ -30,12 +30,15 @@ export type AdminAccount = {
   status: UserStatus;
   activatedAt: string | null;
   createdAt: string;
+  updatedAt: string;
+  hasAvatar: boolean;
 };
 
 export type UserListParams = {
   page: number;
   limit: number;
   search?: string;
+  status?: UserStatus;
 };
 
 export type UserList = {
@@ -62,6 +65,7 @@ export async function fetchUsers(params: UserListParams): Promise<UserList> {
       page: params.page,
       limit: params.limit,
       search: params.search || undefined,
+      status: params.status || undefined,
     },
   });
 
@@ -82,4 +86,13 @@ export async function updateUser(id: string, input: UpdateUserInput): Promise<Ad
 
 export async function resendInvitation(id: string): Promise<void> {
   await api.post(`/users/${id}/resend-invitation`);
+}
+
+export async function deleteUser(id: string): Promise<void> {
+  await api.delete(`/users/${id}`);
+}
+
+export async function fetchUserAvatar(id: string): Promise<Blob> {
+  const { data } = await api.get<Blob>(`/users/${id}/avatar`, { responseType: 'blob' });
+  return data;
 }

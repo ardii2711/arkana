@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo } from 'react';
 
+import { useObjectUrl } from '@/hooks/use-object-url';
 import type { SessionUser } from '@/features/auth/auth.api';
 
 import { fetchAvatar } from './profile.api';
@@ -16,13 +16,5 @@ export function useAvatarUrl(user: SessionUser) {
     retry: false,
   });
 
-  const url = useMemo(() => (blob ? URL.createObjectURL(blob) : null), [blob]);
-
-  useEffect(() => {
-    return () => {
-      if (url) URL.revokeObjectURL(url);
-    };
-  }, [url]);
-
-  return url;
+  return useObjectUrl(blob);
 }

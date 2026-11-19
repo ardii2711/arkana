@@ -392,6 +392,20 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Acceptance Criteria:** Halaman dapat dibuka tanpa sesi tanpa memuat data privat, responsif, CTA menampilkan "Buka Dashboard" untuk sesi aktif dan "Masuk" untuk tamu, serta metadata terisi.
 - **Dependencies:** P11.9a.
 
+### P11.10a — Backend Admin Accounts
+
+- **Objective:** Mendukung filter status, foto profil pada daftar akun, dan penghapusan akun User beserta file R2.
+- **Scope:** Query `status` pada daftar akun; `hasAvatar`/`updatedAt` pada respons; endpoint avatar Admin; endpoint hapus akun dengan pembersihan objek R2 dan cascade database.
+- **Acceptance Criteria:** Filter status dan pencarian dapat digabung; avatar akun User dapat ditampilkan tanpa mengekspos `avatarKey`; penghapusan akun User menghapus seluruh data dan file terkait, sedangkan akun Admin ditolak.
+- **Dependencies:** P11.9b.
+
+### P11.10b — Frontend Halaman Akun Admin
+
+- **Objective:** Menyediakan aksi akun berbasis dropdown, pencarian realtime, filter status, avatar, dan konfirmasi hapus permanen.
+- **Scope:** Sembunyikan menu Profil untuk Admin; pencarian realtime; filter status; dropdown kirim ulang/ubah/hapus; dialog konfirmasi ketik email; avatar akun pada daftar.
+- **Acceptance Criteria:** Pencarian dan filter berjalan tanpa tombol submit; aksi hanya tersedia untuk akun User; penghapusan hanya dapat dijalankan setelah email diketik persis; foto profil tampil bila tersedia.
+- **Dependencies:** P11.10a.
+
 ## Phase 12 — Final Integration & Production Release
 
 **Tujuan:** Memastikan seluruh aplikasi siap digunakan.

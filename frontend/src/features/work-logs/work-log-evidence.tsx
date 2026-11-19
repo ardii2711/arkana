@@ -8,7 +8,7 @@ import {
   TriangleAlertIcon,
   UploadIcon,
 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useObjectUrl } from '@/hooks/use-object-url';
 import { getErrorMessage } from '@/lib/api-error';
 import { MAX_FILE_BYTES, MAX_FILES_PER_WORK_LOG, MAX_TOTAL_BYTES_PER_WORK_LOG } from '@/lib/limits';
 import { FILE_ACCEPT, fileExtension, formatFileSize, isAllowedFile } from '@/lib/file-format';
@@ -71,16 +72,7 @@ export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
   );
 
   const previewBlob = useWorkLogFileBlob(workLogId, preview?.id ?? '', preview !== null);
-  const previewUrl = useMemo(
-    () => (previewBlob.data ? URL.createObjectURL(previewBlob.data) : null),
-    [previewBlob.data],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
+  const previewUrl = useObjectUrl(previewBlob.data);
 
   function patchUpload(index: number, patch: Partial<UploadItem>) {
     setUploads((items) => items.map((item, i) => (i === index ? { ...item, ...patch } : item)));

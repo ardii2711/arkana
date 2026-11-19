@@ -157,12 +157,14 @@ export function AppSidebar({ user }: { user: SessionUser }) {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/profil">
-                    <UserRoundIcon />
-                    Profil
-                  </Link>
-                </DropdownMenuItem>
+                {user.role === 'USER' ? (
+                  <DropdownMenuItem asChild>
+                    <Link href="/profil">
+                      <UserRoundIcon />
+                      Profil
+                    </Link>
+                  </DropdownMenuItem>
+                ) : null}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem disabled={logout.isPending} onSelect={() => logout.mutate()}>
                   <LogOutIcon />

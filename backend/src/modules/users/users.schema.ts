@@ -11,6 +11,7 @@ export const inviteUserSchema = z.object({
 export const listUsersQuerySchema = z.object({
   ...paginationFields,
   search: z.string().trim().max(100).optional(),
+  status: z.enum(['ACTIVE', 'INVITED', 'INACTIVE']).optional(),
 });
 
 export const updateUserSchema = z

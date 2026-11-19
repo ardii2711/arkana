@@ -4,15 +4,19 @@ import {
   notifyEmailChanged,
   sendInvitationEmail,
 } from '../../lib/account-mail.js';
+import { getAvatar } from '../../lib/avatar.js';
 import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
 import { isUniqueViolation } from '../../lib/prisma-error.js';
+import { deleteObjects, mapStorageError } from '../../lib/storage.js';
 import { TOKEN_TTL_MS } from '../../lib/token-ttl.js';
 import { createToken, hashToken } from '../../lib/tokens.js';
 import { ApiError } from '../../lib/api-error.js';
+import type { FileContent } from '../../lib/file-content.js';
+import type { Prisma } from '../../generated/prisma/client.js';
 import type { InviteUserInput, ListUsersQuery, UpdateUserInput } from './users.schema.js';
 
-const userSelect = {
+const adminUserSelect = {
   id: true,
   name: true,
   email: true,
@@ -20,7 +24,18 @@ const userSelect = {
   status: true,
   activatedAt: true,
   createdAt: true,
+  updatedAt: true,
+  avatarKey: true,
 } as const;
+
+type AdminUserRow = Prisma.UserGetPayload<{ select: typeof adminUserSelect }>;
+
+/** Bentuk akun untuk Admin; `avatarKey` tidak pernah dikirim keluar. */
+function toAdminAccount(user: AdminUserRow) {
+  const { avatarKey, ...rest } = user;
+
+  return { ...rest, hasAvatar: Boolean(avatarKey) };
+}
 
 /** Token undangan baru + data pembuatan token, dipakai jalur invite dan resend agar tidak berbeda. */
 function invitationTokenData() {
@@ -51,20 +66,24 @@ async function createInvitationToken(userId: string): Promise<string> {
   return token;
 }
 
-export async function listUsers({ page, limit, search }: ListUsersQuery) {
-  const where = search
-    ? {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' as const } },
-          { email: { contains: search, mode: 'insensitive' as const } },
-        ],
-      }
-    : {};
+export async function listUsers({ page, limit, search, status }: ListUsersQuery) {
+  const where: Prisma.UserWhereInput = {};
+
+  if (status) {
+    where.status = status;
+  }
+
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { email: { contains: search, mode: 'insensitive' } },
+    ];
+  }
 
   const [items, total] = await prisma.$transaction([
     prisma.user.findMany({
       where,
-      select: userSelect,
+      select: adminUserSelect,
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit,
@@ -72,7 +91,7 @@ export async function listUsers({ page, limit, search }: ListUsersQuery) {
     prisma.user.count({ where }),
   ]);
 
-  return { items, total, page, limit };
+  return { items: items.map(toAdminAccount), total, page, limit };
 }
 
 export async function inviteUser({ name, email }: InviteUserInput) {
@@ -95,7 +114,7 @@ export async function inviteUser({ name, email }: InviteUserInput) {
           create: data,
         },
       },
-      select: userSelect,
+      select: adminUserSelect,
     })
     .catch((error: unknown) => {
       if (isUniqueViolation(error)) {
@@ -112,7 +131,7 @@ export async function inviteUser({ name, email }: InviteUserInput) {
     throw new ApiError(502, 'EMAIL_FAILED', 'Gagal mengirim email undangan');
   }
 
-  return user;
+  return toAdminAccount(user);
 }
 
 export async function resendInvitation(id: string) {
@@ -167,7 +186,7 @@ export async function updateUser(id: string, input: UpdateUserInput) {
     .update({
       where: { id },
       data: input,
-      select: userSelect,
+      select: adminUserSelect,
     })
     .catch((error: unknown) => {
       if (isUniqueViolation(error)) {
@@ -194,5 +213,47 @@ export async function updateUser(id: string, input: UpdateUserInput) {
     );
   }
 
-  return updated;
+  return toAdminAccount(updated);
+}
+
+export async function getUserAvatar(id: string): Promise<FileContent> {
+  const user = await prisma.user.findUnique({ where: { id }, select: { role: true } });
+
+  if (!user || user.role === 'ADMIN') {
+    throw new ApiError(404, 'NOT_FOUND', 'Akun tidak ditemukan');
+  }
+
+  return getAvatar(id);
+}
+
+export async function deleteUser(id: string) {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { role: true, avatarKey: true },
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'NOT_FOUND', 'Akun tidak ditemukan');
+  }
+
+  if (user.role === 'ADMIN') {
+    throw new ApiError(403, 'FORBIDDEN', 'Akun Admin tidak dapat dihapus');
+  }
+
+  const [workLogFiles, archiveFiles] = await Promise.all([
+    prisma.workLogFile.findMany({
+      where: { workLog: { userId: id } },
+      select: { key: true },
+    }),
+    prisma.archiveFile.findMany({ where: { userId: id }, select: { key: true } }),
+  ]);
+
+  const keys = [
+    ...workLogFiles.map((file) => file.key),
+    ...archiveFiles.map((file) => file.key),
+    ...(user.avatarKey ? [user.avatarKey] : []),
+  ];
+
+  await deleteObjects(keys).catch(mapStorageError);
+  await prisma.user.delete({ where: { id } });
 }

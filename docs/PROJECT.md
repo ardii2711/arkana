@@ -37,9 +37,9 @@ Terdapat dua role:
 - Hanya terdapat satu akun Admin.
 - Akun dibuat melalui proses inisialisasi aplikasi.
 - Bertugas mengelola akun pengguna ASN.
-- Dapat mengundang pengguna, mengubah informasi akun, dan menonaktifkan akun User.
+- Dapat mengundang pengguna, mengubah informasi akun, menonaktifkan, dan menghapus akun User.
 - Tidak menggunakan modul pekerjaan, bukti dukung, arsip pribadi, jadwal, dan catatan.
-- Tidak memiliki akses untuk membaca atau mengubah konten data pribadi User.
+- Tidak memiliki akses untuk membaca atau mengubah konten data pribadi User, kecuali menampilkan foto profil pada daftar akun.
 
 ### User
 
@@ -238,6 +238,8 @@ Halaman utama `/` dapat diakses tanpa login dan berisi informasi umum tentang AR
 - Tautan bukti dukung hanya membuka informasi aktivitas yang secara khusus dibagikan oleh pemiliknya, bukan seluruh penyimpanan.
 - Tautan publik bersifat permanen selama aplikasi dan data terkait tersedia.
 - Penonaktifan akun tidak otomatis menghilangkan riwayat pekerjaan dan dokumen pengguna.
+- Penghapusan akun User bersifat permanen: seluruh data dan file terkait dihapus dan tidak dapat dipulihkan.
+- Admin dapat melihat foto profil User pada daftar akun, tetapi tidak dapat mengubah atau menghapusnya.
 - Dashboard hanya merangkum data milik pengguna yang sedang login; Admin tidak memperoleh ringkasan konten pribadi User.
 - Halaman publik hanya menampilkan informasi umum aplikasi dan tidak memuat data pribadi pengguna.
 

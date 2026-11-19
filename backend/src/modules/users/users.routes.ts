@@ -3,6 +3,8 @@ import { Router } from 'express';
 import { requireRole } from '../../middlewares/require-role.js';
 import { validate } from '../../middlewares/validate.js';
 import {
+  deleteUserHandler,
+  getUserAvatarHandler,
   inviteUserHandler,
   listUsersHandler,
   resendInvitationHandler,
@@ -31,3 +33,5 @@ usersRouter.patch(
   validate({ params: userIdParamSchema, body: updateUserSchema }),
   updateUserHandler,
 );
+usersRouter.get('/:id/avatar', validate({ params: userIdParamSchema }), getUserAvatarHandler);
+usersRouter.delete('/:id', validate({ params: userIdParamSchema }), deleteUserHandler);

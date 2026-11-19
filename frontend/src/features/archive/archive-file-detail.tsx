@@ -1,7 +1,6 @@
 'use client';
 
 import { DownloadIcon, TriangleAlertIcon } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -15,6 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useObjectUrl } from '@/hooks/use-object-url';
 import { getErrorMessage } from '@/lib/api-error';
 import { fileExtension, formatFileSize } from '@/lib/file-format';
 import { downloadArchiveFile, type ArchiveFile } from './archive.api';
@@ -28,13 +28,7 @@ type ArchiveFileDetailProps = {
 
 export function ArchiveFileDetail({ file, onOpenChange }: ArchiveFileDetailProps) {
   const blob = useArchiveFileBlob(file?.id ?? '', file?.previewable ?? false);
-  const url = useMemo(() => (blob.data ? URL.createObjectURL(blob.data) : null), [blob.data]);
-
-  useEffect(() => {
-    return () => {
-      if (url) URL.revokeObjectURL(url);
-    };
-  }, [url]);
+  const url = useObjectUrl(blob.data);
 
   async function handleDownload() {
     if (!file) return;

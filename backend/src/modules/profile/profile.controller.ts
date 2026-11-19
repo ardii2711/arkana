@@ -1,5 +1,6 @@
 import type { RequestHandler } from 'express';
 
+import { getAvatar } from '../../lib/avatar.js';
 import { sendSuccess } from '../../utils/api-response.js';
 import { ApiError } from '../../lib/api-error.js';
 import { receiveMultipart } from '../../lib/multipart.js';
@@ -14,7 +15,6 @@ import {
   avatarFileError,
   avatarUploadConfig,
   deleteAvatar,
-  getAvatar,
   requestEmailChange,
   updateProfile,
   uploadAvatar,

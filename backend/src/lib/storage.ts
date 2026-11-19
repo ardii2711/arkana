@@ -43,12 +43,17 @@ export async function deleteObjects(keys: string[]): Promise<void> {
     return;
   }
 
-  await storage.send(
-    new DeleteObjectsCommand({
-      Bucket: env.R2_BUCKET_NAME,
-      Delete: { Objects: keys.map((key) => ({ Key: key })), Quiet: true },
-    }),
-  );
+  // S3 DeleteObjects menerima maksimal 1000 key per permintaan.
+  for (let index = 0; index < keys.length; index += 1000) {
+    const batch = keys.slice(index, index + 1000);
+
+    await storage.send(
+      new DeleteObjectsCommand({
+        Bucket: env.R2_BUCKET_NAME,
+        Delete: { Objects: batch.map((key) => ({ Key: key })), Quiet: true },
+      }),
+    );
+  }
 }
 
 export function storageError(error: unknown): never {

@@ -3,6 +3,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
+  deleteUser,
   fetchUsers,
   inviteUser,
   resendInvitation,
@@ -55,6 +56,15 @@ export function useResendInvitation() {
 
   return useMutation({
     mutationFn: (id: string) => resendInvitation(id),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteUser() {
+  const invalidate = useInvalidateUsers();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteUser(id),
     onSuccess: invalidate,
   });
 }

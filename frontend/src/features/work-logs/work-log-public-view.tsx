@@ -1,7 +1,7 @@
 'use client';
 
 import { DownloadIcon, EyeIcon, TriangleAlertIcon } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useObjectUrl } from '@/hooks/use-object-url';
 import { getErrorMessage } from '@/lib/api-error';
 import { downloadBlob } from '@/lib/download';
 import { fileExtension, formatFileSize } from '@/lib/file-format';
@@ -32,16 +33,7 @@ export function WorkLogPublicView({ token }: { token: string }) {
   const [preview, setPreview] = useState<WorkLogFile | null>(null);
 
   const previewBlob = usePublicWorkLogFileBlob(token, preview?.id ?? '', preview !== null);
-  const previewUrl = useMemo(
-    () => (previewBlob.data ? URL.createObjectURL(previewBlob.data) : null),
-    [previewBlob.data],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
+  const previewUrl = useObjectUrl(previewBlob.data);
 
   async function handleDownload(file: WorkLogFile) {
     try {

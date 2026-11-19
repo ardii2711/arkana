@@ -6,7 +6,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** P11.9a + P11.9b — implementasi selesai, menunggu konfirmasi commit
+- **Task aktif:** P11.10a + P11.10b — implementasi selesai
 - **Task berikutnya:** perbaikan UI halaman dashboard (menunggu diskusi pengguna); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
 - **Update terakhir:** 19 November 2026
 
@@ -58,8 +58,11 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.7 — User Management:** `DONE` (commit `fc24f0a`).
 - **P11.8a — Backend Profil Pengguna:** `DONE` (commit `0e5ef6e`, migration `20261116064315_add_profile_fields`).
 - **P11.8b — Frontend Profil Pengguna:** `DONE` (commit `e4b13f0`).
-- **P11.9a — Restrukturisasi Route Dashboard:** implementasi selesai, menunggu commit.
-- **P11.9b — Halaman Publik `/`:** implementasi selesai, menunggu commit.
+- **P11.9a — Restrukturisasi Route Dashboard:** implementasi selesai
+- **P11.9b — Halaman Publik `/`:** implementasi selesai
+- **P11.10a — Backend Admin Accounts:** implementasi selesai
+- **P11.10b — Frontend Halaman Akun Admin:** implementasi selesai
+- **Bugfix — Object URL avatar & pratinjau:** implementasi selesai
 
 ## Hasil Berjalan
 
@@ -482,6 +485,33 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Tanpa dependency, migration, atau env baru. `ROADMAP.md` tidak diubah.
 - Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `format:check`, `build`): lulus; route `/verifikasi-email` dan `/profil` tersedia di build.
 
+### Bugfix — Object URL avatar & pratinjau (implementasi selesai, menunggu commit)
+
+- Avatar daftar akun gagal tampil setelah berpindah halaman: URL blob dibuat dengan `useMemo`, lalu cleanup effect mencabutnya; pada StrictMode URL yang sama dipakai lagi setelah cleanup sehingga gambar gagal dimuat.
+- Hook baru `src/hooks/use-object-url.ts`: URL dicabut tertunda satu tick (aman untuk cleanup/setup StrictMode) dan URL lama dicabut saat blob berubah.
+- Dipakai di `account-avatar.tsx`, `profile/use-avatar.ts`, `work-log-evidence.tsx`, `work-log-public-view.tsx`, dan `archive-file-detail.tsx` (menghapus pola duplikat yang sama).
+- Pemeriksaan statis frontend (`lint`, `typecheck`, `build`): lulus.
+
+### P11.10a — Backend Admin Accounts (implementasi selesai, menunggu commit)
+
+- `listUsersQuerySchema` menerima `status` (`ACTIVE|INVITED|INACTIVE`); `listUsers` menggabungkan filter status dan pencarian nama/email.
+- Respons daftar/undangan/ubah akun memakai mapper `toAdminAccount`: menambah `hasAvatar` dan `updatedAt`, tidak mengekspos `avatarKey`.
+- `getAvatar()` dipindah dari `profile.service.ts` ke `lib/avatar.ts` agar dipakai modul profile dan users.
+- Endpoint baru (ADMIN): `GET /users/:id/avatar` (hanya akun `USER`, 404 bila kosong/Admin) dan `DELETE /users/:id` (204).
+- `deleteUser` menolak akun Admin (403), menghapus objek R2 (bukti dukung, arsip, avatar) lebih dulu, lalu `prisma.user.delete` dengan cascade. Kegagalan R2 → 502 tanpa mengubah database. Tanpa email notifikasi sesuai keputusan.
+- `deleteObjects` di `lib/storage.ts` memecah key per 1000 sesuai batas S3 `DeleteObjects`.
+- `API.md` §3, `PROJECT.md` §4/§6, dan `ARCHITECTURE.md` §7.3 diperbarui. Tanpa migration, env, atau dependency baru.
+
+### P11.10b — Frontend Halaman Akun Admin (implementasi selesai, menunggu commit)
+
+- Menu Profil pada dropdown akun hanya dirender untuk `role === 'USER'`; route `/profil` tetap tersedia (Admin masih memakai ganti password).
+- Toolbar daftar akun: `Input` pencarian realtime (debounce 300 ms, trim, reset halaman) tanpa ikon cari/silang, plus `Select` status (`Semua status`, `Aktif`, `Diundang`, `Nonaktif`). Tanpa tombol reset filter.
+- `account-actions.tsx`: dropdown `EllipsisIcon` berisi `Kirim ulang` (hanya `INVITED`), `Ubah`, dan `Hapus` (destruktif); dipakai tabel desktop dan kartu mobile; akun Admin tanpa aksi.
+- `user-delete-dialog.tsx`: konfirmasi gaya GitHub — identitas akun, instruksi mengetik email, input mono, tombol destruktif penuh yang aktif hanya saat email cocok, peringatan data dihapus permanen, state pending menahan dialog.
+- `account-avatar.tsx`: ambil blob `GET /users/:id/avatar` (cache `['users','avatar',id,updatedAt]`, `staleTime: Infinity`), fallback inisial; baris Admin tetap inisial.
+- `AdminAccount` menambah `hasAvatar` dan `updatedAt`; `useDeleteUser` meng-invalidate `['users']` dan `['dashboard']`; halaman mundur satu bila item terakhir dihapus.
+- Pemeriksaan statis: `lint`, `typecheck` frontend dan backend lulus; build dan prettier diverifikasi setelah seluruh perubahan.
+
 ### P11.9a — Restrukturisasi Route Dashboard (implementasi selesai, menunggu commit)
 
 - `/` dibebaskan untuk halaman publik; dashboard pindah dari `(app)/page.tsx` ke `frontend/src/app/(app)/dashboard/page.tsx`.
@@ -572,6 +602,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Route frontend mengikuti tautan email backend: `/activate?token=...`, `/reset-password?token=...`, `/login`.
 - Topologi domain: satu domain induk dengan subdomain terpisah untuk frontend dan backend (opsi A). Cookie `sameSite=lax` dipertahankan; token CSRF tidak diperlukan selama topologi ini dipakai.
 - Backend tidak memakai lapisan repository; akses database langsung melalui Prisma di service. Repository hanya ditambahkan bila memenuhi kriteria di `ARCHITECTURE.md` §4.1 (query lintas modul, service didominasi query, butuh unit test tanpa DB, ada sumber data kedua, atau query kompleks). Alasan: satu ORM, YAGNI, dan retrofit murah.
+- Penghapusan akun User oleh Admin bersifat permanen, tanpa email notifikasi; objek R2 dihapus lebih dulu, lalu record database melalui cascade.
+- Admin hanya dapat menampilkan foto profil User pada daftar akun; tidak ada hak ubah atau hapus.
+- Halaman akun Admin memakai pencarian realtime (debounce 300 ms), filter status, aksi dropdown, dan konfirmasi hapus dengan mengetik email akun.
 
 ## Urutan Pengembangan
 
@@ -585,7 +618,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`, `Acceptance Criteria`, `Dependencies`) pada 16 November 2026 tanpa perubahan ruang lingkup dan urutan.
 
-1. P11.9a (restrukturisasi route dashboard) dan P11.9b (halaman publik `/`) selesai diimplementasikan, menunggu konfirmasi commit pengguna.
+1. P11.9a/b (route dashboard + halaman publik) dan P11.10a/b (halaman akun admin) selesai diimplementasikan
 2. Fokus berikutnya: perbaikan UI halaman dashboard, lalu halaman lain sesuai urutan yang disepakati pengguna (satu halaman per task).
 3. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
 4. Phase 12 (P12.1 Functional & Integration Testing dan seterusnya) dijadwalkan setelah UI final.

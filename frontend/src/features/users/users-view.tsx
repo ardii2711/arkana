@@ -4,40 +4,42 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   Loader2Icon,
-  PencilIcon,
   PlusIcon,
-  SearchIcon,
-  SendIcon,
   TriangleAlertIcon,
   UserRoundXIcon,
   UsersIcon,
-  XIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, type FormEvent } from 'react';
-import { toast } from 'sonner';
+import { useEffect, useState } from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from '@/components/ui/input-group';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
-import { NAME_MAX_LENGTH } from '@/lib/limits';
-import { getInitials } from '@/lib/initials';
 import { formatDate } from '@/lib/date';
+import { NAME_MAX_LENGTH } from '@/lib/limits';
 import { useSession } from '@/features/auth/use-auth';
-import { USER_STATUS_BADGES, USER_STATUS_LABELS, type AdminAccount } from './users.api';
+import { AccountActions } from './account-actions';
+import { AccountAvatar } from './account-avatar';
+import {
+  USER_STATUS_BADGES,
+  USER_STATUS_LABELS,
+  type AdminAccount,
+  type UserStatus,
+} from './users.api';
 import { UserEditDialog } from './user-edit-dialog';
 import { UserInviteDialog } from './user-invite-dialog';
-import { useResendInvitation, useUsers } from './use-users';
+import { useUsers } from './use-users';
 
 const PAGE_SIZE = 20;
 
@@ -74,38 +76,45 @@ export function UsersView() {
 function UsersAdmin() {
   const [searchDraft, setSearchDraft] = useState('');
   const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<UserStatus | 'ALL'>('ALL');
   const [page, setPage] = useState(1);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [editing, setEditing] = useState<AdminAccount | null>(null);
-  const [resendingId, setResendingId] = useState<string | null>(null);
 
-  const query = useUsers({ page, limit: PAGE_SIZE, search: search || undefined });
-  const resend = useResendInvitation();
+  useEffect(() => {
+    const next = searchDraft.trim();
+
+    if (next === search) return;
+
+    const timer = setTimeout(() => {
+      setSearch(next);
+      setPage(1);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchDraft, search]);
+
+  const query = useUsers({
+    page,
+    limit: PAGE_SIZE,
+    search: search || undefined,
+    status: status === 'ALL' ? undefined : status,
+  });
 
   const total = query.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const items = query.data?.items ?? [];
-  const hasFilters = search !== '';
+  const hasFilters = search !== '' || status !== 'ALL';
 
-  function submitSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSearch(searchDraft.trim());
+  function onStatusChange(value: string) {
+    setStatus(value as UserStatus | 'ALL');
     setPage(1);
   }
 
-  function resetSearch() {
-    setSearch('');
-    setSearchDraft('');
-    setPage(1);
-  }
-
-  function onResend(id: string) {
-    setResendingId(id);
-    resend.mutate(id, {
-      onSuccess: () => toast.success('Undangan dikirim ulang.'),
-      onError: (error) => toast.error(getErrorMessage(error)),
-      onSettled: () => setResendingId(null),
-    });
+  function onDeleted() {
+    if (items.length === 1 && page > 1) {
+      setPage((value) => value - 1);
+    }
   }
 
   return (
@@ -123,29 +132,26 @@ function UsersAdmin() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <form onSubmit={submitSearch} className="min-w-48 flex-1 sm:max-w-sm">
-          <InputGroup>
-            <InputGroupInput
-              value={searchDraft}
-              maxLength={NAME_MAX_LENGTH}
-              placeholder="Cari nama atau email"
-              aria-label="Cari nama atau email"
-              onChange={(event) => setSearchDraft(event.target.value)}
-            />
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton type="submit" size="icon-xs" aria-label="Cari akun">
-                <SearchIcon />
-              </InputGroupButton>
-            </InputGroupAddon>
-          </InputGroup>
-        </form>
-
-        {hasFilters ? (
-          <Button variant="ghost" size="icon" aria-label="Reset pencarian" onClick={resetSearch}>
-            <XIcon />
-          </Button>
-        ) : null}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <Input
+          value={searchDraft}
+          maxLength={NAME_MAX_LENGTH}
+          placeholder="Cari nama atau email"
+          aria-label="Cari nama atau email"
+          className="sm:max-w-sm"
+          onChange={(event) => setSearchDraft(event.target.value)}
+        />
+        <Select value={status} onValueChange={onStatusChange}>
+          <SelectTrigger className="w-full sm:w-44" aria-label="Filter status akun">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Semua status</SelectItem>
+            <SelectItem value="ACTIVE">Aktif</SelectItem>
+            <SelectItem value="INVITED">Diundang</SelectItem>
+            <SelectItem value="INACTIVE">Nonaktif</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {query.isPending ? (
@@ -178,7 +184,7 @@ function UsersAdmin() {
             {page > 1
               ? 'Kembali ke halaman sebelumnya.'
               : hasFilters
-                ? 'Ubah kata kunci pencarian.'
+                ? 'Ubah kata kunci atau status filter.'
                 : 'Undang pengguna pertama untuk mulai menggunakan ARKANA.'}
           </p>
           {page > 1 ? (
@@ -206,11 +212,7 @@ function UsersAdmin() {
                   <tr key={account.id} className="align-middle">
                     <td className="border-t px-3 py-2.5">
                       <div className="flex items-center gap-3">
-                        <Avatar className="size-9">
-                          <AvatarFallback className="text-xs">
-                            {getInitials(account.name)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <AccountAvatar account={account} className="size-9" />
                         <div className="min-w-0">
                           <p className="flex items-center gap-2 font-medium">
                             <span className="truncate">{account.name}</span>
@@ -231,29 +233,13 @@ function UsersAdmin() {
                       {formatDate(account.createdAt)}
                     </td>
                     <td className="border-t px-3 py-2.5">
-                      <div className="flex justify-end gap-1.5">
+                      <div className="flex justify-end">
                         {account.role !== 'ADMIN' ? (
-                          <>
-                            {account.status === 'INVITED' ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={resendingId === account.id}
-                                onClick={() => onResend(account.id)}
-                              >
-                                {resendingId === account.id ? (
-                                  <Loader2Icon aria-hidden="true" className="animate-spin" />
-                                ) : (
-                                  <SendIcon aria-hidden="true" />
-                                )}
-                                Kirim ulang
-                              </Button>
-                            ) : null}
-                            <Button variant="outline" size="sm" onClick={() => setEditing(account)}>
-                              <PencilIcon aria-hidden="true" />
-                              Ubah
-                            </Button>
-                          </>
+                          <AccountActions
+                            account={account}
+                            onEdit={() => setEditing(account)}
+                            onDeleted={onDeleted}
+                          />
                         ) : null}
                       </div>
                     </td>
@@ -268,18 +254,25 @@ function UsersAdmin() {
               <li key={account.id}>
                 <Card>
                   <CardContent className="flex items-start gap-3 p-4">
-                    <Avatar className="size-10">
-                      <AvatarFallback className="text-xs">
-                        {getInitials(account.name)}
-                      </AvatarFallback>
-                    </Avatar>
+                    <AccountAvatar account={account} className="size-10" />
                     <div className="min-w-0 flex-1 space-y-2">
-                      <div>
-                        <p className="flex items-center gap-2 font-medium">
-                          <span className="truncate">{account.name}</span>
-                          {account.role === 'ADMIN' ? <Badge variant="outline">Admin</Badge> : null}
-                        </p>
-                        <p className="text-muted-foreground truncate text-xs">{account.email}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="flex items-center gap-2 font-medium">
+                            <span className="truncate">{account.name}</span>
+                            {account.role === 'ADMIN' ? (
+                              <Badge variant="outline">Admin</Badge>
+                            ) : null}
+                          </p>
+                          <p className="text-muted-foreground truncate text-xs">{account.email}</p>
+                        </div>
+                        {account.role !== 'ADMIN' ? (
+                          <AccountActions
+                            account={account}
+                            onEdit={() => setEditing(account)}
+                            onDeleted={onDeleted}
+                          />
+                        ) : null}
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant={USER_STATUS_BADGES[account.status]}>
@@ -289,29 +282,6 @@ function UsersAdmin() {
                           Terdaftar {formatDate(account.createdAt)}
                         </span>
                       </div>
-                      {account.role !== 'ADMIN' ? (
-                        <div className="flex flex-wrap gap-1.5">
-                          {account.status === 'INVITED' ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={resendingId === account.id}
-                              onClick={() => onResend(account.id)}
-                            >
-                              {resendingId === account.id ? (
-                                <Loader2Icon aria-hidden="true" className="animate-spin" />
-                              ) : (
-                                <SendIcon aria-hidden="true" />
-                              )}
-                              Kirim ulang
-                            </Button>
-                          ) : null}
-                          <Button variant="outline" size="sm" onClick={() => setEditing(account)}>
-                            <PencilIcon aria-hidden="true" />
-                            Ubah
-                          </Button>
-                        </div>
-                      ) : null}
                     </div>
                   </CardContent>
                 </Card>
