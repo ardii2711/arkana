@@ -70,7 +70,7 @@ function AppHeader() {
         <SidebarTrigger />
       ) : (
         <Link href="/dashboard" aria-label="ARKANA — Dashboard">
-          <BrandLogo variant="wordmarkOnly" className="h-4 w-auto" />
+          <BrandLogo variant="wordmarkOnly" className="h-3.5 w-auto" />
         </Link>
       )}
       <div className="ml-auto">

@@ -100,7 +100,7 @@ export function AppSidebar({ user }: { user: SessionUser }) {
             ) : (
               <SidebarMenuButton size="lg" asChild>
                 <Link href="/dashboard" aria-label="ARKANA — Dashboard">
-                  <BrandLogo variant="lockup" iconClassName="h-7.5" wordmarkClassName="h-4" />
+                  <BrandLogo variant="lockup" iconClassName="h-7" wordmarkClassName="h-3.5" />
                 </Link>
               </SidebarMenuButton>
             )}

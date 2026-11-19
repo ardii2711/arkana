@@ -3,8 +3,10 @@ import {
   CalendarDaysIcon,
   ClipboardListIcon,
   FileTextIcon,
+  ImageIcon,
   LinkIcon,
   LockIcon,
+  MailIcon,
   PaperclipIcon,
   ShieldCheckIcon,
   StickyNoteIcon,
@@ -12,7 +14,9 @@ import {
 } from 'lucide-react';
 import type { Metadata } from 'next';
 
-import { PublicSessionCta } from './public-session-cta';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { env } from '@/config/env';
 
 export const metadata: Metadata = {
   title: { absolute: 'ARKANA — Arsip, Rekam Kinerja, dan Agenda' },
@@ -24,25 +28,24 @@ const modules: { title: string; description: string; icon: LucideIcon }[] = [
   {
     title: 'Kegiatan',
     description:
-      'Catat aktivitas harian lengkap dengan uraian, hasil, dan satu kategori tetap sesuai kebutuhan ASN.',
+      'Catat aktivitas harian lengkap dengan uraian, hasil, target, realisasi, dan satu kategori.',
     icon: ClipboardListIcon,
   },
   {
     title: 'Bukti Dukung',
     description:
-      'Lampirkan hingga 10 file per kegiatan dan bagikan melalui tautan permanen untuk pemeriksa.',
+      'Lampirkan hingga 10 file per kegiatan (maks. 5 MB per file) dan bagikan lewat tautan permanen untuk pemeriksa.',
     icon: PaperclipIcon,
   },
   {
     title: 'Arsip Pribadi',
     description:
-      'Simpan SK, sertifikat, dan dokumen pribadi dalam folder hingga tiga level dengan kuota 1 GB.',
+      'Simpan SK, sertifikat, dan dokumen pribadi dalam folder hingga tiga level. Kuota 1 GB per akun.',
     icon: ArchiveIcon,
   },
   {
     title: 'Laporan Kinerja',
-    description:
-      'Rekap harian, mingguan, bulanan, tahunan, atau rentang khusus dengan ekspor XLSX dan PDF.',
+    description: 'Rekap harian, mingguan, bulanan, dan tahunan. Ekspor XLSX dan PDF siap pakai.',
     icon: FileTextIcon,
   },
   {
@@ -52,31 +55,120 @@ const modules: { title: string; description: string; icon: LucideIcon }[] = [
   },
   {
     title: 'Catatan',
-    description: 'Simpan catatan cepat dan sematkan yang penting agar selalu tampil lebih dahulu.',
+    description:
+      'Tangkapan cepat tanpa judul. Sematkan catatan penting agar selalu tampil lebih dulu.',
     icon: StickyNoteIcon,
+  },
+];
+
+const steps: { title: string; description: string }[] = [
+  {
+    title: 'Terima undangan',
+    description:
+      'Admin mengundang melalui email. Buka tautan aktivasi, tetapkan password, lalu masuk.',
+  },
+  {
+    title: 'Catat dan unggah bukti',
+    description:
+      'Satu kegiatan, satu catatan: uraian, hasil, kategori, dan bukti pendukung — semua terpusat.',
+  },
+  {
+    title: 'Ekspor laporan',
+    description:
+      'Rekap harian hingga tahunan mengikuti format e-Kinerja. Unduh sebagai XLSX atau PDF.',
   },
 ];
 
 const guarantees: { title: string; description: string; icon: LucideIcon }[] = [
   {
     title: 'Privat secara default',
-    description:
-      'Kegiatan, arsip, agenda, dan catatan hanya dapat diakses oleh pemilik akun yang sedang login.',
+    description: 'Kegiatan, arsip, agenda, dan catatan hanya dapat diakses pemilik akun.',
     icon: LockIcon,
   },
   {
     title: 'Admin tanpa akses konten',
     description:
-      'Admin hanya mengelola akun dan undangan. Konten pribadi pengguna tidak dapat dibaca atau diubah.',
+      'Admin hanya mengelola akun dan undangan. Konten pribadi tidak dapat dibuka atau diubah.',
     icon: ShieldCheckIcon,
   },
   {
     title: 'Tautan bukti dukung terkendali',
     description:
-      'Tautan publik hanya membuka satu kegiatan beserta bukti dukungnya, bukan seluruh penyimpanan.',
+      'Tautan permanen hanya membuka satu kegiatan beserta bukti dukungnya, bukan seluruh arsip Anda.',
     icon: LinkIcon,
   },
 ];
+
+function HeroVisual() {
+  return (
+    <div aria-hidden="true" className="relative mx-auto w-full max-w-md">
+      {/* Panel Detail Kegiatan */}
+      <div className="bg-card overflow-hidden rounded-2xl border shadow-xl">
+        <div className="flex items-center justify-between gap-3 border-b px-5 py-3">
+          <span className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">
+            Detail Kegiatan
+          </span>
+          <Badge variant="secondary" className="text-[10px] font-normal">
+            Koordinasi dan Rapat
+          </Badge>
+        </div>
+
+        <div className="p-5">
+          <p className="text-[15px] leading-snug font-semibold">
+            Rapat koordinasi penyusunan laporan kinerja
+          </p>
+          <p className="text-muted-foreground mt-1 text-[11px]">Hari ini · 09.00 WITA</p>
+
+          <div className="mt-4 space-y-3 text-xs">
+            <div>
+              <p className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
+                Uraian
+              </p>
+              <p className="mt-0.5 leading-relaxed">
+                Menyusun rekap kinerja bulan berjalan dan menyiapkan bahan rapat koordinasi lintas
+                bidang.
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
+                Hasil
+              </p>
+              <p className="mt-0.5 leading-relaxed">
+                Rekap tersusun; notulen dan foto kegiatan terlampir.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-muted/50 mt-4 space-y-1.5 rounded-xl p-3 text-xs">
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
+              <PaperclipIcon className="size-3.5" /> 2 file bukti dukung
+            </div>
+            <div className="flex items-center gap-2 rounded-lg bg-background px-2.5 py-1.5">
+              <FileTextIcon className="text-muted-foreground size-4 shrink-0" />
+              <span className="min-w-0 flex-1 truncate">notulen-rapat.pdf</span>
+              <span className="text-muted-foreground shrink-0 text-[10px]">1,2 MB</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg bg-background px-2.5 py-1.5">
+              <ImageIcon className="text-muted-foreground size-4 shrink-0" />
+              <span className="min-w-0 flex-1 truncate">foto-kegiatan.jpg</span>
+              <span className="text-muted-foreground shrink-0 text-[10px]">2,4 MB</span>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-[#14BBA6]/40 bg-[#14BBA6]/5 px-3 py-2">
+            <LinkIcon className="size-4 shrink-0 text-[#14BBA6]" />
+            <span className="min-w-0 flex-1 truncate font-mono text-[11px]">
+              arkana.mateng.my.id/p/evidence/9f3a…c21b
+            </span>
+            <span className="shrink-0 text-[10px] font-medium text-[#0F766E] uppercase dark:text-[#2DD4BF]">
+              Salin
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function PublicHomePage() {
   return (
@@ -91,53 +183,49 @@ export default function PublicHomePage() {
           className="bg-primary/5 pointer-events-none absolute -top-48 left-1/2 size-128 -translate-x-1/2 rounded-full blur-3xl"
         />
 
-        <div className="relative mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
-          <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
-            Untuk ASN
-          </p>
-          <h1 className="font-heading mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-            Catat pekerjaan, rapikan bukti dukung, susun laporan kinerja.
-          </h1>
-          <p className="text-muted-foreground mt-5 max-w-2xl text-lg text-pretty">
-            ARKANA — Arsip, Rekam Kinerja, dan Agenda — memusatkan pencatatan kegiatan, bukti
-            dukung, arsip pribadi, laporan, jadwal, dan catatan dalam satu tempat.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <PublicSessionCta size="lg" />
-            <span className="text-muted-foreground text-sm">
-              Akun dibuat oleh Admin melalui undangan email.
-            </span>
+        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2">
+          <div>
+            <h1 className="font-heading max-w-xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+              Catat pekerjaan, rapikan bukti dukung, susun laporan kinerja.
+            </h1>
+            <p className="text-muted-foreground mt-5 max-w-lg text-lg text-pretty">
+              ARKANA memusatkan pencatatan kegiatan, bukti dukung, arsip pribadi, laporan, agenda,
+              dan catatan dalam satu tempat.
+            </p>
           </div>
+          <HeroVisual />
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+      <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
         <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-          Satu tempat untuk seluruh pekerjaan harian
+          Cara kerjanya
         </h2>
-        <p className="text-muted-foreground mt-3 max-w-2xl">
-          Enam modul yang saling terhubung, dari pencatatan hingga pelaporan.
-        </p>
-
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {modules.map((item) => (
-            <div key={item.title} className="bg-card rounded-xl border p-5">
-              <item.icon aria-hidden="true" className="text-primary size-5" />
-              <h3 className="font-heading mt-3 font-semibold">{item.title}</h3>
-              <p className="text-muted-foreground mt-1 text-sm">{item.description}</p>
+        <div className="mt-8 grid gap-8 sm:grid-cols-3">
+          {steps.map((step, index) => (
+            <div key={step.title} className="border-t pt-5">
+              <span className="text-muted-foreground text-xs font-semibold tracking-[0.2em]">
+                0{index + 1}
+              </span>
+              <h3 className="font-heading mt-2 font-semibold">{step.title}</h3>
+              <p className="text-muted-foreground mt-1 text-sm">{step.description}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bg-muted/30 border-y">
-        <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6">
+      <section id="modul" className="bg-muted/30 scroll-mt-20 border-y">
+        <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
           <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-            Data pribadi tetap milik Anda
+            Satu tempat untuk seluruh pekerjaan harian
           </h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-3">
-            {guarantees.map((item) => (
-              <div key={item.title}>
+          <p className="text-muted-foreground mt-3 max-w-2xl">
+            Enam modul yang saling terhubung, dari pencatatan hingga pelaporan.
+          </p>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {modules.map((item) => (
+              <div key={item.title} className="bg-card rounded-xl border p-5">
                 <item.icon aria-hidden="true" className="text-primary size-5" />
                 <h3 className="font-heading mt-3 font-semibold">{item.title}</h3>
                 <p className="text-muted-foreground mt-1 text-sm">{item.description}</p>
@@ -147,16 +235,43 @@ export default function PublicHomePage() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 py-16 text-center sm:px-6">
+      <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
         <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-          Siap merapikan rekam kinerja Anda?
+          Data pribadi tetap milik Anda
         </h2>
-        <p className="text-muted-foreground mx-auto mt-3 max-w-xl">
-          Masuk dengan akun yang sudah diundang Admin, atau hubungi Admin untuk mendapatkan
-          undangan.
+        <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          {guarantees.map((item) => (
+            <div key={item.title}>
+              <item.icon aria-hidden="true" className="text-primary size-5" />
+              <h3 className="font-heading mt-3 font-semibold">{item.title}</h3>
+              <p className="text-muted-foreground mt-1 text-sm">{item.description}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-muted-foreground mt-8 text-sm">
+          ARKANA tidak pernah menampilkan data pribadi Anda secara publik.
         </p>
-        <div className="mt-6 flex justify-center">
-          <PublicSessionCta size="lg" />
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
+        <div className="bg-primary/5 flex flex-col items-start gap-5 rounded-2xl border p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <div className="flex items-start gap-4">
+            <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
+              <MailIcon className="size-5" />
+            </div>
+            <div>
+              <h2 className="font-heading text-xl font-semibold tracking-tight">
+                Butuh akun atau ada kendala?
+              </h2>
+              <p className="text-muted-foreground mt-1 max-w-md text-sm">
+                Hubungi Admin melalui email dan sertakan nama serta keperluan Anda agar penanganan
+                lebih cepat.
+              </p>
+            </div>
+          </div>
+          <Button asChild size="lg" className="shrink-0">
+            <a href={`mailto:${env.NEXT_PUBLIC_CONTACT_EMAIL}`}>{env.NEXT_PUBLIC_CONTACT_EMAIL}</a>
+          </Button>
         </div>
       </section>
     </>
