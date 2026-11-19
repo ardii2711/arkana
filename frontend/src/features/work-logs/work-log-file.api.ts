@@ -22,7 +22,7 @@ export async function fetchWorkLogFiles(workLogId: string): Promise<WorkLogFile[
 export async function uploadWorkLogFile(
   workLogId: string,
   file: File,
-  onProgress?: (percent: number) => void,
+  options: { signal?: AbortSignal; onProgress?: (percent: number) => void } = {},
 ): Promise<WorkLogFile> {
   const formData = new FormData();
   formData.append('file', file);
@@ -31,9 +31,10 @@ export async function uploadWorkLogFile(
     `/work-logs/${workLogId}/files`,
     formData,
     {
+      signal: options.signal,
       onUploadProgress: (event) => {
-        if (!onProgress || !event.total) return;
-        onProgress(Math.round((event.loaded / event.total) * 100));
+        if (!options.onProgress || !event.total) return;
+        options.onProgress(Math.round((event.loaded / event.total) * 100));
       },
     },
   );

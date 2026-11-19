@@ -22,7 +22,7 @@ type WorkLogRow = Pick<
   | 'realisasi'
   | 'createdAt'
   | 'updatedAt'
->;
+> & { _count: { files: number } };
 
 const workLogSelect = {
   id: true,
@@ -36,6 +36,7 @@ const workLogSelect = {
   realisasi: true,
   createdAt: true,
   updatedAt: true,
+  _count: { select: { files: true } },
 } as const;
 
 function today(): Date {
@@ -43,7 +44,9 @@ function today(): Date {
 }
 
 function toItem(row: WorkLogRow) {
-  return { ...row, activityDate: dateKey(row.activityDate) };
+  const { _count, ...workLog } = row;
+
+  return { ...workLog, activityDate: dateKey(workLog.activityDate), fileCount: _count.files };
 }
 
 function notFound(): ApiError {

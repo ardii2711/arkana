@@ -36,9 +36,10 @@ import { useCreateWorkLog, useUpdateWorkLog } from './use-work-logs';
 type WorkLogFormDialogProps = {
   workLog: WorkLog | null;
   onOpenChange: (open: boolean) => void;
+  onCreated?: () => void;
 };
 
-export function WorkLogFormDialog({ workLog, onOpenChange }: WorkLogFormDialogProps) {
+export function WorkLogFormDialog({ workLog, onOpenChange, onCreated }: WorkLogFormDialogProps) {
   const isEdit = workLog !== null;
   const create = useCreateWorkLog();
   const update = useUpdateWorkLog(workLog?.id ?? '');
@@ -65,6 +66,7 @@ export function WorkLogFormDialog({ workLog, onOpenChange }: WorkLogFormDialogPr
         onSuccess: () => {
           toast.success(isEdit ? 'Kegiatan diperbarui.' : 'Kegiatan disimpan.');
           onOpenChange(false);
+          if (!isEdit) onCreated?.();
         },
         onError: (error) => setFormError(getErrorMessage(error)),
       },

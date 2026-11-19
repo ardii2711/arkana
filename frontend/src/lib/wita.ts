@@ -43,6 +43,15 @@ export function addDaysWita(value: string, days: number) {
   return date.toISOString().slice(0, 10);
 }
 
+/** Rentang minggu Senin–Minggu (WITA) untuk tanggal yang diberikan. */
+export function weekRangeWita(date: string) {
+  const day = new Date(`${date}T00:00:00.000Z`).getUTCDay();
+  const offset = day === 0 ? -6 : 1 - day;
+  const from = addDaysWita(date, offset);
+
+  return { from, to: addDaysWita(from, 6) };
+}
+
 /** Rentang satu bulan (WITA) untuk tanggal yang diberikan. */
 export function monthRangeWita(fromDate: string) {
   const year = Number(fromDate.slice(0, 4));

@@ -35,13 +35,21 @@ export function useUploadWorkLogFile(workLogId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ file, onProgress }: { file: File; onProgress?: (percent: number) => void }) =>
-      uploadWorkLogFile(workLogId, file, onProgress),
+    mutationFn: ({
+      file,
+      signal,
+      onProgress,
+    }: {
+      file: File;
+      signal?: AbortSignal;
+      onProgress?: (percent: number) => void;
+    }) => uploadWorkLogFile(workLogId, file, { signal, onProgress }),
     onSuccess: (file: WorkLogFile) => {
       queryClient.setQueryData<WorkLogFile[]>(filesKey(workLogId), (files = []) => [
         ...files,
         file,
       ]);
+      return queryClient.invalidateQueries({ queryKey: ['work-logs', 'detail', workLogId] });
     },
   });
 }
@@ -55,6 +63,7 @@ export function useDeleteWorkLogFile(workLogId: string) {
       queryClient.setQueryData<WorkLogFile[]>(filesKey(workLogId), (files = []) =>
         files.filter((file) => file.id !== fileId),
       );
+      return queryClient.invalidateQueries({ queryKey: ['work-logs', 'detail', workLogId] });
     },
   });
 }

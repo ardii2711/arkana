@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** belum ada; Phase 11 implementasi selesai (commit `a284143`)
-- **Task berikutnya:** UI polish seluruh halaman (mulai dashboard); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
+- **Task aktif:** UI Polish — Kegiatan & Detail Kegiatan (implementasi selesai, menunggu commit)
+- **Task berikutnya:** UI polish halaman lain satu per satu; audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
 - **Update terakhir:** 19 November 2026
 
 ## Kesiapan Proyek
@@ -527,6 +527,24 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Metadata `title` dan `description` terisi; halaman indexable (berbeda dari `/p/evidence/[token]` yang `noindex`).
 - Tanpa dependency, migration, atau env baru.
 - Pemeriksaan statis: `lint`, `typecheck`, `build` frontend dan backend lulus; file yang diubah lolos `prettier --check --end-of-line auto` (kondisi `format:check` repo tetap terpengaruh `core.autocrlf`).
+
+### UI Polish — Kegiatan & Detail Kegiatan (implementasi selesai, menunggu commit)
+
+- Backend: `GET /work-logs` dan `GET /work-logs/:id` menyertakan `fileCount` (`_count.files`).
+- Toolbar daftar: chip periode `Hari ini | Minggu ini | Bulan ini | Semua` (default Hari ini) + pencarian realtime (debounce 300 ms); filter kategori dan rentang tanggal dihapus dari halaman.
+- Pencarian berlaku lintas tanggal: selama pencarian aktif, periode diabaikan dan chip dinonaktifkan.
+- Filter dan pagination disimpan di URL (`periode`, `q`, `page`) sehingga konteks bertahan setelah kembali dari detail.
+- Baris daftar: tanggal (kiri), nama + uraian, kategori, dan indikator bukti dukung (`N bukti` / `Belum ada bukti`).
+- Empty state per konteks (pencarian, periode kosong) dengan CTA catat kegiatan dan tautan ke periode lain.
+- Detail: aksi `Salin tautan` dan `Buka tautan`; `Ubah`/`Hapus` dipindah ke menu `…`; target/realisasi selalu tampil (`-` bila kosong); indikator bukti dukung pada header.
+- Setelah menyimpan kegiatan baru, daftar kembali ke halaman 1 tanpa pencarian agar item baru terlihat (periode dipertahankan).
+- Unggah/hapus bukti dukung meng-invalidate detail kegiatan agar `fileCount` ikut diperbarui.
+- Dialog unggah bukti dukung baru: `components/shared/file-upload-dialog.tsx` dengan tiga fase (pilih → unggah → selesai), drop zone, thumbnail gambar, validasi inline (format, 5 MB, slot, total 50 MB), ringkasan kapasitas, `Ambil foto` di mobile, progress total + per file, batal via `AbortController` (file selesai tetap tersimpan), retry otomatis sekali untuk kegagalan jaringan/5xx dan retry manual, serta `aria-live` pada ringkasan status.
+- `uploadWorkLogFile` menerima `signal`; `useUploadWorkLogFile` meneruskannya. Dialog bersifat generik namun Arsip belum memakainya (menyusul saat halaman Arsip disentuh).
+- `frontend/src/lib/wita.ts`: helper `weekRangeWita` (Senin–Minggu).
+- `docs/API.md` §5 memperbarui keterangan `fileCount`.
+- Tanpa dependency, migration, atau env baru.
+- Pemeriksaan statis backend dan frontend (`typecheck`, `lint`, `build`): lulus.
 
 ### Audit batch 5 — Frontend mati & konsistensi (DONE, commit `30ec979`)
 

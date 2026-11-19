@@ -1,14 +1,7 @@
 'use client';
 
-import {
-  DownloadIcon,
-  EyeIcon,
-  Loader2Icon,
-  Trash2Icon,
-  TriangleAlertIcon,
-  UploadIcon,
-} from 'lucide-react';
-import { useRef, useState } from 'react';
+import { DownloadIcon, EyeIcon, Trash2Icon, TriangleAlertIcon, UploadIcon } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -26,17 +19,16 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FileUploadDialog, type UploadRequest } from '@/components/shared/file-upload-dialog';
 import { useObjectUrl } from '@/hooks/use-object-url';
 import { getErrorMessage } from '@/lib/api-error';
 import { MAX_FILE_BYTES, MAX_FILES_PER_WORK_LOG, MAX_TOTAL_BYTES_PER_WORK_LOG } from '@/lib/limits';
-import { FILE_ACCEPT, fileExtension, formatFileSize, isAllowedFile } from '@/lib/file-format';
+import { FILE_ACCEPT, fileExtension, formatFileSize } from '@/lib/file-format';
 import { downloadWorkLogFile, type WorkLogFile } from './work-log-file.api';
 import { FileTypeIcon } from '@/components/shared/file-type-icon';
 import {
@@ -46,20 +38,10 @@ import {
   useWorkLogFiles,
 } from './use-work-log-files';
 
-type UploadItem = {
-  key: string;
-  name: string;
-  progress: number;
-  status: 'pending' | 'uploading' | 'done' | 'error';
-  message?: string;
-};
-
 export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
   const query = useWorkLogFiles(workLogId);
   const upload = useUploadWorkLogFile(workLogId);
   const remove = useDeleteWorkLogFile(workLogId);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [preview, setPreview] = useState<WorkLogFile | null>(null);
   const [toDelete, setToDelete] = useState<WorkLogFile | null>(null);
@@ -67,75 +49,13 @@ export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
   const files = query.data ?? [];
   const usedBytes = files.reduce((total, file) => total + file.size, 0);
   const slotsLeft = MAX_FILES_PER_WORK_LOG - files.length;
-  const isUploading = uploads.some(
-    (item) => item.status === 'pending' || item.status === 'uploading',
-  );
+  const bytesLeft = MAX_TOTAL_BYTES_PER_WORK_LOG - usedBytes;
 
   const previewBlob = useWorkLogFileBlob(workLogId, preview?.id ?? '', preview !== null);
   const previewUrl = useObjectUrl(previewBlob.data);
 
-  function patchUpload(index: number, patch: Partial<UploadItem>) {
-    setUploads((items) => items.map((item, i) => (i === index ? { ...item, ...patch } : item)));
-  }
-
-  async function handleSelected(selected: FileList | null) {
-    const incoming = selected ? Array.from(selected) : [];
-    if (inputRef.current) inputRef.current.value = '';
-    if (incoming.length === 0) return;
-
-    const unsupported = incoming.find((file) => !isAllowedFile(file));
-    if (unsupported) {
-      toast.error(`Format ${unsupported.name} tidak didukung.`);
-      return;
-    }
-
-    if (incoming.length > slotsLeft) {
-      toast.error(`Maksimal ${MAX_FILES_PER_WORK_LOG} file per kegiatan. Sisa ${slotsLeft} slot.`);
-      return;
-    }
-
-    const oversized = incoming.find((file) => file.size > MAX_FILE_BYTES);
-    if (oversized) {
-      toast.error(`${oversized.name} melebihi batas ${formatFileSize(MAX_FILE_BYTES)}.`);
-      return;
-    }
-
-    const incomingBytes = incoming.reduce((total, file) => total + file.size, 0);
-    if (usedBytes + incomingBytes > MAX_TOTAL_BYTES_PER_WORK_LOG) {
-      toast.error(
-        `Total bukti dukung kegiatan melebihi ${formatFileSize(MAX_TOTAL_BYTES_PER_WORK_LOG)}.`,
-      );
-      return;
-    }
-
-    setUploads(
-      incoming.map((file) => ({
-        key: crypto.randomUUID(),
-        name: file.name,
-        progress: 0,
-        status: 'pending',
-      })),
-    );
-    setUploadOpen(true);
-
-    let uploaded = 0;
-
-    for (const [index, file] of incoming.entries()) {
-      patchUpload(index, { status: 'uploading' });
-
-      try {
-        await upload.mutateAsync({
-          file,
-          onProgress: (progress) => patchUpload(index, { progress }),
-        });
-        patchUpload(index, { status: 'done', progress: 100 });
-        uploaded += 1;
-      } catch (error) {
-        patchUpload(index, { status: 'error', message: getErrorMessage(error) });
-      }
-    }
-
-    if (uploaded > 0) toast.success(`${uploaded} file diunggah.`);
+  async function handleUpload(file: File, request: UploadRequest) {
+    await upload.mutateAsync({ file, signal: request.signal, onProgress: request.onProgress });
   }
 
   async function handleDownload(file: WorkLogFile) {
@@ -170,32 +90,14 @@ export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
           </p>
         </div>
 
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          accept={FILE_ACCEPT}
-          className="sr-only"
-          aria-label="Pilih file bukti dukung"
-          onChange={(event) => void handleSelected(event.target.files)}
-        />
         <Button
           type="button"
           variant="outline"
-          disabled={isUploading || slotsLeft <= 0}
-          onClick={() => inputRef.current?.click()}
+          disabled={slotsLeft <= 0}
+          onClick={() => setUploadOpen(true)}
         >
-          {isUploading ? (
-            <>
-              <Loader2Icon aria-hidden="true" className="animate-spin" />
-              Mengunggah…
-            </>
-          ) : (
-            <>
-              <UploadIcon />
-              Unggah file
-            </>
-          )}
+          <UploadIcon />
+          Unggah file
         </Button>
       </div>
 
@@ -273,54 +175,21 @@ export function WorkLogEvidence({ workLogId }: { workLogId: string }) {
         </ul>
       )}
 
-      <Dialog
-        open={uploadOpen}
-        onOpenChange={(open) => {
-          if (!open && isUploading) return;
-          setUploadOpen(open);
-        }}
-      >
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Unggah bukti dukung</DialogTitle>
-            <DialogDescription>
-              {isUploading
-                ? 'Jangan tutup jendela ini sampai unggahan selesai.'
-                : 'Unggahan selesai.'}
-            </DialogDescription>
-          </DialogHeader>
-
-          <ul className="space-y-3">
-            {uploads.map((item) => (
-              <li key={item.key} className="space-y-1.5">
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="truncate">{item.name}</span>
-                  <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-                    {item.status === 'done'
-                      ? 'Selesai'
-                      : item.status === 'error'
-                        ? 'Gagal'
-                        : item.status === 'pending'
-                          ? 'Menunggu'
-                          : `${item.progress}%`}
-                  </span>
-                </div>
-                <Progress
-                  value={item.status === 'done' ? 100 : item.progress}
-                  aria-label={`Progres unggah ${item.name}`}
-                />
-                {item.message ? <p className="text-destructive text-xs">{item.message}</p> : null}
-              </li>
-            ))}
-          </ul>
-
-          <DialogFooter>
-            <Button onClick={() => setUploadOpen(false)} disabled={isUploading}>
-              {isUploading ? 'Mengunggah…' : 'Tutup'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {uploadOpen ? (
+        <FileUploadDialog
+          files={[]}
+          accept={FILE_ACCEPT}
+          maxFileBytes={MAX_FILE_BYTES}
+          remainingSlots={slotsLeft}
+          remainingBytes={bytesLeft}
+          title="Unggah bukti dukung"
+          upload={handleUpload}
+          onFinished={({ uploaded }) => {
+            if (uploaded > 0) toast.success(`${uploaded} file diunggah.`);
+          }}
+          onClose={() => setUploadOpen(false)}
+        />
+      ) : null}
 
       <Dialog open={preview !== null} onOpenChange={(open) => !open && setPreview(null)}>
         <DialogContent className="sm:max-w-5xl">

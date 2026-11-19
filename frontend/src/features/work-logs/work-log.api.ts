@@ -12,6 +12,7 @@ export type WorkLog = {
   category: WorkCategory;
   target: string | null;
   realisasi: string | null;
+  fileCount: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -19,7 +20,6 @@ export type WorkLog = {
 export type WorkLogListParams = {
   page: number;
   limit: number;
-  category?: WorkCategory;
   from?: string;
   to?: string;
   search?: string;
@@ -37,7 +37,6 @@ export async function fetchWorkLogs(params: WorkLogListParams): Promise<WorkLogL
     params: {
       page: params.page,
       limit: params.limit,
-      category: params.category || undefined,
       from: params.from || undefined,
       to: params.to || undefined,
       search: params.search || undefined,
