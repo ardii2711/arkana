@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Final Integration & Production Release
 - **Fase aktif:** Phase 12 — Final Integration & Production Release
-- **Task aktif:** P12.1a — Test Infrastructure & Fixture selesai, menunggu commit pengguna
-- **Task berikutnya:** P12.1b — Unit Test Domain Murni
+- **Task aktif:** P12.1b — Unit Test Domain Murni selesai, menunggu commit pengguna
+- **Task berikutnya:** P12.1c — Integration Test Auth, Profil, Akun, Otorisasi
 - **Update terakhir:** 20 November 2026
 
 ## Kesiapan Proyek
@@ -675,6 +675,14 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Hasil: `npm --prefix backend run test` lulus (2 test smoke: health check, buat-login-hapus akun uji); `test:coverage` menghasilkan laporan dengan baseline sementara 27,49% lines (hanya smoke test). `lint` dan `typecheck` backend lulus.
 - Prasyarat yang sudah disiapkan pengguna: Mailpit berjalan dan `backend/.env.test` terisi (DB, R2, SMTP Mailpit, `MAILPIT_URL`, JWT secret, `ALLOW_SHARED_DB_TESTS=1`).
 - Tanpa migration, schema, env produksi, atau perubahan kode aplikasi.
+
+### P12.1b — Unit Test Domain Murni (selesai, menunggu commit)
+
+- File baru di `backend/tests/unit/`: `wita.test.ts`, `file-rules.test.ts`, `report-period.test.ts`, `report-rows.test.ts`, `archive-folders.test.ts`, `schedule-schema.test.ts`.
+- Cakupan: tanggal WITA (`todayWita`, batas hari, `addDaysWita` lintas bulan/tahun, `monthRange` tahun kabisat, `dateRangeEndingAt`), aturan file (ekstensi, MIME kanonik, alias `image/jpg`, previewable, HEIC, batas 5 MB/1 GB), periode laporan (harian, mingguan Senin–Minggu termasuk lintas tahun, bulanan, tahunan, rentang khusus, penolakan rentang kosong, label tanggal/waktu WITA), ringkasan bukti dukung (tanpa file, satu file, penggabungan, pemotongan 255 karakter, nama tunggal sangat panjang), kedalaman/keturunan/tinggi subtree folder arsip, dan schema agenda (offset wajib, `endAt` sebelum `startAt`, patch kosong, normalisasi string kosong, rentang filter terbalik).
+- Hasil: 56 test lulus (7 file); `lint`, `typecheck`, dan Prettier lulus. Coverage naik dari 27,49% menjadi 35,09% lines (unit + smoke).
+- Unit test tidak membuka koneksi database maupun R2; `setup.ts` tetap memuat `.env.test` karena guard env berlaku untuk seluruh suite.
+- Tanpa perubahan kode aplikasi, migration, dependency, atau env.
 
 ### Temuan Di Luar Scope
 
