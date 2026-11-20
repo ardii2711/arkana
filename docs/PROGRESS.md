@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Final Integration & Production Release
 - **Fase aktif:** Phase 12 — Final Integration & Production Release
-- **Task aktif:** P12.1b — Unit Test Domain Murni selesai, menunggu commit pengguna
-- **Task berikutnya:** P12.1c — Integration Test Auth, Profil, Akun, Otorisasi
+- **Task aktif:** P12.1c - Integration Test Auth, Profil, Akun, Otorisasi selesai, menunggu commit pengguna
+- **Task berikutnya:** P12.1d - Integration Test Work Log, Bukti Dukung, Tautan Publik
 - **Update terakhir:** 20 November 2026
 
 ## Kesiapan Proyek
@@ -682,6 +682,15 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Cakupan: tanggal WITA (`todayWita`, batas hari, `addDaysWita` lintas bulan/tahun, `monthRange` tahun kabisat, `dateRangeEndingAt`), aturan file (ekstensi, MIME kanonik, alias `image/jpg`, previewable, HEIC, batas 5 MB/1 GB), periode laporan (harian, mingguan Senin–Minggu termasuk lintas tahun, bulanan, tahunan, rentang khusus, penolakan rentang kosong, label tanggal/waktu WITA), ringkasan bukti dukung (tanpa file, satu file, penggabungan, pemotongan 255 karakter, nama tunggal sangat panjang), kedalaman/keturunan/tinggi subtree folder arsip, dan schema agenda (offset wajib, `endAt` sebelum `startAt`, patch kosong, normalisasi string kosong, rentang filter terbalik).
 - Hasil: 56 test lulus (7 file); `lint`, `typecheck`, dan Prettier lulus. Coverage naik dari 27,49% menjadi 35,09% lines (unit + smoke).
 - Unit test tidak membuka koneksi database maupun R2; `setup.ts` tetap memuat `.env.test` karena guard env berlaku untuk seluruh suite.
+- Tanpa perubahan kode aplikasi, migration, dependency, atau env.
+
+### P12.1c — Integration Test Auth, Profil, Akun, Otorisasi (selesai, menunggu commit)
+
+- File baru di `backend/tests/integration/`: `auth-login.test.ts`, `auth-session.test.ts`, `auth-rate-limit.test.ts`, `auth-email.test.ts`, `profile.test.ts`, `users.test.ts`, `authorization.test.ts`; helper `backend/tests/helpers/files.ts` (byte PNG/PDF dan `FormData`).
+- Cakupan: login gagal/berhasil, cookie `arkana_access`/`arkana_refresh`, `/auth/me`, rotasi refresh sekali pakai (`SESSION_EXPIRED`) dan logout, ganti password (password lama salah, sesi lain dicabut), rate limit login 10 percobaan, aktivasi lewat token undangan Mailpit, reset password sekali pakai + pencabutan sesi, respons netral untuk email tak terdaftar, pembaruan profil dan normalisasi `null`, NIP unik/tidak valid, patch kosong, avatar (unggah/baca/tipe salah/lebih dari 2 MB/hapus), ubah email lewat token, filter dan undangan akun, kirim ulang undangan, perubahan status akun, avatar akun untuk Admin, hapus akun beserta data, serta matriks otorisasi (tamu 401, Admin 403 pada data pribadi, User 403 pada endpoint Admin, resource pengguna lain 404, endpoint publik tanpa sesi).
+- Infrastruktur: `authenticatedClient` membuat klien dengan access token langsung agar test tidak menghabiskan kuota rate limit login; `ApiClient` mendapat `requestRaw` untuk unduhan biner dan `setCookie`; `ensureDbReady` melakukan query ringan dengan percobaan ulang karena Supabase transaction pooler menutup koneksi idle setelah periode tanpa aktivitas.
+- `backend/tests/tsconfig.json` ditambahkan (extends tsconfig utama, `moduleResolution: bundler`, `types: ["node"]`, `noEmit`) agar editor mengenali `process` dan tipe Node pada file test. Script `typecheck` backend kini juga memeriksa folder test.
+- Hasil: 86 test lulus (14 file); `typecheck`, `lint`, dan Prettier lulus. Coverage naik dari 35,09% menjadi 63,51% lines.
 - Tanpa perubahan kode aplikasi, migration, dependency, atau env.
 
 ### Temuan Di Luar Scope

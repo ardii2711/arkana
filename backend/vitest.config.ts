@@ -7,8 +7,8 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     // Database dan R2 dipakai bersama antar-file test, jadi dijalankan berurutan.
     fileParallelism: false,
-    testTimeout: 30_000,
-    hookTimeout: 60_000,
+    testTimeout: 60_000,
+    hookTimeout: 120_000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],

@@ -27,6 +27,31 @@ export class ApiClient {
   constructor(private readonly baseUrl: string) {}
 
   async request<T = unknown>(path: string, options: RequestOptions = {}): Promise<ApiResult<T>> {
+    const response = await this.send(path, options);
+    const text = await response.text();
+    const contentType = response.headers.get('content-type') ?? '';
+    const isJson = contentType.includes('application/json');
+
+    return {
+      status: response.status,
+      body: (text && isJson ? JSON.parse(text) : undefined) as T,
+      headers: response.headers,
+      text,
+    };
+  }
+
+  /** Permintaan untuk respons biner (unduh file, avatar). */
+  async requestRaw(path: string, options: RequestOptions = {}) {
+    const response = await this.send(path, options);
+
+    return {
+      status: response.status,
+      headers: response.headers,
+      bytes: Buffer.from(await response.arrayBuffer()),
+    };
+  }
+
+  private async send(path: string, options: RequestOptions): Promise<Response> {
     const headers = new Headers(options.headers);
     const url = new URL(`/api${path}`, this.baseUrl);
 
@@ -39,7 +64,7 @@ export class ApiClient {
       headers.set('cookie', cookieHeader);
     }
 
-    let body: BodyInit | undefined;
+    let body: string | FormData | undefined;
 
     if (options.json !== undefined) {
       headers.set('content-type', 'application/json');
@@ -57,18 +82,20 @@ export class ApiClient {
 
     this.storeCookies(response.headers);
 
-    const text = await response.text();
-
-    return {
-      status: response.status,
-      body: (text ? JSON.parse(text) : undefined) as T,
-      headers: response.headers,
-      text,
-    };
+    return response;
   }
 
   hasCookie(name: string): boolean {
     return this.cookies.some((cookie) => cookie.name === name);
+  }
+
+  cookie(name: string): string | null {
+    return this.cookies.find((cookie) => cookie.name === name)?.value ?? null;
+  }
+
+  setCookie(name: string, value: string, path = '/'): void {
+    this.cookies = this.cookies.filter((cookie) => cookie.name !== name);
+    this.cookies.push({ name, value, path });
   }
 
   clearCookies(): void {
