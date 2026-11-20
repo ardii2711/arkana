@@ -6,9 +6,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Implementasi Frontend
 - **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** Tidak ada — P11.12a & P11.12b ter-commit gabungan (commit `44e8ac2`)
-- **Task berikutnya:** UI polish halaman berikutnya satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
-- **Update terakhir:** 19 November 2026
+- **Task aktif:** Tidak ada — UI polish halaman autentikasi ter-commit (commit `a3c1215`)
+- **Task berikutnya:** UI polish halaman berikutnya satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, halaman publik bukti dukung); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
+- **Update terakhir:** 20 November 2026
 
 ## Kesiapan Proyek
 
@@ -68,6 +68,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.11 — UI Polish, halaman Arsip:** `DONE` (commit `103a2a0`).
 - **P11.12a — Brand Assets & Penempatan Logo:** `DONE` (commit `44e8ac2`, digabung dengan P11.12b atas keputusan pengguna).
 - **P11.12b — Palet Tema & Dark Mode:** `DONE` (commit `44e8ac2`, digabung dengan P11.12a atas keputusan pengguna).
+- **Penyempurnaan halaman publik `/`:** `DONE` (commit `b7a3262`).
+- **P11.11 — UI Polish, halaman autentikasi:** `DONE` (commit `a3c1215`).
 
 ## Hasil Berjalan
 
@@ -638,6 +640,22 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Sidebar: `SidebarTrigger` header kini tooltip "Tutup sidebar" + kursor `ew-resize`; header aplikasi menampilkan trigger saat sidebar terbuka dan lockup saat tertutup (swap via `useSidebar().state`, mobile selalu trigger); header sidebar expanded menampilkan lockup; hover logo di mode collapsed menampilkan ikon `PanelLeftOpenIcon`, tooltip "Buka sidebar", klik membuka sidebar.
 - Catatan: toggle tema sengaja TIDAK diletakkan di sidebar (sesuai keputusan: header kanan).
 
+### Penyempurnaan Halaman Publik `/` (DONE, commit `b7a3262`)
+
+- Hero baru dengan visual detail kegiatan, bagian "Cara kerjanya", grid enam modul, penjelasan privasi, dan CTA kontak Admin.
+- Env wajib baru `NEXT_PUBLIC_CONTACT_EMAIL` (divalidasi Zod sebagai email) dipakai header, footer, dan CTA halaman publik; `.env.example` diperbarui.
+- Tanpa perubahan backend, schema, atau migration.
+
+### P11.11 — UI Polish Halaman Autentikasi (DONE, commit `a3c1215`)
+
+- `(auth)/layout.tsx` ditulis ulang: tanpa header dan footer; grid 56px `opacity-40` + glow `primary/5`; frame `max-w-md rounded-2xl border p-6 sm:p-8` tanpa latar (grid tetap terlihat menembus); logo lockup di dalam frame; `← Beranda` kiri atas dan `ThemeToggle` kanan atas.
+- `auth-card.tsx` tidak lagi memakai `Card`: judul `<h1>` `text-2xl`/`sm:text-3xl`, deskripsi `mt-1.5`, konten `mt-6`, footer `mt-6 text-center`. Komponen `AuthStatus` baru (ikon lingkaran + teks di kanan, varian `success`/`error`) menggantikan `Alert` pada halaman status.
+- Form login, aktivasi, lupa password, dan reset password: input email polos `h-11` tanpa ikon, `PasswordInput` tanpa ikon gembok (hanya tombol tampil/sembunyikan), `FieldGroup gap-4`, status sukses/gagal memakai `AuthStatus` + CTA tombol penuh.
+- `verify-email-form.tsx` ikut memakai shell dan `AuthStatus` baru.
+- `ui/field.tsx`: label `FieldSeparator` memakai `bg-card`; form auth menimpanya dengan `bg-background` karena halaman auth tidak berlatar card.
+- Palet `globals.css` tidak diubah.
+- Pemeriksaan statis (`lint`, `typecheck`, `build`): lulus; build memuat seluruh route auth. Pengujian UI dilakukan pengguna.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
@@ -694,6 +712,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Arsip: memilih folder menampilkan dokumen folder tersebut beserta seluruh subfoldernya; `fileCount` pada daftar folder adalah total subtree. Filter dan halaman disimpan di URL (`folder`, `q`, `jenis`, `page`); filter urutan dihapus dan urutan tetap waktu unggah terbaru.
 - Arsip: baris dokumen membuka dialog detail; aksi per dokumen berada di satu menu `…` (Unduh, Ubah, Hapus). Dialog unggah hanya menerima satu file karena metadata melekat per dokumen; unggah massal bukan bagian P11.11.
 - Arsip: setiap dokumen disimpan pada "Arsip utama" (root) atau di dalam folder. Entri "Tanpa folder" dihapus dari tree, tetapi pilihan "Arsip utama" tersedia saat unggah dan ubah.
+- Halaman auth tidak memakai header/footer: frame hairline transparan berisi logo sampai CTA, latar grid 56px + glow, `← Beranda` kiri atas dan toggle tema kanan atas.
+- Status auth (aktivasi, reset password, verifikasi email) memakai `AuthStatus` horizontal: ikon lingkaran di kiri, teks di kanan.
+- Input email pada form auth tidak memakai ikon; `PasswordInput` hanya memuat tombol tampil/sembunyikan.
 
 ## Urutan Pengembangan
 
@@ -709,7 +730,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. P11.12a & P11.12b "Brand Identity & Dark Mode" ter-commit gabungan (`44e8ac2`, keputusan pengguna: satu commit karena file bercampur brand+tema).
 2. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
-3. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (commit `75693f2`); UI polish halaman Arsip selesai (commit `103a2a0`); lanjut halaman lain satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, autentikasi/halaman publik, halaman publik bukti dukung).
+3. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (commit `75693f2`); UI polish halaman Arsip selesai (commit `103a2a0`); UI polish halaman autentikasi selesai (commit `a3c1215`); lanjut halaman lain satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, halaman publik bukti dukung).
 4. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
 5. Phase 12 (P12.1 Functional & Integration Testing dan seterusnya) dijadwalkan setelah UI final.
 
