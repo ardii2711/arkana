@@ -4,10 +4,10 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 ## Status
 
-- **Tahap:** Implementasi Frontend
-- **Fase aktif:** Phase 11 — Frontend Core Modules
-- **Task aktif:** Tidak ada — UI polish halaman autentikasi ter-commit (commit `a3c1215`)
-- **Task berikutnya:** UI polish halaman berikutnya satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, halaman publik bukti dukung); audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) ditunda
+- **Tahap:** Final Integration & Production Release
+- **Fase aktif:** Phase 12 — Final Integration & Production Release
+- **Task aktif:** P12.1a — Test Infrastructure & Fixture selesai, menunggu commit pengguna
+- **Task berikutnya:** P12.1b — Unit Test Domain Murni
 - **Update terakhir:** 20 November 2026
 
 ## Kesiapan Proyek
@@ -656,6 +656,26 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Palet `globals.css` tidak diubah.
 - Pemeriksaan statis (`lint`, `typecheck`, `build`): lulus; build memuat seluruh route auth. Pengujian UI dilakukan pengguna.
 
+### Penutupan Phase 11 (keputusan pengguna, tanpa kode)
+
+- P11.11 — UI Polish dianggap selesai atas keputusan pengguna. Halaman yang belum dipoles (Dashboard, Agenda, Catatan, Profil & Akun, halaman publik bukti dukung) tidak dikerjakan pada tahap ini.
+- Gap grafik Dashboard (`PROJECT.md` §5.7: kegiatan per kategori bulan berjalan serta tren 7/30 hari) tetap tercatat sebagai temuan; data sudah tersedia di API tetapi belum dirender.
+- Audit batch 6 (shared component frontend) dan batch 7 (pecah komponen besar) tetap ditunda.
+- Phase 12 dimulai dengan P12.1; rencana P12.1a–P12.1h dicatat di `ROADMAP.md`.
+- Prasyarat P12.1 yang belum dikonfirmasi pengguna: ketersediaan database uji terpisah (`TEST_DATABASE_URL`), bucket/prefix R2 uji, dan penggunaan sink email uji (Mailpit) untuk alur token email.
+
+### P12.1a — Test Infrastructure & Fixture (selesai, menunggu commit)
+
+- Dependency baru (dev): `vitest` 5.1.1 dan `@vitest/coverage-v8` 5.1.1. Tanpa `supertest`; HTTP diuji in-process lewat `app.listen(0)` dan `fetch` native Node.
+- `backend/vitest.config.ts`: environment node, `tests/**/*.test.ts`, `fileParallelism: false` (database/R2 dipakai bersama), coverage v8 (`text`, `html`, `lcov` ke `backend/coverage`), exclude bootstrap (`app.ts`, `server.ts`, `config/`, `generated/`, `types/`).
+- `backend/tests/`: `setup.ts` (muat `.env.test` via `process.loadEnvFile`, paksa `NODE_ENV=test`, `LOG_LEVEL=silent`, guard variabel wajib, guard `ALLOW_SHARED_DB_TESTS=1`, map `DATABASE_URL ← TEST_DATABASE_URL`, disconnect Prisma), `helpers/server.ts`, `helpers/client.ts` (cookie jar path-aware + `expectStatus`), `helpers/fixtures.ts` (Admin uji via Prisma, dua User uji, pembersihan lewat `DELETE /users/:id`), `helpers/mail.ts` (Mailpit: bersihkan inbox, tunggu email, ekstrak token), `integration/smoke.test.ts`.
+- Keputusan pengguna: memakai database dan bucket R2 yang sudah ada (bukan project baru) dengan akun uji berdomain `@e2e.arkana.test`; jaminan lewat guard eksplisit dan pembersihan otomatis di awal serta akhir run.
+- Script baru: backend `test`, `test:watch`, `test:coverage`; root `test`, `test:coverage`. `backend/.env.test.example` ditambahkan (`.env.test` tetap gitignored melalui pola `.env.*`, dengan pengecualian `!.env.test.example`).
+- `README.md`: bagian "Pengujian Backend" (salin `.env.test.example`, jalankan Mailpit, perintah test).
+- Hasil: `npm --prefix backend run test` lulus (2 test smoke: health check, buat-login-hapus akun uji); `test:coverage` menghasilkan laporan dengan baseline sementara 27,49% lines (hanya smoke test). `lint` dan `typecheck` backend lulus.
+- Prasyarat yang sudah disiapkan pengguna: Mailpit berjalan dan `backend/.env.test` terisi (DB, R2, SMTP Mailpit, `MAILPIT_URL`, JWT secret, `ALLOW_SHARED_DB_TESTS=1`).
+- Tanpa migration, schema, env produksi, atau perubahan kode aplikasi.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
@@ -730,9 +750,10 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. P11.12a & P11.12b "Brand Identity & Dark Mode" ter-commit gabungan (`44e8ac2`, keputusan pengguna: satu commit karena file bercampur brand+tema).
 2. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
-3. UI polish halaman Kegiatan (daftar, detail, bukti dukung) selesai (commit `5f13a42`); UI polish halaman Laporan selesai (commit `75693f2`); UI polish halaman Arsip selesai (commit `103a2a0`); UI polish halaman autentikasi selesai (commit `a3c1215`); lanjut halaman lain satu per satu sesuai urutan `ROADMAP.md` P11.11 (Dashboard, Agenda, Catatan, Profil & Akun, halaman publik bukti dukung).
-4. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
-5. Phase 12 (P12.1 Functional & Integration Testing dan seterusnya) dijadwalkan setelah UI final.
+3. Phase 11 ditutup atas keputusan pengguna: UI polish halaman Kegiatan (commit `5f13a42`), Laporan (`75693f2`), Arsip (`103a2a0`), dan autentikasi (`a3c1215`) selesai; halaman lain dianggap selesai tanpa dipoles.
+4. Phase 12 dimulai: P12.1 dipecah menjadi P12.1a (infrastruktur test), P12.1b (unit test), P12.1c–P12.1e (integration test per kelompok modul), P12.1f (coverage baseline & threshold), P12.1g (checklist UI manual), P12.1h (bugfix & dokumentasi). Mulai dari P12.1a setelah prasyarat lingkungan uji dikonfirmasi.
+5. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
+6. P12.2 dan seterusnya dijadwalkan setelah P12.1 selesai.
 
 ## Aturan Pembaruan
 

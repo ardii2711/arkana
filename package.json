@@ -16,6 +16,8 @@
     "format:check": "npm --prefix backend run format:check",
     "format:check:frontend": "npm --prefix frontend run format:check",
     "check:file-rules": "npm --prefix backend run check:file-rules",
-    "check:archive-folders": "npm --prefix backend run check:archive-folders"
+    "check:archive-folders": "npm --prefix backend run check:archive-folders",
+    "test": "npm --prefix backend run test",
+    "test:coverage": "npm --prefix backend run test:coverage"
   }
 }

@@ -22,7 +22,10 @@
     "check:archive-folders": "tsx scripts/check-archive-folders.ts",
     "check:report-format": "tsx scripts/check-report-format.ts",
     "check:schedule-rules": "tsx scripts/check-schedule-rules.ts",
-    "check:dashboard": "tsx scripts/check-dashboard.ts"
+    "check:dashboard": "tsx scripts/check-dashboard.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1169.0",
@@ -56,6 +59,7 @@
     "@types/node": "^24.19.2",
     "@types/nodemailer": "^8.0.2",
     "@types/pdfkit": "^0.17.7",
+    "@vitest/coverage-v8": "^5.1.1",
     "eslint": "^10.15.0",
     "eslint-config-prettier": "^10.1.8",
     "pino-pretty": "^13.2.0",
@@ -63,7 +67,8 @@
     "prisma": "7.10.1",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.72.2"
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^5.1.1"
   },
   "prettier": {
     "singleQuote": true,

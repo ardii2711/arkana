@@ -42,17 +42,32 @@ Salin `frontend/.env.example` menjadi `frontend/.env.local`, lalu sesuaikan `NEX
 
 ## Perintah Root
 
-| Perintah | Fungsi |
-| --- | --- |
-| `npm run dev` | Jalankan backend (watch mode) |
-| `npm run dev:frontend` | Jalankan frontend (Next.js dev) |
-| `npm run build` | Build backend ke `backend/dist` |
-| `npm run build:frontend` | Build frontend |
-| `npm start` | Jalankan backend hasil build |
-| `npm run typecheck` | Pemeriksaan TypeScript backend |
-| `npm run typecheck:frontend` | Pemeriksaan TypeScript frontend |
-| `npm run lint` | ESLint backend |
-| `npm run lint:frontend` | ESLint frontend |
-| `npm run format` | Prettier backend (tulis) |
-| `npm run format:check` | Prettier backend (cek) |
-| `npm run format:check:frontend` | Prettier frontend (cek) |
+| Perintah                        | Fungsi                          |
+| ------------------------------- | ------------------------------- |
+| `npm run dev`                   | Jalankan backend (watch mode)   |
+| `npm run dev:frontend`          | Jalankan frontend (Next.js dev) |
+| `npm run build`                 | Build backend ke `backend/dist` |
+| `npm run build:frontend`        | Build frontend                  |
+| `npm start`                     | Jalankan backend hasil build    |
+| `npm run typecheck`             | Pemeriksaan TypeScript backend  |
+| `npm run typecheck:frontend`    | Pemeriksaan TypeScript frontend |
+| `npm run lint`                  | ESLint backend                  |
+| `npm run lint:frontend`         | ESLint frontend                 |
+| `npm run format`                | Prettier backend (tulis)        |
+| `npm run format:check`          | Prettier backend (cek)          |
+| `npm run format:check:frontend` | Prettier frontend (cek)         |
+
+## Pengujian Backend
+
+Test memakai Vitest dan berjalan in-process terhadap database serta R2 yang dikonfigurasi di `backend/.env.test`.
+
+1. Salin `backend/.env.test.example` menjadi `backend/.env.test`, lalu isi nilainya. `TEST_DATABASE_URL` diisi nilai `DATABASE_URL` dari `backend/.env`.
+2. Jalankan Mailpit (`mailpit`) agar alur email dapat diuji. UI di `http://localhost:8025`, SMTP di port `1025`.
+3. Jalankan test:
+
+```bash
+npm run test
+npm run test:coverage
+```
+
+Test membuat akun dengan domain `@e2e.arkana.test` lalu menghapusnya di akhir. Karena memakai database aplikasi, jangan jalankan saat aplikasi sedang dipakai orang lain.

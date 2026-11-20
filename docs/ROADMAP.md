@@ -444,6 +444,64 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Acceptance Criteria:** Seluruh alur utama berjalan dan tidak ada kegagalan kritis.
 - **Dependencies:** Seluruh task implementasi P1.1–P11.12b.
 
+Pendekatan: pengujian otomatis backend dengan Vitest + `@vitest/coverage-v8` (tanpa `supertest`; HTTP in-process lewat `app.listen(0)` dan `fetch` native Node), lalu checklist UI manual. Task dikerjakan berurutan.
+
+#### P12.1a — Test Infrastructure & Fixture
+
+- **Objective:** Menyediakan kerangka pengujian otomatis backend beserta isolasi data uji dan helper bersama.
+- **Scope:** `backend/vitest.config.ts` (environment node, setup, coverage v8 dengan laporan `text`/`html`/`lcov`), `backend/tests/setup.ts`, helper `server.ts` (listen port 0), `client.ts` (fetch + cookie jar + assert), `fixtures.ts` (Admin dari env, dua akun User uji untuk kepemilikan silang, pembersihan melalui `DELETE /users/:id`), guard env uji wajib, script `test`/`test:coverage`/`test:watch`, `coverage/` pada `.gitignore`.
+- **Acceptance Criteria:** Suite kosong berjalan tanpa error; suite menolak jalan bila `DATABASE_URL` tidak menunjuk database uji; akun dan data uji terbuat serta terhapus otomatis.
+- **Dependencies:** P11.12b.
+
+#### P12.1b — Unit Test Domain Murni
+
+- **Objective:** Menguji logika domain yang tidak membutuhkan database maupun R2.
+- **Scope:** Unit test untuk `lib/wita.ts`, `lib/file-rules.ts`, `report.period.ts`, `report.rows.ts`, aturan kedalaman/siklus folder arsip, dan validasi rentang agenda.
+- **Acceptance Criteria:** Seluruh unit test lulus tanpa koneksi eksternal.
+- **Dependencies:** P12.1a.
+
+#### P12.1c — Integration Test Auth, Profil, Akun, Otorisasi
+
+- **Objective:** Memverifikasi autentikasi, pengelolaan akun, dan penegakan otorisasi terhadap server dan database nyata.
+- **Scope:** Login, `/auth/me`, refresh + rotasi, logout, rate limit; aktivasi, reset password, dan verifikasi email baru (otomatis bila tersedia sink email uji, selain itu manual); `PATCH /profile`, NIP unik, avatar, perubahan email; daftar akun Admin dengan filter status/pencarian, avatar User, hapus User, penolakan hapus Admin; matriks negatif User→endpoint Admin `403`, Admin→endpoint data `403`, User A→resource User B `404`.
+- **Acceptance Criteria:** Seluruh kasus pada matriks lulus dan tidak ada kebocoran data lintas pengguna.
+- **Dependencies:** P12.1a.
+
+#### P12.1d — Integration Test Work Log, Bukti Dukung, Tautan Publik
+
+- **Objective:** Memverifikasi pencatatan kegiatan, pengelolaan file bukti dukung, dan halaman publik beserta batasannya.
+- **Scope:** CRUD kegiatan, filter kategori/tanggal/pencarian, pagination, `target`/`realisasi`, aturan tanggal WITA; upload PNG/PDF, preview inline, unduh, hapus, penolakan tipe dan ukuran, konsistensi metadata; tautan publik tanpa sesi, file inline/attachment, token salah `404`, file kegiatan lain `404`.
+- **Acceptance Criteria:** Alur kegiatan dan bukti dukung lulus termasuk seluruh kasus batas file dan otorisasi.
+- **Dependencies:** P12.1c.
+
+#### P12.1e — Integration Test Arsip, Laporan, Agenda, Notes, Dashboard
+
+- **Objective:** Memverifikasi modul data pribadi lainnya dan konsistensi data dashboard.
+- **Scope:** Folder arsip maksimal 3 level, nama duplikat `409`, hapus folder berisi, pencegahan siklus, dokumen CRUD, kuota, tampilan subtree; rekap laporan dan ekspor XLSX/PDF beserta header respons; agenda CRUD, rentang waktu, filter WITA; notes CRUD, pin, pencarian; ringkasan dashboard sesuai data uji.
+- **Acceptance Criteria:** Seluruh modul lulus dan angka dashboard konsisten dengan data yang dibuat pengujian.
+- **Dependencies:** P12.1d.
+
+#### P12.1f — Coverage Baseline & Threshold
+
+- **Objective:** Mengukur cakupan pengujian dan menetapkan ambang minimal yang wajar.
+- **Scope:** Jalankan `test:coverage`, dokumentasikan baseline per direktori (`src/lib`, `src/modules`), tetapkan threshold pada `vitest.config.ts` beserta pengecualian bootstrap (`app.ts`, `server.ts`, `config/env.ts`).
+- **Acceptance Criteria:** Baseline tercatat dan suite gagal bila cakupan turun di bawah threshold yang disetujui.
+- **Dependencies:** P12.1b–P12.1e.
+
+#### P12.1g — Checklist UI Manual
+
+- **Objective:** Memverifikasi antarmuka end-to-end pada browser.
+- **Scope:** Login dan Google OAuth, aktivasi, reset password, profil, kegiatan beserta unggah/preview/unduh/hapus, salin tautan publik, arsip, laporan beserta ekspor, agenda, catatan, dashboard, akun Admin, halaman publik `/` dan `/p/evidence/[token]`; desktop dan mobile, tema terang dan gelap.
+- **Acceptance Criteria:** Seluruh butir checklist dijalankan pengguna dan hasilnya dicatat.
+- **Dependencies:** P12.1c–P12.1e.
+
+#### P12.1h — Bugfix & Dokumentasi Hasil Uji
+
+- **Objective:** Menutup kegagalan yang ditemukan pengujian dan mencatat hasilnya.
+- **Scope:** Perbaikan bug dengan commit terpisah per perbaikan; pencatatan hasil, coverage baseline, dan temuan sisa di `PROGRESS.md`.
+- **Acceptance Criteria:** Tidak ada kegagalan kritis tersisa dan hasil pengujian terdokumentasi.
+- **Dependencies:** P12.1a–P12.1g.
+
 ### P12.2 — Security & Performance Verification
 
 - **Objective:** Memastikan keamanan akses data dan performa aplikasi memadai sebelum rilis.
