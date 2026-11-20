@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2Icon, MailIcon, TriangleAlertIcon } from 'lucide-react';
+import { Loader2Icon, TriangleAlertIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -12,7 +12,7 @@ import { PasswordInput } from '@/components/shared/password-input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field';
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { Input } from '@/components/ui/input';
 import { env } from '@/config/env';
 import { getErrorMessage } from '@/lib/api-error';
 import { AuthCard } from './auth-card';
@@ -56,9 +56,9 @@ export function LoginForm() {
   }
 
   return (
-    <AuthCard title="Masuk" description="Gunakan akun ARKANA yang terdaftar.">
+    <AuthCard title="Masuk" description="Gunakan akun ARKANA yang diundang Admin.">
       <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-        <FieldGroup>
+        <FieldGroup className="gap-4">
           {errorMessage ? (
             <Alert variant="destructive">
               <TriangleAlertIcon />
@@ -72,21 +72,17 @@ export function LoginForm() {
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="login-email">Email</FieldLabel>
-                <InputGroup className="h-11">
-                  <InputGroupInput
-                    {...field}
-                    className="h-full"
-                    id="login-email"
-                    type="email"
-                    autoComplete="username"
-                    placeholder="nama@instansi.go.id"
-                    aria-invalid={fieldState.invalid}
-                    disabled={login.isPending}
-                  />
-                  <InputGroupAddon align="inline-start">
-                    <MailIcon aria-hidden="true" className="opacity-60" />
-                  </InputGroupAddon>
-                </InputGroup>
+                <Input
+                  {...field}
+                  className="h-11"
+                  id="login-email"
+                  type="email"
+                  autoComplete="username"
+                  autoFocus
+                  placeholder="nama@instansi.go.id"
+                  aria-invalid={fieldState.invalid}
+                  disabled={login.isPending}
+                />
                 {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
               </Field>
             )}
@@ -130,7 +126,9 @@ export function LoginForm() {
             )}
           </Button>
 
-          <FieldSeparator>atau</FieldSeparator>
+          <FieldSeparator className="[&_[data-slot=field-separator-content]]:bg-background">
+            atau
+          </FieldSeparator>
 
           <Button asChild variant="outline" className="h-11 w-full">
             <a href={`${env.NEXT_PUBLIC_API_URL}/auth/google`}>

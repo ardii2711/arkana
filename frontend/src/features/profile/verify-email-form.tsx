@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { getErrorMessage } from '@/lib/api-error';
-import { AuthCard } from '@/features/auth/auth-card';
+import { AuthCard, AuthStatus } from '@/features/auth/auth-card';
 import { useVerifyEmailChange } from './use-profile';
 
 export function VerifyEmailForm() {
@@ -27,15 +27,14 @@ export function VerifyEmailForm() {
         title="Tautan tidak valid"
         description="Tautan verifikasi email tidak lengkap."
         footer={
-          <Link className="text-foreground font-medium hover:underline" href="/profil">
-            Kembali ke profil
-          </Link>
+          <Button asChild variant="outline" className="h-11 w-full">
+            <Link href="/profil">Kembali ke profil</Link>
+          </Button>
         }
       >
-        <Alert variant="destructive">
-          <TriangleAlertIcon />
-          <AlertDescription>Buka tautan verifikasi langsung dari email Anda.</AlertDescription>
-        </Alert>
+        <AuthStatus icon={<TriangleAlertIcon />} variant="error">
+          Buka tautan verifikasi langsung dari email Anda.
+        </AuthStatus>
       </AuthCard>
     );
   }
@@ -43,10 +42,9 @@ export function VerifyEmailForm() {
   if (verify.isPending) {
     return (
       <AuthCard title="Verifikasi email" description="Mohon tunggu sebentar.">
-        <div className="flex items-center gap-3">
-          <Loader2Icon className="text-muted-foreground size-5 animate-spin" aria-hidden="true" />
-          <p className="text-muted-foreground text-sm">Memverifikasi email Anda…</p>
-        </div>
+        <AuthStatus icon={<Loader2Icon className="animate-spin" />}>
+          Memverifikasi email Anda…
+        </AuthStatus>
       </AuthCard>
     );
   }
@@ -57,18 +55,15 @@ export function VerifyEmailForm() {
         title="Email diperbarui"
         description="Email akun Anda berhasil diverifikasi dan diperbarui."
         footer={
-          <Link className="text-foreground font-medium hover:underline" href="/profil">
-            Kembali ke profil
-          </Link>
+          <Button asChild className="h-11 w-full">
+            <Link href="/profil">Kembali ke profil</Link>
+          </Button>
         }
       >
-        <Alert>
-          <CircleCheckIcon />
-          <AlertDescription>
-            Gunakan email baru Anda saat masuk berikutnya. Notifikasi telah dikirim ke alamat lama
-            dan baru.
-          </AlertDescription>
-        </Alert>
+        <AuthStatus icon={<CircleCheckIcon />}>
+          Gunakan email baru Anda saat masuk berikutnya. Notifikasi telah dikirim ke alamat lama dan
+          baru.
+        </AuthStatus>
       </AuthCard>
     );
   }
@@ -78,15 +73,14 @@ export function VerifyEmailForm() {
       title="Verifikasi gagal"
       description="Tautan verifikasi tidak dapat digunakan."
       footer={
-        <Link className="text-foreground font-medium hover:underline" href="/profil">
-          Ajukan ulang di halaman profil
-        </Link>
+        <Button asChild variant="outline" className="h-11 w-full">
+          <Link href="/profil">Ajukan ulang di halaman profil</Link>
+        </Button>
       }
     >
-      <Alert variant="destructive">
-        <TriangleAlertIcon />
-        <AlertDescription>{getErrorMessage(verify.error)}</AlertDescription>
-      </Alert>
+      <AuthStatus icon={<TriangleAlertIcon />} variant="error">
+        {getErrorMessage(verify.error)}
+      </AuthStatus>
     </AuthCard>
   );
 }

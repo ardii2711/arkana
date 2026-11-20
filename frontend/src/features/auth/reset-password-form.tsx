@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { getErrorMessage } from '@/lib/api-error';
-import { AuthCard } from './auth-card';
+import { AuthCard, AuthStatus } from './auth-card';
 import { newPasswordSchema, type NewPasswordValues } from './auth.schemas';
 import { useResetPassword } from './use-auth';
 
@@ -42,15 +42,14 @@ export function ResetPasswordForm() {
         title="Password diperbarui"
         description="Password baru sudah tersimpan."
         footer={
-          <Link className="text-foreground font-medium hover:underline" href="/login">
-            Masuk ke ARKANA
-          </Link>
+          <Button asChild className="h-11 w-full">
+            <Link href="/login">Masuk ke ARKANA</Link>
+          </Button>
         }
       >
-        <Alert>
-          <CircleCheckIcon />
-          <AlertDescription>Silakan masuk menggunakan password baru Anda.</AlertDescription>
-        </Alert>
+        <AuthStatus icon={<CircleCheckIcon />}>
+          Silakan masuk menggunakan password baru Anda.
+        </AuthStatus>
       </AuthCard>
     );
   }
@@ -61,15 +60,14 @@ export function ResetPasswordForm() {
         title="Tautan tidak valid"
         description="Tautan reset password tidak lengkap."
         footer={
-          <Link className="text-foreground font-medium hover:underline" href="/lupa-password">
-            Minta tautan baru
-          </Link>
+          <Button asChild variant="outline" className="h-11 w-full">
+            <Link href="/lupa-password">Minta tautan baru</Link>
+          </Button>
         }
       >
-        <Alert variant="destructive">
-          <TriangleAlertIcon />
-          <AlertDescription>Buka tautan reset password langsung dari email Anda.</AlertDescription>
-        </Alert>
+        <AuthStatus icon={<TriangleAlertIcon />} variant="error">
+          Buka tautan reset password langsung dari email Anda.
+        </AuthStatus>
       </AuthCard>
     );
   }
@@ -77,7 +75,7 @@ export function ResetPasswordForm() {
   return (
     <AuthCard title="Reset password" description="Buat password baru untuk akun Anda.">
       <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-        <FieldGroup>
+        <FieldGroup className="gap-4">
           {formError ? (
             <Alert variant="destructive">
               <TriangleAlertIcon />

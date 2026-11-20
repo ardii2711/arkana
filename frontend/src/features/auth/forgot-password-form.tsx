@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2Icon, MailCheckIcon, MailIcon, TriangleAlertIcon } from 'lucide-react';
+import { Loader2Icon, MailCheckIcon, TriangleAlertIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -9,7 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { Input } from '@/components/ui/input';
 import { getErrorMessage } from '@/lib/api-error';
 import { AuthCard } from './auth-card';
 import { forgotPasswordSchema, type ForgotPasswordValues } from './auth.schemas';
@@ -51,7 +51,7 @@ export function ForgotPasswordForm() {
         </Alert>
       ) : (
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-          <FieldGroup>
+          <FieldGroup className="gap-4">
             {formError ? (
               <Alert variant="destructive">
                 <TriangleAlertIcon />
@@ -65,21 +65,16 @@ export function ForgotPasswordForm() {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="forgot-email">Email</FieldLabel>
-                  <InputGroup className="h-11">
-                    <InputGroupInput
-                      {...field}
-                      className="h-full"
-                      id="forgot-email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="nama@instansi.go.id"
-                      aria-invalid={fieldState.invalid}
-                      disabled={requestReset.isPending}
-                    />
-                    <InputGroupAddon align="inline-start">
-                      <MailIcon aria-hidden="true" className="opacity-60" />
-                    </InputGroupAddon>
-                  </InputGroup>
+                  <Input
+                    {...field}
+                    className="h-11"
+                    id="forgot-email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="nama@instansi.go.id"
+                    aria-invalid={fieldState.invalid}
+                    disabled={requestReset.isPending}
+                  />
                   {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
                 </Field>
               )}

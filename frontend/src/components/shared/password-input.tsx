@@ -1,6 +1,6 @@
 'use client';
 
-import { EyeIcon, EyeOffIcon, LockIcon } from 'lucide-react';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useState, type ComponentProps } from 'react';
 
 import {
@@ -16,9 +16,6 @@ export function PasswordInput({ ...props }: ComponentProps<'input'>) {
   return (
     <InputGroup className="h-11">
       <InputGroupInput {...props} className="h-full" type={visible ? 'text' : 'password'} />
-      <InputGroupAddon align="inline-start">
-        <LockIcon aria-hidden="true" className="opacity-60" />
-      </InputGroupAddon>
       <InputGroupAddon align="inline-end">
         <InputGroupButton
           size="icon-sm"

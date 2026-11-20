@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { getErrorMessage } from '@/lib/api-error';
-import { AuthCard } from './auth-card';
+import { AuthCard, AuthStatus } from './auth-card';
 import { newPasswordSchema, type NewPasswordValues } from './auth.schemas';
 import { useActivateAccount, useActivationInfo } from './use-auth';
 
@@ -48,17 +48,14 @@ export function ActivateForm() {
         title="Aktivasi tidak valid"
         description="Tautan aktivasi tidak valid atau sudah kedaluwarsa."
         footer={
-          <Link className="text-foreground font-medium hover:underline" href="/login">
-            Kembali ke halaman masuk
-          </Link>
+          <Button asChild variant="outline" className="h-11 w-full">
+            <Link href="/login">Kembali ke halaman masuk</Link>
+          </Button>
         }
       >
-        <Alert variant="destructive">
-          <TriangleAlertIcon />
-          <AlertDescription>
-            Minta Admin mengirim ulang undangan, lalu buka tautan terbaru dari email Anda.
-          </AlertDescription>
-        </Alert>
+        <AuthStatus icon={<TriangleAlertIcon />} variant="error">
+          Minta Admin mengirim ulang undangan, lalu buka tautan terbaru dari email Anda.
+        </AuthStatus>
       </AuthCard>
     );
   }
@@ -69,15 +66,12 @@ export function ActivateForm() {
         title="Akun aktif"
         description="Password berhasil dibuat. Silakan masuk."
         footer={
-          <Link className="text-foreground font-medium hover:underline" href="/login">
-            Masuk ke ARKANA
-          </Link>
+          <Button asChild className="h-11 w-full">
+            <Link href="/login">Masuk ke ARKANA</Link>
+          </Button>
         }
       >
-        <Alert>
-          <CircleCheckIcon />
-          <AlertDescription>Akun Anda sudah dapat digunakan.</AlertDescription>
-        </Alert>
+        <AuthStatus icon={<CircleCheckIcon />}>Akun Anda sudah dapat digunakan.</AuthStatus>
       </AuthCard>
     );
   }
@@ -88,7 +82,7 @@ export function ActivateForm() {
       description={info.data ? `${info.data.name} · ${info.data.email}` : 'Memuat data akun…'}
     >
       <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-        <FieldGroup>
+        <FieldGroup className="gap-4">
           {formError ? (
             <Alert variant="destructive">
               <TriangleAlertIcon />
