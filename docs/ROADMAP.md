@@ -418,6 +418,8 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Acceptance Criteria:** Setiap halaman memakai pola informasi, filter, dan aksi yang konsisten; pemeriksaan statis lulus; perilaku diverifikasi pengguna.
 - **Dependencies:** P11.10b.
 
+**Status (23 November 2026):** Seluruh halaman dalam scope selesai dipoles. Halaman Agenda (`8b576ec`) dan Catatan (`bc710f6`) dikerjakan terakhir.
+
 ### P11.12a — Brand Assets & Penempatan Logo
 
 - **Objective:** Menerapkan identitas merek ARKANA (logo, favicon, Open Graph, manifest) pada antarmuka.

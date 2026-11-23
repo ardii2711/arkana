@@ -6,7 +6,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Final Integration & Production Release
 - **Fase aktif:** Phase 12 — Final Integration & Production Release
-- **Task aktif:** UI Polish — halaman Agenda & Catatan (selesai, menunggu commit)
+- **Task aktif:** Tidak ada (UI Polish Agenda & Catatan selesai)
 - **Task berikutnya:** P12.2 — Security & Performance Verification
 - **Update terakhir:** 23 November 2026
 
@@ -70,6 +70,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.12b — Palet Tema & Dark Mode:** `DONE` (commit `44e8ac2`, digabung dengan P11.12a atas keputusan pengguna).
 - **Penyempurnaan halaman publik `/`:** `DONE` (commit `b7a3262`).
 - **P11.11 — UI Polish, halaman autentikasi:** `DONE` (commit `a3c1215`).
+- **UI Polish — Agenda & Penghapusan Kategori:** `DONE` (commit `8b576ec`, migration `20261123090000_remove_schedule_category`).
+- **UI Polish — Catatan:** `DONE` (commit `bc710f6`).
 
 ## Hasil Berjalan
 
@@ -436,6 +438,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Form: judul, deskripsi opsional, sepanjang hari (waktu disembunyikan), tanggal dan jam mulai, tanggal dan jam selesai opsional (`selesai >= mulai` divalidasi di client dan backend), tempat, kategori, status. Waktu dikirim sebagai ISO WITA dan ditampilkan dengan `Intl` zona `Asia/Makassar`.
 - Hapus memakai `AlertDialog`; aksi tambah/ubah memakai dialog yang sama (mode lintas edit/create).
 - Pemeriksaan statis (`lint`, `typecheck`, `format:check`, `build`): lulus; build menghasilkan route `/agenda`. Pengujian UI dilakukan pengguna. Status P11.3 dan bugfix WITA ikut commit ini.
+- Kalender dan tab periode kemudian dihapus pada UI polish Agenda (`8b576ec`); halaman kini hanya berisi daftar `Hari ini` dan `Mendatang`.
 
 ### P11.5 — Notes (DONE, commit `f9add48`)
 
@@ -700,7 +703,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Residu: modul di luar auth/profil/akun belum memiliki integration test dan checklist UI manual belum dijalankan.
 - `ROADMAP.md` P12.1d–P12.1h ditandai dilewati, bukan `DONE`.
 
-### UI Polish — Agenda & Penghapusan Kategori (selesai, menunggu commit)
+### UI Polish — Agenda & Penghapusan Kategori (DONE, commit `8b576ec`)
 
 - Backend:
   - Kategori agenda dihapus sesuai keputusan pengguna: `enum ScheduleCategory` dan `Schedule.category` dihapus dari `schema.prisma`; migration `20261123090000_remove_schedule_category` berisi `DROP COLUMN` + `DROP TYPE` dan sudah dijalankan pengguna (`prisma migrate status`: up to date).
@@ -718,9 +721,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
   - Agenda `CANCELLED` dicoret, `DONE` diredupkan; empty state memakai `Card` putus-putus dengan CTA.
   - Form: kategori dihapus, label waktu menyebut WITA, validasi `endDate`/`endTime` diperbaiki (termasuk all-day), ternary mati dihapus.
   - Dashboard User memakai `scheduleTimeLabel` (pengganti `scheduleDateLabel`).
-- Pemeriksaan: backend `typecheck`, `lint`, `build`, `check:schedule-rules`, `check:dashboard` lulus; frontend `typecheck`, `lint`, `build` lulus. Render `/agenda` diverifikasi pada Chrome headless dengan akun pengguna: agenda hari ini dan mendatang tampil, filter status bekerja. Tidak ada perubahan schema pada task ini.
+- Pemeriksaan: backend `typecheck`, `lint`, `build`, `check:schedule-rules`, `check:dashboard` lulus; frontend `typecheck`, `lint`, `build` lulus. Render `/agenda` diverifikasi pada Chrome headless dengan akun pengguna: agenda hari ini dan mendatang tampil, filter status bekerja. Migration baru sudah dijalankan pengguna (`prisma migrate status`: up to date).
 
-### UI Polish — Catatan (selesai, menunggu commit)
+### UI Polish — Catatan (DONE, commit `bc710f6`)
 
 - `note-view.tsx`: state di URL (`q`, `sematkan`, `page`), pencarian debounce 300 ms + tombol hapus, toggle `Disematkan`; halaman di-clamp otomatis bila data menyusut; pagination ringkas `Menampilkan x–y dari z catatan`; error state dengan tombol `Coba lagi`; empty state `Card` putus-putus dengan CTA (tulis catatan / hapus filter).
 - `note-card.tsx`: aksi lewat menu `…` (`Ubah`, `Hapus`) agar hapus tidak sekali klik; pin dan hapus memakai toast sukses/gagal; dialog hapus tetap terbuka saat request gagal; footer menampilkan `Diperbarui …` dan penanda visual catatan tersemat; hover ring memberi afordansi kartu dapat dibuka.
@@ -804,7 +807,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. P11.12a & P11.12b "Brand Identity & Dark Mode" ter-commit gabungan (`44e8ac2`, keputusan pengguna: satu commit karena file bercampur brand+tema).
 2. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
-3. Phase 11 ditutup atas keputusan pengguna: UI polish halaman Kegiatan (commit `5f13a42`), Laporan (`75693f2`), Arsip (`103a2a0`), dan autentikasi (`a3c1215`) selesai; halaman lain dianggap selesai tanpa dipoles. UI polish halaman Agenda dan Catatan dikerjakan menyusul.
+3. Phase 11 ditutup atas keputusan pengguna: UI polish halaman Kegiatan (commit `5f13a42`), Laporan (`75693f2`), Arsip (`103a2a0`), dan autentikasi (`a3c1215`) selesai; halaman lain dianggap selesai tanpa dipoles. UI polish halaman Agenda (`8b576ec`) dan Catatan (`bc710f6`) selesai.
 4. Phase 12 dimulai: P12.1a (infrastruktur test, `3dafaab`), P12.1b (unit test, `50b2a0d`), dan P12.1c (integration test auth/profil/akun/otorisasi, `92de968`) selesai. P12.1d–P12.1h dilewati atas keputusan pengguna; P12.1 ditutup.
 5. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
 6. Urutan berikutnya: P12.2 — Security & Performance Verification, P12.3 — Production Deployment, P12.4 — Backup & Recovery.
