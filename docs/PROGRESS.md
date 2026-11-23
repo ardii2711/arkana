@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Final Integration & Production Release
 - **Fase aktif:** Phase 12 — Final Integration & Production Release
-- **Task aktif:** UI Polish — halaman Agenda (selesai, menunggu commit); Catatan berikutnya
-- **Task berikutnya:** UI Polish — halaman Catatan
+- **Task aktif:** UI Polish — halaman Agenda & Catatan (selesai, menunggu commit)
+- **Task berikutnya:** P12.2 — Security & Performance Verification
 - **Update terakhir:** 23 November 2026
 
 ## Kesiapan Proyek
@@ -720,6 +720,15 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
   - Dashboard User memakai `scheduleTimeLabel` (pengganti `scheduleDateLabel`).
 - Pemeriksaan: backend `typecheck`, `lint`, `build`, `check:schedule-rules`, `check:dashboard` lulus; frontend `typecheck`, `lint`, `build` lulus. Render `/agenda` diverifikasi pada Chrome headless dengan akun pengguna: agenda hari ini dan mendatang tampil, filter status bekerja. Tidak ada perubahan schema pada task ini.
 
+### UI Polish — Catatan (selesai, menunggu commit)
+
+- `note-view.tsx`: state di URL (`q`, `sematkan`, `page`), pencarian debounce 300 ms + tombol hapus, toggle `Disematkan`; halaman di-clamp otomatis bila data menyusut; pagination ringkas `Menampilkan x–y dari z catatan`; error state dengan tombol `Coba lagi`; empty state `Card` putus-putus dengan CTA (tulis catatan / hapus filter).
+- `note-card.tsx`: aksi lewat menu `…` (`Ubah`, `Hapus`) agar hapus tidak sekali klik; pin dan hapus memakai toast sukses/gagal; dialog hapus tetap terbuka saat request gagal; footer menampilkan `Diperbarui …` dan penanda visual catatan tersemat; hover ring memberi afordansi kartu dapat dibuka.
+- `note-editor-dialog.tsx`: konfirmasi `Buang perubahan?` saat menutup lewat `Batal`, `Esc`, atau klik luar dengan perubahan belum disimpan; cabang counter karakter yang tidak terjangkau dihapus.
+- `catatan/page.tsx`: `NoteView` dibungkus `Suspense` karena memakai `useSearchParams`.
+- Backend, schema, API, dan migration tidak berubah.
+- Pemeriksaan: frontend `typecheck`, `lint`, `build` lulus; render `/catatan`, `/catatan?sematkan=1`, `/catatan?q=zzzz` diverifikasi pada Chrome headless dengan akun pengguna (daftar dan empty state tampil, tanpa exception).
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
@@ -798,7 +807,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 3. Phase 11 ditutup atas keputusan pengguna: UI polish halaman Kegiatan (commit `5f13a42`), Laporan (`75693f2`), Arsip (`103a2a0`), dan autentikasi (`a3c1215`) selesai; halaman lain dianggap selesai tanpa dipoles. UI polish halaman Agenda dan Catatan dikerjakan menyusul.
 4. Phase 12 dimulai: P12.1a (infrastruktur test, `3dafaab`), P12.1b (unit test, `50b2a0d`), dan P12.1c (integration test auth/profil/akun/otorisasi, `92de968`) selesai. P12.1d–P12.1h dilewati atas keputusan pengguna; P12.1 ditutup.
 5. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
-6. Urutan berikutnya: UI Polish halaman Catatan, lalu P12.2 — Security & Performance Verification, P12.3 — Production Deployment, P12.4 — Backup & Recovery.
+6. Urutan berikutnya: P12.2 — Security & Performance Verification, P12.3 — Production Deployment, P12.4 — Backup & Recovery.
 
 ## Aturan Pembaruan
 

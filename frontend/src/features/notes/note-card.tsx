@@ -1,6 +1,8 @@
 'use client';
 
-import { PinIcon, Trash2Icon } from 'lucide-react';
+import { EllipsisIcon, PinIcon, PencilIcon, Trash2Icon } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 import {
   AlertDialog,
@@ -11,12 +13,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Note } from './note.api';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { getErrorMessage } from '@/lib/api-error';
 import { formatDateTime } from '@/lib/date';
+import type { Note } from './note.api';
 import { useDeleteNote, useToggleNotePin } from './use-notes';
 
 type NoteCardProps = {
@@ -25,11 +34,29 @@ type NoteCardProps = {
 };
 
 export function NoteCard({ note, onEdit }: NoteCardProps) {
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const togglePin = useToggleNotePin(note.id);
   const remove = useDeleteNote();
 
+  function handlePin() {
+    togglePin.mutate(!note.pinned, {
+      onSuccess: () => toast.success(note.pinned ? 'Sematan dilepas.' : 'Catatan disematkan.'),
+      onError: (error) => toast.error(getErrorMessage(error)),
+    });
+  }
+
+  function handleDelete() {
+    remove.mutate(note.id, {
+      onSuccess: () => {
+        toast.success('Catatan dihapus.');
+        setDeleteOpen(false);
+      },
+      onError: (error) => toast.error(getErrorMessage(error)),
+    });
+  }
+
   return (
-    <Card className="h-full">
+    <Card className="hover:border-primary/40 h-full transition-colors">
       <CardContent className="flex h-full flex-col gap-3">
         <button
           type="button"
@@ -40,7 +67,13 @@ export function NoteCard({ note, onEdit }: NoteCardProps) {
         </button>
 
         <div className="mt-auto flex items-center justify-between gap-2">
-          <span className="text-muted-foreground text-xs">{formatDateTime(note.updatedAt)}</span>
+          <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
+            {note.pinned ? (
+              <PinIcon aria-hidden="true" className="text-primary size-3 fill-current" />
+            ) : null}
+            Diperbarui {formatDateTime(note.updatedAt)}
+          </span>
+
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
@@ -49,37 +82,57 @@ export function NoteCard({ note, onEdit }: NoteCardProps) {
               aria-pressed={note.pinned}
               disabled={togglePin.isPending}
               className={note.pinned ? 'text-primary' : undefined}
-              onClick={() => togglePin.mutate(!note.pinned)}
+              onClick={handlePin}
             >
               <PinIcon fill={note.pinned ? 'currentColor' : 'none'} />
             </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Hapus catatan">
-                  <Trash2Icon />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Aksi untuk catatan ${formatDateTime(note.updatedAt)}`}
+                >
+                  <EllipsisIcon />
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Hapus catatan?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Catatan ini akan dihapus permanen.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Batal</AlertDialogCancel>
-                  <AlertDialogAction
-                    disabled={remove.isPending}
-                    onClick={() => remove.mutate(note.id)}
-                  >
-                    Hapus
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onSelect={() => onEdit(note)}>
+                  <PencilIcon aria-hidden="true" />
+                  Ubah
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onSelect={() => setDeleteOpen(true)}>
+                  <Trash2Icon aria-hidden="true" />
+                  Hapus
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </CardContent>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus catatan?</AlertDialogTitle>
+            <AlertDialogDescription>Catatan ini akan dihapus permanen.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={remove.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                handleDelete();
+              }}
+            >
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
