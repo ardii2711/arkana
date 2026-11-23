@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Final Integration & Production Release
 - **Fase aktif:** Phase 12 — Final Integration & Production Release
-- **Task aktif:** Tidak ada (UI Polish Agenda & Catatan selesai)
-- **Task berikutnya:** P12.2 — Security & Performance Verification
+- **Task aktif:** P12.2a — Security Verification & Fix (implementasi selesai, menunggu commit)
+- **Task berikutnya:** P12.2b — Performance Verification & Readiness Probe
 - **Update terakhir:** 23 November 2026
 
 ## Kesiapan Proyek
@@ -732,6 +732,18 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Backend, schema, API, dan migration tidak berubah.
 - Pemeriksaan: frontend `typecheck`, `lint`, `build` lulus; render `/catatan`, `/catatan?sematkan=1`, `/catatan?q=zzzz` diverifikasi pada Chrome headless dengan akun pengguna (daftar dan empty state tampil, tanpa exception).
 
+### P12.2a — Security Verification & Fix (implementasi selesai, menunggu commit)
+
+- Matriks audit (tanpa temuan kritis yang perlu perubahan kode):
+  - Konfigurasi: `helmet()` aktif di seluruh respons; CORS satu origin dengan `credentials: true` (pastikan `CORS_ORIGIN` produksi diisi domain frontend yang tepat); `trust proxy` hanya di production; cookie `httpOnly`, `secure` di production, `sameSite=lax`, path `/` untuk access dan `/api/auth` untuk refresh; CSRF ditangani topologi same-site seperti keputusan sebelumnya.
+  - Autorisasi: `requireAuth` memuat ulang role/status dari database; `requireRole('USER')` pada seluruh modul data pribadi dan `requireRole('ADMIN')` pada modul akun; ownership `where { id, userId }` terpakai di Work Log, Arsip, Agenda, Notes, dan Profil; resource milik User lain dijawab `404`; Admin hanya memiliki endpoint avatar baca.
+  - Validasi dan error: Zod pada body/query/params; whitelist ekstensi↔MIME, batas 5 MB/file, 10 file, 50 MB/kegiatan, kuota arsip 1 GB; log meredaksi `authorization`, `cookie`, dan `set-cookie`; pesan error produksi generik.
+  - Log request: `pino-http` awalnya mencatat URL lengkap, termasuk token bearer pada `/api/public/work-logs/:token` dan `/api/auth/activation/:token` serta query OAuth. `request-logger.ts` kini membuang query string dan mengganti segmen token dengan `[token]`; test unit ditambahkan.
+  - Rate limit: login 10, refresh 60, logout 30, aktivasi 10, Google 20, forgot 5, reset 10, ganti password 5, email change 5 per 15 menit; bukti publik 120/menit.
+- `npm audit`: backend 3 high dan 9 moderate; frontend 10 moderate. High berasal `prisma` 7.10.1 → `@prisma/config` → `effect` 3.20.0 (ReDoS template literal regex); `prisma` adalah devDependency CLI, runtime memakai `@prisma/client`. Moderate lain: `exceljs`→`uuid` 8.3.2 (advisory menyasar v3/v5/v6 dengan buffer; exceljs memakai v4), `typescript-eslint`/`shadcn`→`minimatch` (dev-only). Tidak ada upgrade/downgrade dependency tanpa persetujuan; dicatat sebagai residu.
+- Bugfix: `backend/src/modules/dashboard/dashboard.service.ts` kini memakai `scheduleRangeFilter(besok)` untuk `upcomingSchedules`, sehingga agenda multi-hari yang masih aktif besok ikut tampil. Test regresi: `backend/tests/integration/dashboard-schedules.test.ts`.
+- Pemeriksaan: backend `typecheck`, `lint`, `build` lulus; seluruh suite 91 test pada 16 file lulus dengan Mailpit berjalan; Prettier lulus pada file yang diubah.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
@@ -745,7 +757,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `GET /api/reports/work-logs` dan `/export` masih menerima `period=custom`, `date`, `from`/`to`, `category`, `groupBy`, serta `onlyWithEvidence`; UI tidak lagi menawarkannya. Diselaraskan hanya jika API ikut disederhanakan.
 - Pagination laporan bersifat klien; respons API tetap memuat seluruh baris periode karena dipakai ekspor. Backend pagination dipertimbangkan bila volume data per periode besar.
 - Dashboard User belum merender grafik kegiatan per kategori bulan berjalan maupun tren 7/30 hari, padahal `PROJECT.md` §5.7 mewajibkannya; data `workLogCategories`/`workLogTrend` sudah tersedia di API. Diselesaikan pada UI polish Dashboard atau kebutuhan `PROJECT.md` direvisi.
-- Dashboard `upcomingSchedules` masih memakai `startAt >= besok`, sehingga lanjutan agenda multi-hari yang dimulai hari ini tidak muncul pada daftar mendatang Dashboard (`todaySchedules` sudah benar).
+- ~~Dashboard `upcomingSchedules` masih memakai `startAt >= besok`, sehingga lanjutan agenda multi-hari yang dimulai hari ini tidak muncul pada daftar mendatang Dashboard (`todaySchedules` sudah benar).~~ Diperbaiki pada P12.2a.
 
 ## Keputusan Teknis Kumulatif
 
@@ -810,7 +822,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 3. Phase 11 ditutup atas keputusan pengguna: UI polish halaman Kegiatan (commit `5f13a42`), Laporan (`75693f2`), Arsip (`103a2a0`), dan autentikasi (`a3c1215`) selesai; halaman lain dianggap selesai tanpa dipoles. UI polish halaman Agenda (`8b576ec`) dan Catatan (`bc710f6`) selesai.
 4. Phase 12 dimulai: P12.1a (infrastruktur test, `3dafaab`), P12.1b (unit test, `50b2a0d`), dan P12.1c (integration test auth/profil/akun/otorisasi, `92de968`) selesai. P12.1d–P12.1h dilewati atas keputusan pengguna; P12.1 ditutup.
 5. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
-6. Urutan berikutnya: P12.2 — Security & Performance Verification, P12.3 — Production Deployment, P12.4 — Backup & Recovery.
+6. P12.2a — Security Verification & Fix selesai diimplementasikan dan menunggu commit. Urutan berikutnya: P12.2b — Performance Verification & Readiness Probe, P12.3 — Production Deployment, P12.4 — Backup & Recovery.
 
 ## Aturan Pembaruan
 

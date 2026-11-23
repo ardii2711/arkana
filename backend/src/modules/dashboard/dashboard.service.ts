@@ -53,7 +53,7 @@ export async function getDashboard(userId: string, now: Date = new Date()) {
       where: {
         userId,
         status: { not: 'CANCELLED' },
-        startAt: { gte: startOfDayWita(addDaysWita(today, 1)) },
+        ...scheduleRangeFilter(addDaysWita(today, 1)),
       },
       orderBy: { startAt: 'asc' },
       take: UPCOMING_LIMIT,

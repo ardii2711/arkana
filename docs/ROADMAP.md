@@ -505,12 +505,19 @@ Pendekatan: pengujian otomatis backend dengan Vitest + `@vitest/coverage-v8` (ta
 - **Acceptance Criteria:** Tidak ada kegagalan kritis tersisa dan hasil pengujian terdokumentasi.
 - **Dependencies:** P12.1a–P12.1g.
 
-### P12.2 — Security & Performance Verification
+### P12.2a — Security Verification & Fix
 
-- **Objective:** Memastikan keamanan akses data dan performa aplikasi memadai sebelum rilis.
-- **Scope:** Pemeriksaan keamanan autentikasi dan akses data; validasi, penanganan error, dan kebocoran informasi; performa aplikasi dan penggunaan sumber daya.
-- **Acceptance Criteria:** Tidak ditemukan masalah keamanan kritis dan performa memadai.
+- **Objective:** Memverifikasi keamanan akses data dan menutup temuan yang masuk akal untuk dikerjakan sebelum rilis.
+- **Scope:** Audit konfigurasi (helmet, CORS, cookie, rate limit, CSRF same-site), autorisasi dan kepemilikan data, validasi batas input, redaksi log dan error, serta `npm audit` frontend dan backend. Termasuk bugfix agenda multi-hari pada daftar "agenda terdekat" Dashboard User: pakai filter rentang beririsan dengan batas mulai besok. Audit dependency tidak otomatis meng-upgrade atau menurunkan versi; temuan yang tidak direktif dicatat sebagai residu.
+- **Acceptance Criteria:** Matriks audit tercatat di `PROGRESS.md`; tidak ada temuan keamanan kritis yang dibiarkan tanpa keputusan; agenda multi-hari yang masih aktif besok muncul pada daftar terdekat dengan batas lima item; `typecheck`, `lint`, `build`, dan suite test lulus.
 - **Dependencies:** P12.1.
+
+### P12.2b — Performance Verification & Readiness Probe
+
+- **Objective:** Mencatat baseline performa dan menyediakan pemeriksaan kesiapan untuk deployment.
+- **Scope:** Ukur endpoint berat (`work-logs`, `archive/files`, `reports/work-logs`, `dashboard`, `schedules`, `notes`) dengan harness dan fixture yang sudah ada, tanpa dependency baru. Catat p50/p95, ukuran respons, dan pola query; lakukan `EXPLAIN ANALYZE` hanya untuk query yang lambat. Tambahkan `GET /api/health/ready` yang memeriksa koneksi database dan bucket R2, dengan `200` ketika siap dan `503` ketika tidak; endpoint `/api/health` tetap sebagai liveness. Dokumentasikan probe di `docs/API.md` dan pakai pada P12.3.
+- **Acceptance Criteria:** Baseline performa dan hasil probe tercatat di `PROGRESS.md`; probe tidak membocorkan kredensial dan terverifikasi di lingkungan uji; `typecheck`, `lint`, `build`, dan suite test lulus.
+- **Dependencies:** P12.2a.
 
 ### P12.3 — Production Deployment
 
