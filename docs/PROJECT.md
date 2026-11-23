@@ -161,22 +161,12 @@ Informasi agenda:
 - Tanggal dan waktu selesai opsional.
 - Penanda agenda sepanjang hari.
 - Tempat atau lokasi opsional.
-- Satu kategori.
 - Status: Belum Dimulai, Selesai, Dibatalkan.
-
-Kategori tetap:
-
-1. Rapat dan Koordinasi
-2. Pekerjaan dan Tugas
-3. Pelatihan dan Pengembangan Kompetensi
-4. Perjalanan Dinas
-5. Kegiatan Pribadi
-6. Tenggat Waktu (Deadline)
-7. Lainnya
 
 Ketentuan:
 
 - Agenda bersifat privat dan hanya dapat diakses pemiliknya.
+- Agenda multi-hari menampilkan rentang tanggalnya pada daftar.
 - Pengulangan agenda tidak tersedia pada versi awal.
 - Pengingat dan notifikasi ditangguhkan ke pengembangan berikutnya.
 - Waktu mengikuti zona waktu WITA (Asia/Makassar).

@@ -36,16 +36,6 @@ enum WorkCategory {
   PERJALANAN_DINAS
 }
 
-enum ScheduleCategory {
-  RAPAT_KOORDINASI
-  PEKERJAAN_TUGAS
-  PELATIHAN_PENGEMBANGAN
-  PERJALANAN_DINAS
-  KEGIATAN_PRIBADI
-  TENGGAT_WAKTU
-  LAINNYA
-}
-
 enum ScheduleStatus {
   NOT_STARTED
   DONE
@@ -149,7 +139,6 @@ model Schedule {
   endAt       DateTime?
   allDay      Boolean          @default(false)
   location    String?
-  category    ScheduleCategory
   status      ScheduleStatus   @default(NOT_STARTED)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt

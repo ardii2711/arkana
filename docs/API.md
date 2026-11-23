@@ -117,15 +117,15 @@ Query: `period` wajib (`daily|weekly|monthly|yearly|custom`), `date` opsional un
 
 ## 8. Agenda
 
-Role `USER`. Waktu disimpan UTC, filter tanggal memakai WITA.
+Role `USER`. Waktu disimpan UTC, filter tanggal memakai WITA. Filter `from`/`to` memakai rentang beririsan, sehingga agenda multi-hari ikut tampil pada tanggal setelah `startAt`.
 
-| Method | Endpoint         | Keterangan                                                                                            |
-| ------ | ---------------- | ----------------------------------------------------------------------------------------------------- |
-| GET    | `/schedules`     | `page`, `limit`, `from`, `to`, `category`, `status`, `search`                                         |
-| POST   | `/schedules`     | `title`, `startAt`, `category` wajib; `description`, `endAt`, `allDay`, `location`, `status` opsional |
-| GET    | `/schedules/:id` | Detail agenda                                                                                         |
-| PATCH  | `/schedules/:id` | Ubah sebagian field                                                                                   |
-| DELETE | `/schedules/:id` | Hapus agenda; `204`                                                                                   |
+| Method | Endpoint         | Keterangan                                                                                    |
+| ------ | ---------------- | --------------------------------------------------------------------------------------------- |
+| GET    | `/schedules`     | `page`, `limit`, `from`, `to`, `status`, `search`                                             |
+| POST   | `/schedules`     | `title` dan `startAt` wajib; `description`, `endAt`, `allDay`, `location`, `status` opsional  |
+| GET    | `/schedules/:id` | Detail agenda                                                                                 |
+| PATCH  | `/schedules/:id` | Ubah sebagian field                                                                           |
+| DELETE | `/schedules/:id` | Hapus agenda; `204`                                                                           |
 
 ## 9. Catatan
 

@@ -1,10 +1,16 @@
+import { formatDate } from '@/lib/date';
 import { witaDatePart, witaTimePart } from '@/lib/wita';
 
 import type { Schedule } from './schedule.api';
 
-export function scheduleDateLabel(schedule: Schedule) {
+/** Label waktu ringkas; menyebut tanggal akhir bila agenda mencakup beberapa hari. */
+export function scheduleTimeLabel(schedule: Schedule) {
+  const startDate = witaDatePart(schedule.startAt);
+  const endDate = schedule.endAt ? witaDatePart(schedule.endAt) : null;
+  const multiDay = endDate !== null && endDate !== startDate;
+
   if (schedule.allDay) {
-    return 'Sepanjang hari';
+    return multiDay ? `Sepanjang hari · s.d. ${formatDate(schedule.endAt!)}` : 'Sepanjang hari';
   }
 
   const start = witaTimePart(schedule.startAt);
@@ -13,18 +19,9 @@ export function scheduleDateLabel(schedule: Schedule) {
     return start;
   }
 
+  if (multiDay) {
+    return `${start} · s.d. ${formatDate(schedule.endAt)} ${witaTimePart(schedule.endAt)}`;
+  }
+
   return `${start} – ${witaTimePart(schedule.endAt)}`;
-}
-
-/** Daftar tanggal (WITA) yang berisi agenda, untuk indikator kalender. */
-export function witaBookedDates(schedules: Schedule[]) {
-  return [...new Set(schedules.map((schedule) => witaDatePart(schedule.startAt)))];
-}
-
-export function isScheduleOnDate(schedule: Schedule, date: string) {
-  return witaDatePart(schedule.startAt) === date;
-}
-
-export function sortSchedules(schedules: Schedule[]) {
-  return [...schedules].sort((a, b) => a.startAt.localeCompare(b.startAt));
 }

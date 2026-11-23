@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
 import { ScheduleView } from '@/features/schedules/schedule-view';
 
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function SchedulePage() {
-  return <ScheduleView />;
+  return (
+    <Suspense>
+      <ScheduleView />
+    </Suspense>
+  );
 }

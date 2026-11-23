@@ -6,9 +6,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Final Integration & Production Release
 - **Fase aktif:** Phase 12 — Final Integration & Production Release
-- **Task aktif:** P12.1c - Integration Test Auth, Profil, Akun, Otorisasi selesai, menunggu commit pengguna
-- **Task berikutnya:** P12.1d - Integration Test Work Log, Bukti Dukung, Tautan Publik
-- **Update terakhir:** 20 November 2026
+- **Task aktif:** UI Polish — halaman Agenda (selesai, menunggu commit); Catatan berikutnya
+- **Task berikutnya:** UI Polish — halaman Catatan
+- **Update terakhir:** 23 November 2026
 
 ## Kesiapan Proyek
 
@@ -664,7 +664,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Phase 12 dimulai dengan P12.1; rencana P12.1a–P12.1h dicatat di `ROADMAP.md`.
 - Prasyarat P12.1 yang belum dikonfirmasi pengguna: ketersediaan database uji terpisah (`TEST_DATABASE_URL`), bucket/prefix R2 uji, dan penggunaan sink email uji (Mailpit) untuk alur token email.
 
-### P12.1a — Test Infrastructure & Fixture (selesai, menunggu commit)
+### P12.1a — Test Infrastructure & Fixture (DONE, commit `3dafaab`)
 
 - Dependency baru (dev): `vitest` 5.1.1 dan `@vitest/coverage-v8` 5.1.1. Tanpa `supertest`; HTTP diuji in-process lewat `app.listen(0)` dan `fetch` native Node.
 - `backend/vitest.config.ts`: environment node, `tests/**/*.test.ts`, `fileParallelism: false` (database/R2 dipakai bersama), coverage v8 (`text`, `html`, `lcov` ke `backend/coverage`), exclude bootstrap (`app.ts`, `server.ts`, `config/`, `generated/`, `types/`).
@@ -676,7 +676,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Prasyarat yang sudah disiapkan pengguna: Mailpit berjalan dan `backend/.env.test` terisi (DB, R2, SMTP Mailpit, `MAILPIT_URL`, JWT secret, `ALLOW_SHARED_DB_TESTS=1`).
 - Tanpa migration, schema, env produksi, atau perubahan kode aplikasi.
 
-### P12.1b — Unit Test Domain Murni (selesai, menunggu commit)
+### P12.1b — Unit Test Domain Murni (DONE, commit `50b2a0d`)
 
 - File baru di `backend/tests/unit/`: `wita.test.ts`, `file-rules.test.ts`, `report-period.test.ts`, `report-rows.test.ts`, `archive-folders.test.ts`, `schedule-schema.test.ts`.
 - Cakupan: tanggal WITA (`todayWita`, batas hari, `addDaysWita` lintas bulan/tahun, `monthRange` tahun kabisat, `dateRangeEndingAt`), aturan file (ekstensi, MIME kanonik, alias `image/jpg`, previewable, HEIC, batas 5 MB/1 GB), periode laporan (harian, mingguan Senin–Minggu termasuk lintas tahun, bulanan, tahunan, rentang khusus, penolakan rentang kosong, label tanggal/waktu WITA), ringkasan bukti dukung (tanpa file, satu file, penggabungan, pemotongan 255 karakter, nama tunggal sangat panjang), kedalaman/keturunan/tinggi subtree folder arsip, dan schema agenda (offset wajib, `endAt` sebelum `startAt`, patch kosong, normalisasi string kosong, rentang filter terbalik).
@@ -684,7 +684,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Unit test tidak membuka koneksi database maupun R2; `setup.ts` tetap memuat `.env.test` karena guard env berlaku untuk seluruh suite.
 - Tanpa perubahan kode aplikasi, migration, dependency, atau env.
 
-### P12.1c — Integration Test Auth, Profil, Akun, Otorisasi (selesai, menunggu commit)
+### P12.1c — Integration Test Auth, Profil, Akun, Otorisasi (DONE, commit `92de968`)
 
 - File baru di `backend/tests/integration/`: `auth-login.test.ts`, `auth-session.test.ts`, `auth-rate-limit.test.ts`, `auth-email.test.ts`, `profile.test.ts`, `users.test.ts`, `authorization.test.ts`; helper `backend/tests/helpers/files.ts` (byte PNG/PDF dan `FormData`).
 - Cakupan: login gagal/berhasil, cookie `arkana_access`/`arkana_refresh`, `/auth/me`, rotasi refresh sekali pakai (`SESSION_EXPIRED`) dan logout, ganti password (password lama salah, sesi lain dicabut), rate limit login 10 percobaan, aktivasi lewat token undangan Mailpit, reset password sekali pakai + pencabutan sesi, respons netral untuk email tak terdaftar, pembaruan profil dan normalisasi `null`, NIP unik/tidak valid, patch kosong, avatar (unggah/baca/tipe salah/lebih dari 2 MB/hapus), ubah email lewat token, filter dan undangan akun, kirim ulang undangan, perubahan status akun, avatar akun untuk Admin, hapus akun beserta data, serta matriks otorisasi (tamu 401, Admin 403 pada data pribadi, User 403 pada endpoint Admin, resource pengguna lain 404, endpoint publik tanpa sesi).
@@ -692,6 +692,33 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `backend/tests/tsconfig.json` ditambahkan (extends tsconfig utama, `moduleResolution: bundler`, `types: ["node"]`, `noEmit`) agar editor mengenali `process` dan tipe Node pada file test. Script `typecheck` backend kini juga memeriksa folder test.
 - Hasil: 86 test lulus (14 file); `typecheck`, `lint`, dan Prettier lulus. Coverage naik dari 35,09% menjadi 63,51% lines.
 - Tanpa perubahan kode aplikasi, migration, dependency, atau env.
+
+### Penutupan Pengujian P12.1 (keputusan pengguna, tanpa kode)
+
+- P12.1d–P12.1h tidak dikerjakan: integration test Work Log/Bukti Dukung/Tautan Publik/Arsip/Laporan/Agenda/Notes/Dashboard, coverage threshold, checklist UI manual, dan bugfix hasil uji. Pengujian dianggap selesai atas keputusan pengguna 23 November 2026.
+- Baseline berlaku: 86 test lulus (14 file), coverage 63,51% lines; threshold coverage tidak ditetapkan.
+- Residu: modul di luar auth/profil/akun belum memiliki integration test dan checklist UI manual belum dijalankan.
+- `ROADMAP.md` P12.1d–P12.1h ditandai dilewati, bukan `DONE`.
+
+### UI Polish — Agenda & Penghapusan Kategori (selesai, menunggu commit)
+
+- Backend:
+  - Kategori agenda dihapus sesuai keputusan pengguna: `enum ScheduleCategory` dan `Schedule.category` dihapus dari `schema.prisma`; migration `20261123090000_remove_schedule_category` berisi `DROP COLUMN` + `DROP TYPE` dan sudah dijalankan pengguna (`prisma migrate status`: up to date).
+  - `lib/schedule-range.ts` (`scheduleRangeFilter`) memakai rentang beririsan, sehingga agenda multi-hari ikut terambil pada tanggal setelah `startAt`; dipakai `listSchedules` dan `todaySchedules` Dashboard.
+  - Filter `category` dihapus dari query, schema create/update, dan `docs/API.md` §8; `PROJECT.md` §5.5 dan `ROADMAP.md` P6.1 disesuaikan (tanpa kategori, agenda multi-hari ditampilkan pada setiap tanggal).
+  - `check:schedule-rules` menambah assert filter rentang beririsan; unit test schema agenda dan payload integration test disesuaikan.
+- Frontend:
+  - Kalender dihapus atas keputusan pengguna: `schedule-calendar.tsx` dihapus, halaman `/agenda` hanya berisi daftar (tanpa `Sheet`, tab periode, atau state `bulan`/`tanggal`/`tampilan`).
+  - State di URL (`q`, `status`, `page`); route `/agenda` dibungkus `Suspense`.
+  - Toolbar mengikuti pola Arsip: pencarian debounce 300 ms dengan tombol hapus + filter status.
+  - Dua bagian: `Hari ini` (rentang hari ini, limit 100, tanpa pagination) dan `Mendatang` (mulai besok, limit 20, pagination). Saat pencarian aktif, kedua bagian diganti daftar `Hasil pencarian` lintas tanggal dengan pagination.
+  - Baris agenda: waktu (ditambah tanggal pada bagian Mendatang dan hasil pencarian), judul, tempat, badge status untuk Selesai/Dibatalkan, dan menu `…`; deskripsi tidak ditampilkan di daftar.
+  - `schedule.format.ts` disederhanakan menjadi `scheduleTimeLabel`; helper pengelompokan tanggal agenda dihapus.
+  - Aksi baris lewat menu `…`: tandai selesai/belum dimulai, batalkan, ubah, hapus; sukses/gagal memakai toast.
+  - Agenda `CANCELLED` dicoret, `DONE` diredupkan; empty state memakai `Card` putus-putus dengan CTA.
+  - Form: kategori dihapus, label waktu menyebut WITA, validasi `endDate`/`endTime` diperbaiki (termasuk all-day), ternary mati dihapus.
+  - Dashboard User memakai `scheduleTimeLabel` (pengganti `scheduleDateLabel`).
+- Pemeriksaan: backend `typecheck`, `lint`, `build`, `check:schedule-rules`, `check:dashboard` lulus; frontend `typecheck`, `lint`, `build` lulus. Render `/agenda` diverifikasi pada Chrome headless dengan akun pengguna: agenda hari ini dan mendatang tampil, filter status bekerja. Tidak ada perubahan schema pada task ini.
 
 ### Temuan Di Luar Scope
 
@@ -706,6 +733,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `GET /api/reports/work-logs` dan `/export` masih menerima `period=custom`, `date`, `from`/`to`, `category`, `groupBy`, serta `onlyWithEvidence`; UI tidak lagi menawarkannya. Diselaraskan hanya jika API ikut disederhanakan.
 - Pagination laporan bersifat klien; respons API tetap memuat seluruh baris periode karena dipakai ekspor. Backend pagination dipertimbangkan bila volume data per periode besar.
 - Dashboard User belum merender grafik kegiatan per kategori bulan berjalan maupun tren 7/30 hari, padahal `PROJECT.md` §5.7 mewajibkannya; data `workLogCategories`/`workLogTrend` sudah tersedia di API. Diselesaikan pada UI polish Dashboard atau kebutuhan `PROJECT.md` direvisi.
+- Dashboard `upcomingSchedules` masih memakai `startAt >= besok`, sehingga lanjutan agenda multi-hari yang dimulai hari ini tidak muncul pada daftar mendatang Dashboard (`todaySchedules` sudah benar).
 
 ## Keputusan Teknis Kumulatif
 
@@ -767,10 +795,10 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 
 1. P11.12a & P11.12b "Brand Identity & Dark Mode" ter-commit gabungan (`44e8ac2`, keputusan pengguna: satu commit karena file bercampur brand+tema).
 2. Phase 11 implementasi selesai dan ter-commit (`8b11bf5`, `a284143`).
-3. Phase 11 ditutup atas keputusan pengguna: UI polish halaman Kegiatan (commit `5f13a42`), Laporan (`75693f2`), Arsip (`103a2a0`), dan autentikasi (`a3c1215`) selesai; halaman lain dianggap selesai tanpa dipoles.
-4. Phase 12 dimulai: P12.1 dipecah menjadi P12.1a (infrastruktur test), P12.1b (unit test), P12.1c–P12.1e (integration test per kelompok modul), P12.1f (coverage baseline & threshold), P12.1g (checklist UI manual), P12.1h (bugfix & dokumentasi). Mulai dari P12.1a setelah prasyarat lingkungan uji dikonfirmasi.
+3. Phase 11 ditutup atas keputusan pengguna: UI polish halaman Kegiatan (commit `5f13a42`), Laporan (`75693f2`), Arsip (`103a2a0`), dan autentikasi (`a3c1215`) selesai; halaman lain dianggap selesai tanpa dipoles. UI polish halaman Agenda dan Catatan dikerjakan menyusul.
+4. Phase 12 dimulai: P12.1a (infrastruktur test, `3dafaab`), P12.1b (unit test, `50b2a0d`), dan P12.1c (integration test auth/profil/akun/otorisasi, `92de968`) selesai. P12.1d–P12.1h dilewati atas keputusan pengguna; P12.1 ditutup.
 5. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
-6. P12.2 dan seterusnya dijadwalkan setelah P12.1 selesai.
+6. Urutan berikutnya: UI Polish halaman Catatan, lalu P12.2 — Security & Performance Verification, P12.3 — Production Deployment, P12.4 — Backup & Recovery.
 
 ## Aturan Pembaruan
 

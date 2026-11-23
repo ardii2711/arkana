@@ -9,15 +9,17 @@ import {
   updateSchedule,
   type ScheduleInput,
   type ScheduleListParams,
+  type ScheduleStatus,
 } from './schedule.api';
 
 const rootKey = ['schedules'] as const;
 
-export function useSchedules(params: ScheduleListParams) {
+export function useSchedules(params: ScheduleListParams, enabled = true) {
   return useQuery({
     queryKey: [...rootKey, 'list', params],
     queryFn: () => fetchSchedules(params),
     placeholderData: keepPreviousData,
+    enabled,
   });
 }
 
@@ -34,7 +36,17 @@ export function useUpdateSchedule(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: ScheduleInput) => updateSchedule(id, input),
+    mutationFn: (input: Partial<ScheduleInput>) => updateSchedule(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: rootKey }),
+  });
+}
+
+export function useUpdateScheduleStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: ScheduleStatus }) =>
+      updateSchedule(id, { status }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: rootKey }),
   });
 }

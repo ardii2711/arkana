@@ -169,8 +169,7 @@ Roadmap implementasi aplikasi berdasarkan kebutuhan produk (`PROJECT.md`) dan ar
 
 ### P6.1 — Finalisasi Kebutuhan
 
-- Tetapkan atribut agenda: judul, deskripsi opsional, waktu mulai, waktu selesai opsional, penanda sepanjang hari, lokasi opsional, kategori, dan status (Belum Dimulai, Selesai, Dibatalkan).
-- Tetapkan tujuh kategori tetap agenda.
+- Tetapkan atribut agenda: judul, deskripsi opsional, waktu mulai, waktu selesai opsional, penanda sepanjang hari, lokasi opsional, dan status (Belum Dimulai, Selesai, Dibatalkan).
 - Tetapkan zona waktu WITA (Asia/Makassar).
 - Pengulangan agenda dan notifikasi pengingat ditangguhkan.
 
@@ -345,7 +344,7 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 ### P11.4 — Schedule
 
 - **Objective:** Menyediakan antarmuka pengelolaan agenda.
-- **Scope:** Kalender, daftar agenda, dan form agenda. Pengingat dan notifikasi tidak termasuk dalam task ini (ditangguhkan).
+- **Scope:** Daftar agenda (hari ini dan mendatang), pencarian, filter status, dan form agenda. Kalender tidak dipakai; pengingat dan notifikasi tidak termasuk dalam task ini (ditangguhkan).
 - **Acceptance Criteria:** Agenda dapat dikelola melalui antarmuka sesuai API backend.
 - **Dependencies:** P6.2.
 
@@ -445,6 +444,8 @@ Task dipecah menjadi empat sub-task yang dikerjakan berurutan.
 - **Dependencies:** Seluruh task implementasi P1.1–P11.12b.
 
 Pendekatan: pengujian otomatis backend dengan Vitest + `@vitest/coverage-v8` (tanpa `supertest`; HTTP in-process lewat `app.listen(0)` dan `fetch` native Node), lalu checklist UI manual. Task dikerjakan berurutan.
+
+**Status (23 November 2026):** P12.1 ditutup atas keputusan pengguna. P12.1a–P12.1c selesai; P12.1d–P12.1h dilewati dan tidak ditandai `DONE`.
 
 #### P12.1a — Test Infrastructure & Fixture
 

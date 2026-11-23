@@ -1,5 +1,6 @@
 import { ARCHIVE_QUOTA_BYTES } from '../../lib/file-rules.js';
 import { prisma } from '../../lib/prisma.js';
+import { scheduleRangeFilter } from '../../lib/schedule-range.js';
 import {
   addDaysWita,
   dateRangeEndingAt,
@@ -45,7 +46,7 @@ export async function getDashboard(userId: string, now: Date = new Date()) {
     prisma.workLogFile.count({ where: { workLog: { userId } } }),
     prisma.archiveFile.aggregate({ where: { userId }, _sum: { size: true } }),
     prisma.schedule.findMany({
-      where: { userId, startAt: { gte: startOfDayWita(today), lte: endOfDayWita(today) } },
+      where: { userId, ...scheduleRangeFilter(today, today) },
       orderBy: { startAt: 'asc' },
     }),
     prisma.schedule.findMany({

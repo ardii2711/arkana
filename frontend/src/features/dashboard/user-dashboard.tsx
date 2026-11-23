@@ -28,7 +28,7 @@ import {
   type Schedule,
 } from '@/features/schedules/schedule.api';
 import { formatDate, formatMonthYear } from '@/lib/date';
-import { scheduleDateLabel } from '@/features/schedules/schedule.format';
+import { scheduleTimeLabel } from '@/features/schedules/schedule.format';
 import { useUserDashboard } from './use-dashboard';
 
 export function UserDashboard() {
@@ -266,7 +266,7 @@ function ScheduleListCard({
                   <p className="truncate text-sm font-medium">{schedule.title}</p>
                   <p className="text-muted-foreground text-xs">
                     {showDate ? `${formatDate(schedule.startAt)} · ` : ''}
-                    {scheduleDateLabel(schedule)}
+                    {scheduleTimeLabel(schedule)}
                     {schedule.location ? ` · ${schedule.location}` : ''}
                   </p>
                 </div>

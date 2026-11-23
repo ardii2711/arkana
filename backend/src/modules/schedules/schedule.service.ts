@@ -6,7 +6,7 @@ import type {
   ListSchedulesQuery,
   UpdateScheduleInput,
 } from './schedule.schema.js';
-import { endOfDayWita, startOfDayWita } from '../../lib/wita.js';
+import { scheduleRangeFilter } from '../../lib/schedule-range.js';
 
 function notFound(): ApiError {
   return new ApiError(404, 'NOT_FOUND', 'Agenda tidak ditemukan');
@@ -33,13 +33,7 @@ async function findOwnedSchedule(userId: string, id: string): Promise<Schedule> 
 export async function listSchedules(userId: string, query: ListSchedulesQuery) {
   const where = {
     userId,
-    ...((query.from || query.to) && {
-      startAt: {
-        ...(query.from && { gte: startOfDayWita(query.from) }),
-        ...(query.to && { lte: endOfDayWita(query.to) }),
-      },
-    }),
-    ...(query.category && { category: query.category }),
+    ...scheduleRangeFilter(query.from, query.to),
     ...(query.status && { status: query.status }),
     ...(query.search && {
       OR: [

@@ -1,14 +1,20 @@
 'use client';
 
 import {
-  CalendarIcon,
-  ClockIcon,
+  BanIcon,
+  CalendarPlusIcon,
+  CheckIcon,
+  EllipsisIcon,
   MapPinIcon,
   PencilIcon,
-  PlusIcon,
+  RotateCcwIcon,
+  SearchXIcon,
   Trash2Icon,
 } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,162 +24,246 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/api-error';
-import {
-  SCHEDULE_CATEGORY_LABELS,
-  SCHEDULE_STATUS_BADGES,
-  SCHEDULE_STATUS_LABELS,
-  type Schedule,
-} from './schedule.api';
 import { formatDate } from '@/lib/date';
-import { scheduleDateLabel } from './schedule.format';
-import { useDeleteSchedule } from './use-schedules';
+import { cn } from '@/lib/utils';
+import { SCHEDULE_STATUS_BADGES, SCHEDULE_STATUS_LABELS, type Schedule } from './schedule.api';
+import { scheduleTimeLabel } from './schedule.format';
+import { useDeleteSchedule, useUpdateScheduleStatus } from './use-schedules';
 
 type ScheduleListProps = {
-  title: string;
-  subtitle: string;
   schedules: Schedule[];
   isLoading: boolean;
   isError: boolean;
   error: unknown;
+  hasSearch: boolean;
   showDate?: boolean;
+  emptyText?: string;
   onRetry: () => void;
   onAdd: () => void;
   onEdit: (schedule: Schedule) => void;
+  onClearSearch: () => void;
 };
 
 export function ScheduleList({
-  title,
-  subtitle,
   schedules,
   isLoading,
   isError,
   error,
+  hasSearch,
   showDate = false,
+  emptyText,
   onRetry,
   onAdd,
   onEdit,
+  onClearSearch,
 }: ScheduleListProps) {
+  const [deleting, setDeleting] = useState<Schedule | null>(null);
   const remove = useDeleteSchedule();
+  const updateStatus = useUpdateScheduleStatus();
+
+  function changeStatus(schedule: Schedule, status: Schedule['status']) {
+    updateStatus.mutate(
+      { id: schedule.id, status },
+      {
+        onSuccess: () => toast.success(`Status diubah menjadi ${SCHEDULE_STATUS_LABELS[status]}.`),
+        onError: (mutationError) => toast.error(getErrorMessage(mutationError)),
+      },
+    );
+  }
+
+  function handleDelete() {
+    if (!deleting) return;
+
+    remove.mutate(deleting.id, {
+      onSuccess: () => {
+        toast.success('Agenda dihapus.');
+        setDeleting(null);
+      },
+      onError: (mutationError) => toast.error(getErrorMessage(mutationError)),
+    });
+  }
 
   return (
-    <section aria-labelledby="schedule-list-title" className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 id="schedule-list-title" className="font-heading text-lg font-semibold">
-            {title}
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            {schedules.length} agenda · {subtitle}
-          </p>
-        </div>
-        <Button onClick={onAdd}>
-          <PlusIcon />
-          Tambah agenda
-        </Button>
-      </div>
-
-      {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} className="h-28 w-full" />
-          ))}
-        </div>
-      ) : null}
-
+    <div className="space-y-4">
       {isError ? (
-        <Alert variant="destructive">
-          <AlertDescription>
-            {getErrorMessage(error)}{' '}
-            <button type="button" className="underline" onClick={onRetry}>
-              Coba lagi
-            </button>
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {!isLoading && !isError && schedules.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-12 text-center">
-          <CalendarIcon className="text-muted-foreground size-8" />
-          <p className="font-medium">Belum ada agenda</p>
-          <p className="text-muted-foreground text-sm">Tambahkan agenda baru untuk rentang ini.</p>
+        <div className="space-y-3">
+          <Alert variant="destructive">
+            <AlertDescription>{getErrorMessage(error)}</AlertDescription>
+          </Alert>
+          <Button variant="outline" onClick={onRetry}>
+            Coba lagi
+          </Button>
         </div>
-      ) : null}
-
-      <div className="space-y-3">
-        {schedules.map((schedule) => (
-          <Card key={schedule.id}>
-            <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0 space-y-1.5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-                    <ClockIcon className="size-3.5" />
-                    {showDate ? `${formatDate(schedule.startAt)} · ` : ''}
-                    {scheduleDateLabel(schedule)}
-                  </span>
-                  <Badge variant="secondary">{SCHEDULE_CATEGORY_LABELS[schedule.category]}</Badge>
-                  <Badge variant={SCHEDULE_STATUS_BADGES[schedule.status]}>
-                    {SCHEDULE_STATUS_LABELS[schedule.status]}
-                  </Badge>
-                </div>
-                <p className="font-medium">{schedule.title}</p>
-                {schedule.location ? (
-                  <p className="text-muted-foreground inline-flex items-center gap-1 text-sm">
-                    <MapPinIcon className="size-3.5" />
-                    {schedule.location}
-                  </p>
-                ) : null}
-                {schedule.description ? (
-                  <p className="text-muted-foreground text-sm break-words">
-                    {schedule.description}
-                  </p>
-                ) : null}
+      ) : isLoading ? (
+        <ul className="divide-y overflow-hidden rounded-xl border" aria-busy="true">
+          {[0, 1, 2].map((row) => (
+            <li key={row} className="flex flex-col gap-2 p-4 sm:flex-row sm:gap-4">
+              <Skeleton className="h-4 w-28" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-3 w-1/4" />
               </div>
-              <div className="flex shrink-0 gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Ubah agenda"
-                  onClick={() => onEdit(schedule)}
-                >
-                  <PencilIcon />
+            </li>
+          ))}
+        </ul>
+      ) : schedules.length === 0 && emptyText ? (
+        <p className="text-muted-foreground text-sm">{emptyText}</p>
+      ) : schedules.length === 0 ? (
+        <Card className="border border-dashed ring-0">
+          <CardContent className="flex min-h-48 flex-col items-center justify-center gap-4 py-10 text-center">
+            <div className="bg-muted text-muted-foreground flex size-12 items-center justify-center rounded-xl">
+              {hasSearch ? (
+                <SearchXIcon aria-hidden="true" className="size-5" />
+              ) : (
+                <CalendarPlusIcon aria-hidden="true" className="size-5" />
+              )}
+            </div>
+            <div className="space-y-1">
+              <p className="font-medium">
+                {hasSearch ? 'Tidak ada agenda yang cocok' : 'Belum ada agenda'}
+              </p>
+              <p className="text-muted-foreground max-w-sm text-sm">
+                {hasSearch
+                  ? 'Tidak ada judul, deskripsi, atau tempat yang memuat kata kunci tersebut.'
+                  : 'Tambahkan agenda untuk mengisi jadwal Anda.'}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {hasSearch ? (
+                <Button variant="outline" onClick={onClearSearch}>
+                  Hapus pencarian
                 </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" aria-label="Hapus agenda">
-                      <Trash2Icon />
+              ) : (
+                <Button onClick={onAdd}>
+                  <CalendarPlusIcon />
+                  Tambah agenda
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <ul className="divide-y overflow-hidden rounded-xl border">
+          {schedules.map((schedule) => (
+            <li
+              key={schedule.id}
+              className="flex flex-col gap-1 p-4 sm:flex-row sm:items-start sm:gap-4"
+            >
+              <span className="text-muted-foreground text-xs font-medium tabular-nums sm:w-32 sm:shrink-0 sm:pt-0.5 sm:text-sm">
+                {showDate ? `${formatDate(schedule.startAt)} · ` : ''}
+                {scheduleTimeLabel(schedule)}
+              </span>
+
+              <div className="flex min-w-0 flex-1 items-start gap-2">
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p
+                      className={cn(
+                        'text-sm font-medium',
+                        schedule.status === 'CANCELLED' && 'text-muted-foreground line-through',
+                        schedule.status === 'DONE' && 'text-muted-foreground',
+                      )}
+                    >
+                      {schedule.title}
+                    </p>
+                    {schedule.status === 'NOT_STARTED' ? null : (
+                      <Badge variant={SCHEDULE_STATUS_BADGES[schedule.status]}>
+                        {SCHEDULE_STATUS_LABELS[schedule.status]}
+                      </Badge>
+                    )}
+                  </div>
+                  {schedule.location ? (
+                    <p className="text-muted-foreground inline-flex items-center gap-1 text-sm">
+                      <MapPinIcon aria-hidden="true" className="size-3.5" />
+                      {schedule.location}
+                    </p>
+                  ) : null}
+                </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="-mt-1 shrink-0"
+                      aria-label={`Aksi untuk ${schedule.title}`}
+                    >
+                      <EllipsisIcon />
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Hapus agenda?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        &quot;{schedule.title}&quot; akan dihapus permanen.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Batal</AlertDialogCancel>
-                      <AlertDialogAction
-                        disabled={remove.isPending}
-                        onClick={() => remove.mutate(schedule.id)}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    {schedule.status !== 'DONE' ? (
+                      <DropdownMenuItem
+                        disabled={updateStatus.isPending}
+                        onSelect={() => changeStatus(schedule, 'DONE')}
                       >
-                        Hapus
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                        <CheckIcon aria-hidden="true" />
+                        Tandai selesai
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem
+                        disabled={updateStatus.isPending}
+                        onSelect={() => changeStatus(schedule, 'NOT_STARTED')}
+                      >
+                        <RotateCcwIcon aria-hidden="true" />
+                        Tandai belum dimulai
+                      </DropdownMenuItem>
+                    )}
+                    {schedule.status !== 'CANCELLED' ? (
+                      <DropdownMenuItem
+                        disabled={updateStatus.isPending}
+                        onSelect={() => changeStatus(schedule, 'CANCELLED')}
+                      >
+                        <BanIcon aria-hidden="true" />
+                        Batalkan agenda
+                      </DropdownMenuItem>
+                    ) : null}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => onEdit(schedule)}>
+                      <PencilIcon aria-hidden="true" />
+                      Ubah
+                    </DropdownMenuItem>
+                    <DropdownMenuItem variant="destructive" onSelect={() => setDeleting(schedule)}>
+                      <Trash2Icon aria-hidden="true" />
+                      Hapus
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </section>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <AlertDialog open={deleting !== null} onOpenChange={(open) => !open && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus agenda?</AlertDialogTitle>
+            <AlertDialogDescription>
+              &quot;{deleting?.title}&quot; akan dihapus permanen.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction disabled={remove.isPending} onClick={handleDelete}>
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }

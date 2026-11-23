@@ -30,8 +30,6 @@ import { getErrorMessage } from '@/lib/api-error';
 import { toWitaIso, witaDatePart, witaTimePart } from '@/lib/wita';
 import { TITLE_MAX_LENGTH } from '@/lib/limits';
 import {
-  SCHEDULE_CATEGORIES,
-  SCHEDULE_CATEGORY_LABELS,
   SCHEDULE_STATUS_LABELS,
   SCHEDULE_STATUSES,
   type Schedule,
@@ -65,7 +63,6 @@ export function ScheduleFormDialog({
       title: schedule?.title ?? '',
       description: schedule?.description ?? '',
       location: schedule?.location ?? '',
-      category: schedule?.category ?? SCHEDULE_CATEGORIES[0],
       status: schedule?.status ?? 'NOT_STARTED',
       allDay: schedule?.allDay ?? false,
       startDate: schedule ? witaDatePart(schedule.startAt) : defaultDate,
@@ -84,7 +81,6 @@ export function ScheduleFormDialog({
       title: values.title,
       description: values.description || null,
       location: values.location || null,
-      category: values.category,
       status: values.status,
       allDay: values.allDay,
       startAt: toWitaIso(values.startDate, values.allDay ? '00:00' : values.startTime),
@@ -92,7 +88,7 @@ export function ScheduleFormDialog({
         values.endDate || values.endTime
           ? toWitaIso(
               values.endDate || values.startDate,
-              values.endTime || (values.allDay ? '23:59' : '23:59'),
+              values.allDay ? '23:59' : values.endTime || '23:59',
             )
           : null,
     };
@@ -112,7 +108,9 @@ export function ScheduleFormDialog({
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEdit ? 'Ubah agenda' : 'Tambah agenda'}</DialogTitle>
-          <DialogDescription>Tanpa pengulangan dan pengingat pada versi ini.</DialogDescription>
+          <DialogDescription>
+            Waktu mengikuti WITA (Asia/Makassar). Tanpa pengulangan dan pengingat pada versi ini.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-4">
@@ -172,7 +170,7 @@ export function ScheduleFormDialog({
 
               {!allDay ? (
                 <Field>
-                  <FieldLabel htmlFor="schedule-start-time">Waktu mulai</FieldLabel>
+                  <FieldLabel htmlFor="schedule-start-time">Waktu mulai (WITA)</FieldLabel>
                   <Input id="schedule-start-time" type="time" {...form.register('startTime')} />
                   <FieldError
                     errors={
@@ -198,7 +196,9 @@ export function ScheduleFormDialog({
 
               {!allDay ? (
                 <Field>
-                  <FieldLabel htmlFor="schedule-end-time">Waktu selesai (opsional)</FieldLabel>
+                  <FieldLabel htmlFor="schedule-end-time">
+                    Waktu selesai (WITA, opsional)
+                  </FieldLabel>
                   <Input id="schedule-end-time" type="time" {...form.register('endTime')} />
                   <FieldError
                     errors={
@@ -223,59 +223,30 @@ export function ScheduleFormDialog({
               />
             </Field>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="schedule-category">Kategori</FieldLabel>
-                <Controller
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger id="schedule-category" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SCHEDULE_CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {SCHEDULE_CATEGORY_LABELS[category]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                <FieldError
-                  errors={
-                    form.formState.errors.category ? [form.formState.errors.category] : undefined
-                  }
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="schedule-status">Status</FieldLabel>
-                <Controller
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger id="schedule-status" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SCHEDULE_STATUSES.map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {SCHEDULE_STATUS_LABELS[status]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                <FieldError
-                  errors={form.formState.errors.status ? [form.formState.errors.status] : undefined}
-                />
-              </Field>
-            </div>
+            <Field>
+              <FieldLabel htmlFor="schedule-status">Status</FieldLabel>
+              <Controller
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="schedule-status" className="w-full sm:w-56">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SCHEDULE_STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {SCHEDULE_STATUS_LABELS[status]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <FieldError
+                errors={form.formState.errors.status ? [form.formState.errors.status] : undefined}
+              />
+            </Field>
           </FieldGroup>
 
           {formError ? (

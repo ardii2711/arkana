@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { ScheduleCategory, ScheduleStatus } from '../../generated/prisma/enums.js';
+import { ScheduleStatus } from '../../generated/prisma/enums.js';
 import { paginationFields } from '../../lib/pagination.js';
 import { AT_LEAST_ONE_FIELD_MESSAGE, hasAtLeastOneField } from '../../lib/validation.js';
 
@@ -14,7 +14,6 @@ const optionalText = (max: number) =>
     .optional()
     .transform((value) => (value === '' ? null : value));
 const dateTime = z.iso.datetime({ offset: true });
-const category = z.enum(ScheduleCategory);
 const status = z.enum(ScheduleStatus);
 
 function endsBeforeStart(startAt?: string, endAt?: string | null): boolean {
@@ -34,7 +33,6 @@ export const createScheduleSchema = z
     endAt: dateTime.nullable().optional(),
     allDay: z.boolean().optional(),
     location: optionalText(200),
-    category,
     status: status.optional(),
   })
   .refine((input) => !endsBeforeStart(input.startAt, input.endAt), endAtIssue);
@@ -47,7 +45,6 @@ export const updateScheduleSchema = z
     endAt: dateTime.nullable().optional(),
     allDay: z.boolean().optional(),
     location: optionalText(200),
-    category: category.optional(),
     status: status.optional(),
   })
   .refine(hasAtLeastOneField, { message: AT_LEAST_ONE_FIELD_MESSAGE })
@@ -58,7 +55,6 @@ export const listSchedulesQuerySchema = z
     ...paginationFields,
     from: z.iso.date().optional(),
     to: z.iso.date().optional(),
-    category: category.optional(),
     status: status.optional(),
     search: z.string().trim().min(1).max(100).optional(),
   })

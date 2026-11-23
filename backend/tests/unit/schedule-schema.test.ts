@@ -10,7 +10,6 @@ import {
 const validSchedule = {
   title: 'Rapat koordinasi',
   startAt: '2026-11-20T09:00:00+08:00',
-  category: 'RAPAT_KOORDINASI',
 };
 
 describe('createScheduleSchema', () => {
@@ -63,10 +62,14 @@ describe('createScheduleSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('menolak kategori di luar enum', () => {
-    const result = createScheduleSchema.safeParse({ ...validSchedule, category: 'LIBUR' });
+  it('mengabaikan kategori lama pada payload', () => {
+    const result = createScheduleSchema.safeParse({
+      ...validSchedule,
+      category: 'RAPAT_KOORDINASI',
+    });
 
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
+    expect(result.data).not.toHaveProperty('category');
   });
 });
 
