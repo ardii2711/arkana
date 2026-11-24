@@ -521,7 +521,7 @@ Pendekatan: pengujian otomatis backend dengan Vitest + `@vitest/coverage-v8` (ta
 - **Acceptance Criteria:** Baseline performa dan hasil probe tercatat di `PROGRESS.md`; probe tidak membocorkan kredensial dan terverifikasi di lingkungan uji; `typecheck`, `lint`, `build`, dan suite test lulus.
 - **Dependencies:** P12.2a.
 
-**Status (24 November 2026):** implementasi selesai, menunggu commit; baseline performa dan hasil probe tercatat di `PROGRESS.md`, probe didokumentasikan di `docs/API.md` §11.
+**Status (24 November 2026):** `DONE` (commit `3ede8c3`); baseline performa dan hasil probe tercatat di `PROGRESS.md`, probe didokumentasikan di `docs/API.md` §11.
 
 ### P12.3 — Production Deployment
 
@@ -529,6 +529,8 @@ Pendekatan: pengujian otomatis backend dengan Vitest + `@vitest/coverage-v8` (ta
 - **Scope:** Penyiapan environment produksi; konfigurasi domain, HTTPS, cookie, CORS, database, dan R2; deploy frontend dan backend; verifikasi fungsi di produksi.
 - **Acceptance Criteria:** Aplikasi berjalan dan dapat digunakan di lingkungan produksi.
 - **Dependencies:** P12.1, P12.2.
+
+**Status (24 November 2026):** `IN_PROGRESS`; backend dan frontend live di `api.arkana.mateng.my.id` dan `arkana.mateng.my.id`. Residu verifikasi (login/`Set-Cookie`, rate limit per IP, email nyata, unggah + tautan publik, latensi produksi) tercatat di `PROGRESS.md`.
 
 ### P12.4 — Backup & Recovery
 

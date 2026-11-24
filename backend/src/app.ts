@@ -11,7 +11,10 @@ import { apiRouter } from './routes/index.js';
 export const app = express();
 
 if (env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1);
+  // Produksi: klien -> edge Cloudflare -> proxy Render -> app. Dua hop dipercaya
+  // agar req.ip (rate limit, log, audit) berisi IP klien, bukan IP Cloudflare/Render.
+  // Bila DNS `api` diubah menjadi DNS-only, turunkan ke 1.
+  app.set('trust proxy', 2);
 }
 
 app.disable('x-powered-by');

@@ -71,3 +71,72 @@ npm run test:coverage
 ```
 
 Test membuat akun dengan domain `@e2e.arkana.test` lalu menghapusnya di akhir. Karena memakai database aplikasi, jangan jalankan saat aplikasi sedang dipakai orang lain.
+
+## Deployment Produksi
+
+Topologi: frontend di Vercel (`<frontend-domain>`), backend di Render (`<api-domain>`), database Supabase, file di Cloudflare R2, DNS di Cloudflare. Frontend dan backend memakai subdomain dari satu domain induk agar cookie sesi `SameSite=Lax` tetap berlaku.
+
+### 1. Database dan akun awal (dijalankan manual)
+
+```bash
+cd backend
+npx prisma migrate deploy   # memakai DIRECT_URL (session pooler 5432)
+npm run db:seed             # memakai ADMIN_EMAIL dan ADMIN_PASSWORD dari .env
+```
+
+### 2. Backend (Render)
+
+- Root directory: `backend`; region: samakan dengan region Supabase (mis. Singapore).
+- Build: `npm ci --include=dev && npm run build` — `--include=dev` wajib karena `prisma` dan `typescript` ada di `devDependencies`.
+- Start: `npm start`.
+- Health check path: `/api/health` (liveness). Jangan `/health/ready`: probe yang bergantung pada database bisa memicu restart loop.
+- Instance: 1 (connection pool Prisma per instance).
+- Node mengikuti `engines` di `backend/package.json` (`24.x`).
+
+Environment wajib:
+
+| Variabel                                                                      | Nilai                                                              |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `NODE_ENV`                                                                    | `production`                                                       |
+| `CORS_ORIGIN`                                                                 | `https://<frontend-domain>` (tanpa trailing slash)                 |
+| `PUBLIC_WEB_URL`                                                              | `https://<frontend-domain>`                                        |
+| `DATABASE_URL`                                                                | Supabase transaction pooler `:6543` + `?pgbouncer=true`            |
+| `DIRECT_URL`                                                                  | Supabase session pooler `:5432` (migration/seed)                   |
+| `JWT_ACCESS_SECRET`                                                           | minimal 32 karakter, khusus produksi                               |
+| `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` | bucket produksi                                                    |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`               | SMTP produksi (port 465 memakai TLS implisit)                      |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`             | opsional; redirect `https://<api-domain>/api/auth/google/callback` |
+
+### 3. Frontend (Vercel)
+
+- Root directory: `frontend`; framework Next.js.
+- `NEXT_PUBLIC_*` di-inline saat build: set environment variable sebelum deploy pertama, lalu deploy ulang setiap kali nilainya berubah.
+
+| Variabel                    | Nilai                       |
+| --------------------------- | --------------------------- |
+| `NEXT_PUBLIC_API_URL`       | `https://<api-domain>/api`  |
+| `NEXT_PUBLIC_SITE_URL`      | `https://<frontend-domain>` |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | email Admin                 |
+
+### 4. Domain dan DNS
+
+- `arkana` → CNAME `cname.vercel-dns.com`.
+- `api` → CNAME hostname Render (`<service>.onrender.com`).
+  Dua topologi yang didukung, sesuaikan `trust proxy` di `backend/src/app.ts`:
+  - **Cloudflare proxy aktif (orange cloud, default):** klien → edge Cloudflare → proxy Render → app = 2 hop. Pakai `app.set('trust proxy', 2)`.
+  - **DNS only (grey cloud):** klien → proxy Render → app = 1 hop. Turunkan ke `1`.
+    Bila `trust proxy` tidak sesuai jumlah hop, `req.ip` (rate limit, log, audit) berisi IP proxy, bukan IP klien.
+
+### 5. Verifikasi setelah deploy
+
+1. `GET https://<api-domain>/api/health` → `200`.
+2. `GET https://<api-domain>/api/health/ready` → `200` dengan `database` dan `storage` bernilai `ok`.
+3. Login di frontend → cookie `arkana_access`/`arkana_refresh` memiliki `Secure`, `HttpOnly`, `SameSite=Lax`.
+4. Unggah bukti dukung, buka pratinjau, salin tautan publik lalu buka tanpa sesi.
+5. Kirim undangan atau reset password → email diterima.
+6. Log backend tidak memuat `cookie`, `authorization`, maupun token pada URL.
+
+### 6. Probe dan monitoring
+
+- Render hanya memakai `/api/health` sebagai health check.
+- Uptime monitor eksternal menembak `/api/health/ready` dengan interval ≥30 detik; tiap probe melakukan satu query database dan satu `HeadBucket` R2.

@@ -6,8 +6,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Final Integration & Production Release
 - **Fase aktif:** Phase 12 — Final Integration & Production Release
-- **Task aktif:** P12.2b — Performance Verification & Readiness Probe (implementasi selesai, menunggu commit)
-- **Task berikutnya:** P12.3 — Production Deployment
+- **Task aktif:** P12.3 — Production Deployment (deploy berjalan; verifikasi lanjutan menunggu)
+- **Task berikutnya:** P12.4 — Backup & Recovery
 - **Update terakhir:** 24 November 2026
 
 ## Kesiapan Proyek
@@ -76,7 +76,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P12.1b — Unit Test Domain Murni:** `DONE` (commit `50b2a0d`).
 - **P12.1c — Integration Test Auth, Profil, Akun, Otorisasi:** `DONE` (commit `92de968`).
 - **P12.2a — Security Verification & Fix:** `DONE` (commit `08c97ab`).
-- **P12.2b — Performance Verification & Readiness Probe:** implementasi selesai, menunggu commit.
+- **P12.2b — Performance Verification & Readiness Probe:** `DONE` (commit `3ede8c3`).
+- **P12.3 — Production Deployment:** `IN_PROGRESS` (backend dan frontend live; verifikasi fungsi berjalan).
 
 ## Hasil Berjalan
 
@@ -749,9 +750,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Bugfix: `backend/src/modules/dashboard/dashboard.service.ts` kini memakai `scheduleRangeFilter(besok)` untuk `upcomingSchedules`, sehingga agenda multi-hari yang masih aktif besok ikut tampil. Test regresi: `backend/tests/integration/dashboard-schedules.test.ts`.
 - Pemeriksaan: backend `typecheck`, `lint`, `build` lulus; seluruh suite 91 test pada 16 file lulus dengan Mailpit berjalan; Prettier lulus pada file yang diubah.
 
-### P12.2b — Performance Verification & Readiness Probe (implementasi selesai, menunggu commit)
+### P12.2b — Performance Verification & Readiness Probe (DONE, commit `3ede8c3`)
 
-- Readiness probe `GET /api/health/ready` (`src/modules/health/health.routes.ts`): `prisma.$queryRaw\`SELECT 1\``dan`HeadBucketCommand`R2 dijalankan paralel melalui`Promise.allSettled`. Respons `{ status: 'ready' | 'not_ready', checks: { database: 'ok' | 'error', storage: 'ok' | 'error' } }`; `200`bila keduanya siap,`503`bila salah satu gagal. Kegagalan dicatat`logger.warn`tanpa detail di respons. Tanpa timeout internal (probe platform yang membatasi waktu tunggu);`/api/health` tetap liveness.
+- Readiness probe `GET /api/health/ready` (`src/modules/health/health.routes.ts`): kueri `SELECT 1` ke Prisma dan `HeadBucket` ke R2 dijalankan paralel melalui `Promise.allSettled`. Respons `{ status: 'ready' | 'not_ready', checks: { database: 'ok' | 'error', storage: 'ok' | 'error' } }`; `200` bila keduanya siap, `503` bila salah satu gagal. Kegagalan dicatat `logger.warn` tanpa detail di respons. Tanpa timeout internal (probe platform yang membatasi waktu tunggu); `/api/health` tetap liveness.
 - Harness baseline: `backend/tests/perf/endpoints.perf.ts` + `backend/vitest.perf.config.ts` (config terpisah agar tidak ikut suite biasa; `mergeConfig` tidak dipakai karena array `include` ikut tergabung). Script `test:perf` di backend dan root. Tanpa dependency baru.
 - Dataset uji: 500 kegiatan, 1.000 file bukti, 300 arsip, 100 agenda, 100 catatan; 20 run per endpoint setelah satu warm-up; seed dan pembersihan lewat helper fixture yang sudah ada.
 - Baseline (24 November 2026; database uji Supabase via pooler, server in-process lokal):
@@ -773,6 +774,22 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Pemeriksaan: backend `typecheck`, `lint`, `build`, seluruh suite test (dengan Mailpit), dan `test:perf` lulus.
 - Tanpa dependency, migration, env, atau perubahan schema.
 
+### P12.3 — Production Deployment (IN_PROGRESS)
+
+- Topologi: frontend Vercel `https://arkana.mateng.my.id`; backend Render `https://api.arkana.mateng.my.id` (service `arkana-2kdx.onrender.com`); database Supabase `ap-southeast-1`; file di Cloudflare R2 bucket `arkana`; SMTP Resend port 465; DNS Cloudflare. Backend dan frontend satu domain induk (`mateng.my.id`) sehingga cookie `sameSite=lax` tetap berlaku.
+- Deploy backend: root `backend`, build `npm ci --include=dev && npm run build`, start `npm start`, health check `/api/health`, region Singapore. Env produksi diisi lewat dashboard Render (`NODE_ENV=production`, `CORS_ORIGIN`/`PUBLIC_WEB_URL` domain frontend, `GOOGLE_REDIRECT_URI` domain API).
+- Deploy frontend: root `frontend`, env `NEXT_PUBLIC_API_URL=https://api.arkana.mateng.my.id/api`, `NEXT_PUBLIC_SITE_URL=https://arkana.mateng.my.id`, `NEXT_PUBLIC_CONTACT_EMAIL`; domain `arkana` CNAME Vercel.
+- Verifikasi dari luar (24 November 2026):
+  - `GET /api/health` → `200`; `GET /api/health/ready` → `200` dengan `database: ok`, `storage: ok`.
+  - CORS preflight `OPTIONS /api/auth/login` → `204`, `access-control-allow-origin: https://arkana.mateng.my.id`, `allow-credentials: true`.
+  - Helmet/CSP/HSTS aktif, `x-powered-by` tidak ada, 404 generik tanpa stack trace.
+  - Frontend `/`, `/login`, `/dashboard`, `/p/evidence/[token]`, `manifest.webmanifest`, `og-image.png` → `200`; bundle memuat `https://api.arkana.mateng.my.id/api`; metadata memakai domain frontend.
+- Perbaikan saat deploy:
+  - `trust proxy` produksi dinaikkan ke `2` (`backend/src/app.ts`): klien → edge Cloudflare → proxy Render → app. Sebelumnya `1`, sehingga `req.ip` (rate limit, log, audit) menunjuk IP Cloudflare, bukan IP klien.
+  - `engines.node` dipin ke `24.x` (`backend/package.json`); sebelumnya `>=24` membuat Render memakai Node 26.13.1, berbeda dari lingkungan dev/test (24.22.1).
+  - Bagian **Deployment Produksi** ditambahkan ke `README.md` (urutan migration/seed, env backend/frontend, DNS, health check, verifikasi).
+- Residu: belum diverifikasi login/`Set-Cookie` `Secure`, rate limit per IP setelah perubahan `trust proxy`, email Resend nyata, unggah bukti dukung + tautan publik, dan latensi endpoint dari produksi (pembanding baseline P12.2b). Database dan bucket R2 masih sama dengan lingkungan pengembangan.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
@@ -785,6 +802,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - ~~Health check belum memeriksa koneksi database maupun R2; relevan untuk verifikasi deployment di P12.~~ Ditambahkan `GET /api/health/ready` pada P12.2b.
 - `GET /api/health/ready` hanya diuji pada jalur `200`; jalur `503` belum diuji otomatis karena butuh injeksi kegagalan DB/R2.
 - Baseline performa P12.2b diukur dengan server in-process lokal dan database uji Supabase via pooler; angka lingkungan produksi (Render/Vercel) perlu diukur ulang pada P12.3.
+- Instance backend Render masih plan free (hibernasi saat idle): request pertama setelah idle dapat tertunda puluhan detik. Naikkan plan atau terima cold start sebagai batasan.
+- `trust proxy` produksi `2` mengasumsikan `api` tetap di-proxy Cloudflare di depan Render; bila DNS `api` diubah menjadi DNS-only, nilai harus diturunkan ke `1`. Akses langsung ke hostname `onrender.com` (melewati Cloudflare) berpotensi memalsukan entri kiri `X-Forwarded-For`; batasi rate limit ketat atau blokir hostname tersebut bila penyalahgunaan terdeteksi.
 - `GET /api/reports/work-logs` dan `/export` masih menerima `period=custom`, `date`, `from`/`to`, `category`, `groupBy`, serta `onlyWithEvidence`; UI tidak lagi menawarkannya. Diselaraskan hanya jika API ikut disederhanakan.
 - Pagination laporan bersifat klien; respons API tetap memuat seluruh baris periode karena dipakai ekspor. Backend pagination dipertimbangkan bila volume data per periode besar.
 - Dashboard User belum merender grafik kegiatan per kategori bulan berjalan maupun tren 7/30 hari, padahal `PROJECT.md` §5.7 mewajibkannya; data `workLogCategories`/`workLogTrend` sudah tersedia di API. Diselesaikan pada UI polish Dashboard atau kebutuhan `PROJECT.md` direvisi.
@@ -855,7 +874,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 3. Phase 11 ditutup atas keputusan pengguna: UI polish halaman Kegiatan (commit `5f13a42`), Laporan (`75693f2`), Arsip (`103a2a0`), dan autentikasi (`a3c1215`) selesai; halaman lain dianggap selesai tanpa dipoles. UI polish halaman Agenda (`8b576ec`) dan Catatan (`bc710f6`) selesai.
 4. Phase 12 dimulai: P12.1a (infrastruktur test, `3dafaab`), P12.1b (unit test, `50b2a0d`), dan P12.1c (integration test auth/profil/akun/otorisasi, `92de968`) selesai. P12.1d–P12.1h dilewati atas keputusan pengguna; P12.1 ditutup.
 5. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
-6. P12.2a — Security Verification & Fix selesai dan ter-commit (`08c97ab`). P12.2b — Performance Verification & Readiness Probe selesai diimplementasikan dan menunggu commit. Urutan berikutnya: P12.3 — Production Deployment, P12.4 — Backup & Recovery.
+6. P12.2a — Security Verification & Fix selesai dan ter-commit (`08c97ab`). P12.2b — Performance Verification & Readiness Probe selesai dan ter-commit (`3ede8c3`). P12.3 — Production Deployment berjalan: backend dan frontend live di `api.arkana.mateng.my.id` dan `arkana.mateng.my.id`; residu verifikasi dicatat di `PROGRESS.md`. Berikutnya: P12.4 — Backup & Recovery.
 
 ## Aturan Pembaruan
 
