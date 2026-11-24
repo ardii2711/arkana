@@ -18,6 +18,7 @@
     "check:file-rules": "npm --prefix backend run check:file-rules",
     "check:archive-folders": "npm --prefix backend run check:archive-folders",
     "test": "npm --prefix backend run test",
-    "test:coverage": "npm --prefix backend run test:coverage"
+    "test:coverage": "npm --prefix backend run test:coverage",
+    "test:perf": "npm --prefix backend run test:perf"
   }
 }

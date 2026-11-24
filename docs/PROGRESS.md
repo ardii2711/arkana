@@ -6,9 +6,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 
 - **Tahap:** Final Integration & Production Release
 - **Fase aktif:** Phase 12 — Final Integration & Production Release
-- **Task aktif:** P12.2a — Security Verification & Fix (implementasi selesai, menunggu commit)
-- **Task berikutnya:** P12.2b — Performance Verification & Readiness Probe
-- **Update terakhir:** 23 November 2026
+- **Task aktif:** P12.2b — Performance Verification & Readiness Probe (implementasi selesai, menunggu commit)
+- **Task berikutnya:** P12.3 — Production Deployment
+- **Update terakhir:** 24 November 2026
 
 ## Kesiapan Proyek
 
@@ -72,6 +72,11 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **P11.11 — UI Polish, halaman autentikasi:** `DONE` (commit `a3c1215`).
 - **UI Polish — Agenda & Penghapusan Kategori:** `DONE` (commit `8b576ec`, migration `20261123090000_remove_schedule_category`).
 - **UI Polish — Catatan:** `DONE` (commit `bc710f6`).
+- **P12.1a — Test Infrastructure & Fixture:** `DONE` (commit `3dafaab`).
+- **P12.1b — Unit Test Domain Murni:** `DONE` (commit `50b2a0d`).
+- **P12.1c — Integration Test Auth, Profil, Akun, Otorisasi:** `DONE` (commit `92de968`).
+- **P12.2a — Security Verification & Fix:** `DONE` (commit `08c97ab`).
+- **P12.2b — Performance Verification & Readiness Probe:** implementasi selesai, menunggu commit.
 
 ## Hasil Berjalan
 
@@ -732,7 +737,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Backend, schema, API, dan migration tidak berubah.
 - Pemeriksaan: frontend `typecheck`, `lint`, `build` lulus; render `/catatan`, `/catatan?sematkan=1`, `/catatan?q=zzzz` diverifikasi pada Chrome headless dengan akun pengguna (daftar dan empty state tampil, tanpa exception).
 
-### P12.2a — Security Verification & Fix (implementasi selesai, menunggu commit)
+### P12.2a — Security Verification & Fix (DONE, commit `08c97ab`)
 
 - Matriks audit (tanpa temuan kritis yang perlu perubahan kode):
   - Konfigurasi: `helmet()` aktif di seluruh respons; CORS satu origin dengan `credentials: true` (pastikan `CORS_ORIGIN` produksi diisi domain frontend yang tepat); `trust proxy` hanya di production; cookie `httpOnly`, `secure` di production, `sameSite=lax`, path `/` untuk access dan `/api/auth` untuk refresh; CSRF ditangani topologi same-site seperti keputusan sebelumnya.
@@ -744,6 +749,30 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Bugfix: `backend/src/modules/dashboard/dashboard.service.ts` kini memakai `scheduleRangeFilter(besok)` untuk `upcomingSchedules`, sehingga agenda multi-hari yang masih aktif besok ikut tampil. Test regresi: `backend/tests/integration/dashboard-schedules.test.ts`.
 - Pemeriksaan: backend `typecheck`, `lint`, `build` lulus; seluruh suite 91 test pada 16 file lulus dengan Mailpit berjalan; Prettier lulus pada file yang diubah.
 
+### P12.2b — Performance Verification & Readiness Probe (implementasi selesai, menunggu commit)
+
+- Readiness probe `GET /api/health/ready` (`src/modules/health/health.routes.ts`): `prisma.$queryRaw\`SELECT 1\``dan`HeadBucketCommand`R2 dijalankan paralel melalui`Promise.allSettled`. Respons `{ status: 'ready' | 'not_ready', checks: { database: 'ok' | 'error', storage: 'ok' | 'error' } }`; `200`bila keduanya siap,`503`bila salah satu gagal. Kegagalan dicatat`logger.warn`tanpa detail di respons. Tanpa timeout internal (probe platform yang membatasi waktu tunggu);`/api/health` tetap liveness.
+- Harness baseline: `backend/tests/perf/endpoints.perf.ts` + `backend/vitest.perf.config.ts` (config terpisah agar tidak ikut suite biasa; `mergeConfig` tidak dipakai karena array `include` ikut tergabung). Script `test:perf` di backend dan root. Tanpa dependency baru.
+- Dataset uji: 500 kegiatan, 1.000 file bukti, 300 arsip, 100 agenda, 100 catatan; 20 run per endpoint setelah satu warm-up; seed dan pembersihan lewat helper fixture yang sudah ada.
+- Baseline (24 November 2026; database uji Supabase via pooler, server in-process lokal):
+
+| Endpoint                     | p50    | p95     | Respons  |
+| ---------------------------- | ------ | ------- | -------- |
+| `GET /api/work-logs`         | 469 ms | 731 ms  | 48,8 KB  |
+| `GET /api/archive/files`     | 640 ms | 1839 ms | 32,8 KB  |
+| `GET /api/reports/work-logs` | 552 ms | 871 ms  | 128,7 KB |
+| `GET /api/dashboard`         | 259 ms | 347 ms  | 7,2 KB   |
+| `GET /api/schedules`         | 542 ms | 1269 ms | 31,9 KB  |
+| `GET /api/notes`             | 455 ms | 605 ms  | 20,9 KB  |
+| `GET /api/health/ready`      | 330 ms | 423 ms  | 0,1 KB   |
+
+- `EXPLAIN ANALYZE` untuk seluruh query lambat (p95 > 300 ms): semua daftar memakai index per pengguna dan selesai 0,09–0,34 ms — `WorkLog_userId_activityDate_idx` (backward index scan + incremental sort), `ArchiveFile_userId_folderId_idx`, `Schedule_userId_startAt_idx`, `Note_userId_pinned_updatedAt_idx` (backward index scan). Tidak ada sequential scan atau sort besar. Latensi endpoint berasal dari round-trip jaringan ke Supabase pooler (2+ query berurutan per endpoint), bukan biaya query.
+- Pola query: work-logs/archive/files/schedules/notes = `findMany` + `count` dalam satu `$transaction`; dashboard = 9 query paralel (`count`, `aggregate`, `findMany`, 2 `groupBy`); laporan = 1 `findMany` lalu grouping di memori; `health/ready` = 1 query DB + 1 `HeadBucket`.
+- Test baru: `backend/tests/integration/health-ready.test.ts` — `200`, `checks` keduanya `ok`, respons tidak memuat kredensial R2. Jalur `503` belum diuji otomatis (butuh injeksi kegagalan).
+- `docs/API.md` §11 menambahkan `/health/ready` beserta tabel kondisi `200`/`503`.
+- Pemeriksaan: backend `typecheck`, `lint`, `build`, seluruh suite test (dengan Mailpit), dan `test:perf` lulus.
+- Tanpa dependency, migration, env, atau perubahan schema.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
@@ -753,7 +782,9 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - `busboy` mendekode nama file multipart sebagai latin1; nama file non-ASCII berpotensi tampil tidak sesuai. Perlu normalisasi bila diperlukan.
 - Pengingat dan notifikasi agenda ditangguhkan: perlu keputusan kanal (email/in-app), mekanisme penjadwalan, dan penanganan multi-instance sebelum dijadwalkan sebagai task roadmap baru.
 - ~~Perlindungan CSRF belum diimplementasikan.~~ Mitigasi saat ini `sameSite=lax` dan topologi same-site (subdomain satu domain induk); token CSRF belum diperlukan selama topologi ini dipakai.
-- Health check belum memeriksa koneksi database maupun R2; relevan untuk verifikasi deployment di P12.
+- ~~Health check belum memeriksa koneksi database maupun R2; relevan untuk verifikasi deployment di P12.~~ Ditambahkan `GET /api/health/ready` pada P12.2b.
+- `GET /api/health/ready` hanya diuji pada jalur `200`; jalur `503` belum diuji otomatis karena butuh injeksi kegagalan DB/R2.
+- Baseline performa P12.2b diukur dengan server in-process lokal dan database uji Supabase via pooler; angka lingkungan produksi (Render/Vercel) perlu diukur ulang pada P12.3.
 - `GET /api/reports/work-logs` dan `/export` masih menerima `period=custom`, `date`, `from`/`to`, `category`, `groupBy`, serta `onlyWithEvidence`; UI tidak lagi menawarkannya. Diselaraskan hanya jika API ikut disederhanakan.
 - Pagination laporan bersifat klien; respons API tetap memuat seluruh baris periode karena dipakai ekspor. Backend pagination dipertimbangkan bila volume data per periode besar.
 - Dashboard User belum merender grafik kegiatan per kategori bulan berjalan maupun tren 7/30 hari, padahal `PROJECT.md` §5.7 mewajibkannya; data `workLogCategories`/`workLogTrend` sudah tersedia di API. Diselesaikan pada UI polish Dashboard atau kebutuhan `PROJECT.md` direvisi.
@@ -803,6 +834,8 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Arsip: setiap dokumen disimpan pada "Arsip utama" (root) atau di dalam folder. Entri "Tanpa folder" dihapus dari tree, tetapi pilihan "Arsip utama" tersedia saat unggah dan ubah.
 - Halaman auth tidak memakai header/footer: frame hairline transparan berisi logo sampai CTA, latar grid 56px + glow, `← Beranda` kiri atas dan toggle tema kanan atas.
 - Status auth (aktivasi, reset password, verifikasi email) memakai `AuthStatus` horizontal: ikon lingkaran di kiri, teks di kanan.
+- Health check dipisah: `/api/health` liveness (tanpa dependensi) dan `/api/health/ready` readiness (DB + R2, `200`/`503`, tanpa detail error di respons).
+- Baseline performa memakai harness Vitest terpisah (`vitest.perf.config.ts`, script `test:perf`) dengan dataset seed standar; tidak dijalankan pada suite biasa.
 - Input email pada form auth tidak memakai ikon; `PasswordInput` hanya memuat tombol tampil/sembunyikan.
 
 ## Urutan Pengembangan
@@ -822,7 +855,7 @@ Catatan: `ROADMAP.md` dinormalisasi ke format task kanonik (`Objective`, `Scope`
 3. Phase 11 ditutup atas keputusan pengguna: UI polish halaman Kegiatan (commit `5f13a42`), Laporan (`75693f2`), Arsip (`103a2a0`), dan autentikasi (`a3c1215`) selesai; halaman lain dianggap selesai tanpa dipoles. UI polish halaman Agenda (`8b576ec`) dan Catatan (`bc710f6`) selesai.
 4. Phase 12 dimulai: P12.1a (infrastruktur test, `3dafaab`), P12.1b (unit test, `50b2a0d`), dan P12.1c (integration test auth/profil/akun/otorisasi, `92de968`) selesai. P12.1d–P12.1h dilewati atas keputusan pengguna; P12.1 ditutup.
 5. Sisa audit yang **ditunda**: batch 6 — shared component frontend (`PaginationBar`, `EmptyState`, `QueryError`, `FormErrorAlert`, `useObjectUrl`, `FolderSelect`, `StatCard`/`ScheduleRow`, temuan B.2.1–B.2.8); batch 7 — pecah komponen besar (`profile-view.tsx`, `users-view.tsx`, temuan B.6).
-6. P12.2a — Security Verification & Fix selesai diimplementasikan dan menunggu commit. Urutan berikutnya: P12.2b — Performance Verification & Readiness Probe, P12.3 — Production Deployment, P12.4 — Backup & Recovery.
+6. P12.2a — Security Verification & Fix selesai dan ter-commit (`08c97ab`). P12.2b — Performance Verification & Readiness Probe selesai diimplementasikan dan menunggu commit. Urutan berikutnya: P12.3 — Production Deployment, P12.4 — Backup & Recovery.
 
 ## Aturan Pembaruan
 

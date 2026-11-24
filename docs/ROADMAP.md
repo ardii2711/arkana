@@ -512,12 +512,16 @@ Pendekatan: pengujian otomatis backend dengan Vitest + `@vitest/coverage-v8` (ta
 - **Acceptance Criteria:** Matriks audit tercatat di `PROGRESS.md`; tidak ada temuan keamanan kritis yang dibiarkan tanpa keputusan; agenda multi-hari yang masih aktif besok muncul pada daftar terdekat dengan batas lima item; `typecheck`, `lint`, `build`, dan suite test lulus.
 - **Dependencies:** P12.1.
 
+**Status (24 November 2026):** `DONE` (commit `08c97ab`); matriks audit dan residu `npm audit` tercatat di `PROGRESS.md`.
+
 ### P12.2b — Performance Verification & Readiness Probe
 
 - **Objective:** Mencatat baseline performa dan menyediakan pemeriksaan kesiapan untuk deployment.
 - **Scope:** Ukur endpoint berat (`work-logs`, `archive/files`, `reports/work-logs`, `dashboard`, `schedules`, `notes`) dengan harness dan fixture yang sudah ada, tanpa dependency baru. Catat p50/p95, ukuran respons, dan pola query; lakukan `EXPLAIN ANALYZE` hanya untuk query yang lambat. Tambahkan `GET /api/health/ready` yang memeriksa koneksi database dan bucket R2, dengan `200` ketika siap dan `503` ketika tidak; endpoint `/api/health` tetap sebagai liveness. Dokumentasikan probe di `docs/API.md` dan pakai pada P12.3.
 - **Acceptance Criteria:** Baseline performa dan hasil probe tercatat di `PROGRESS.md`; probe tidak membocorkan kredensial dan terverifikasi di lingkungan uji; `typecheck`, `lint`, `build`, dan suite test lulus.
 - **Dependencies:** P12.2a.
+
+**Status (24 November 2026):** implementasi selesai, menunggu commit; baseline performa dan hasil probe tercatat di `PROGRESS.md`, probe didokumentasikan di `docs/API.md` §11.
 
 ### P12.3 — Production Deployment
 

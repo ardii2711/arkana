@@ -91,18 +91,18 @@ Batas: 5 MB per file, 10 file per kegiatan, 50 MB total per kegiatan. Format: JP
 
 Role `USER`. Privat, tanpa tautan publik. Kuota 1 GB per akun.
 
-| Method | Endpoint                     | Keterangan                                                                                   |
-| ------ | ---------------------------- | -------------------------------------------------------------------------------------------- |
-| GET    | `/archive/folders`           | Daftar folder + `usage { usedBytes, quotaBytes }`; `fileCount` mencakup seluruh subfolder     |
-| POST   | `/archive/folders`           | `name`, `parentId?`; maksimal 3 level                                                        |
-| PATCH  | `/archive/folders/:id`       | Ubah `name` dan/atau `parentId`                                                              |
-| DELETE | `/archive/folders/:id`       | `recursive=true` untuk hapus isi; `204`                                                      |
-| GET    | `/archive/files`             | `folderId` (uuid, ikut subfolder), `search`, `type`, `sort`, `page`, `limit`                  |
+| Method | Endpoint                     | Keterangan                                                                                      |
+| ------ | ---------------------------- | ----------------------------------------------------------------------------------------------- |
+| GET    | `/archive/folders`           | Daftar folder + `usage { usedBytes, quotaBytes }`; `fileCount` mencakup seluruh subfolder       |
+| POST   | `/archive/folders`           | `name`, `parentId?`; maksimal 3 level                                                           |
+| PATCH  | `/archive/folders/:id`       | Ubah `name` dan/atau `parentId`                                                                 |
+| DELETE | `/archive/folders/:id`       | `recursive=true` untuk hapus isi; `204`                                                         |
+| GET    | `/archive/files`             | `folderId` (uuid, ikut subfolder), `search`, `type`, `sort`, `page`, `limit`                    |
 | POST   | `/archive/files`             | Multipart `file` + `folderId?` (kosong = arsip utama), `name?`, `description?`, `documentDate?` |
-| GET    | `/archive/files/:id`         | Detail dokumen                                                                               |
-| PATCH  | `/archive/files/:id`         | Ubah metadata dan/atau pindah folder (`null` = arsip utama)                                  |
-| DELETE | `/archive/files/:id`         | Hapus objek R2 lalu metadata; `204`                                                          |
-| GET    | `/archive/files/:id/content` | `inline=true` untuk gambar/PDF                                                               |
+| GET    | `/archive/files/:id`         | Detail dokumen                                                                                  |
+| PATCH  | `/archive/files/:id`         | Ubah metadata dan/atau pindah folder (`null` = arsip utama)                                     |
+| DELETE | `/archive/files/:id`         | Hapus objek R2 lalu metadata; `204`                                                             |
+| GET    | `/archive/files/:id/content` | `inline=true` untuk gambar/PDF                                                                  |
 
 Catatan: `folderId` berupa uuid menampilkan dokumen pada folder tersebut beserta seluruh turunannya (maksimal 3 level). `folderId=root` menampilkan dokumen pada arsip utama (tanpa folder) dan tidak dipakai UI.
 
@@ -119,13 +119,13 @@ Query: `period` wajib (`daily|weekly|monthly|yearly|custom`), `date` opsional un
 
 Role `USER`. Waktu disimpan UTC, filter tanggal memakai WITA. Filter `from`/`to` memakai rentang beririsan, sehingga agenda multi-hari ikut tampil pada tanggal setelah `startAt`.
 
-| Method | Endpoint         | Keterangan                                                                                    |
-| ------ | ---------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/schedules`     | `page`, `limit`, `from`, `to`, `status`, `search`                                             |
-| POST   | `/schedules`     | `title` dan `startAt` wajib; `description`, `endAt`, `allDay`, `location`, `status` opsional  |
-| GET    | `/schedules/:id` | Detail agenda                                                                                 |
-| PATCH  | `/schedules/:id` | Ubah sebagian field                                                                           |
-| DELETE | `/schedules/:id` | Hapus agenda; `204`                                                                           |
+| Method | Endpoint         | Keterangan                                                                                   |
+| ------ | ---------------- | -------------------------------------------------------------------------------------------- |
+| GET    | `/schedules`     | `page`, `limit`, `from`, `to`, `status`, `search`                                            |
+| POST   | `/schedules`     | `title` dan `startAt` wajib; `description`, `endAt`, `allDay`, `location`, `status` opsional |
+| GET    | `/schedules/:id` | Detail agenda                                                                                |
+| PATCH  | `/schedules/:id` | Ubah sebagian field                                                                          |
+| DELETE | `/schedules/:id` | Hapus agenda; `204`                                                                          |
 
 ## 9. Catatan
 
@@ -153,9 +153,19 @@ Tautan yang dipakai laporan dan aplikasi: `${PUBLIC_WEB_URL}/p/evidence/{publicT
 
 ## 11. Health Check
 
-| Method | Endpoint  | Keterangan                      |
-| ------ | --------- | ------------------------------- |
-| GET    | `/health` | `status`, `uptime`, `timestamp` |
+| Method | Endpoint        | Keterangan                                |
+| ------ | --------------- | ----------------------------------------- |
+| GET    | `/health`       | Liveness: `status`, `uptime`, `timestamp` |
+| GET    | `/health/ready` | Readiness: koneksi database dan bucket R2 |
+
+`GET /api/health/ready` memeriksa `SELECT 1` ke PostgreSQL dan `HeadBucket` ke R2 secara paralel.
+
+| Kondisi                        | Status | Body                                                                                      |
+| ------------------------------ | ------ | ----------------------------------------------------------------------------------------- |
+| Database dan R2 siap           | `200`  | `{ success: true, data: { status: 'ready', checks: { database: 'ok', storage: 'ok' } } }` |
+| Salah satu atau keduanya gagal | `503`  | `status: 'not_ready'` dengan `checks` bernilai `error` pada bagian yang gagal             |
+
+Respons tidak memuat pesan error, host, atau kredensial; kegagalan hanya dicatat di log server. Endpoint tidak memiliki timeout internal — probe platform yang membatasi waktu tunggu.
 
 ## 12. Aturan Umum
 
