@@ -155,14 +155,12 @@ function HeroVisual() {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center gap-2 rounded-lg border border-[#14BBA6]/40 bg-[#14BBA6]/5 px-3 py-2">
-            <LinkIcon className="size-4 shrink-0 text-[#14BBA6]" />
+          <div className="border-primary/40 bg-primary/5 mt-4 flex items-center gap-2 rounded-lg border px-3 py-2">
+            <LinkIcon className="text-primary size-4 shrink-0" />
             <span className="min-w-0 flex-1 truncate font-mono text-[11px]">
               arkana.mateng.my.id/p/evidence/9f3a…c21b
             </span>
-            <span className="shrink-0 text-[10px] font-medium text-[#0F766E] uppercase dark:text-[#2DD4BF]">
-              Salin
-            </span>
+            <span className="text-primary shrink-0 text-[10px] font-medium uppercase">Salin</span>
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - **Fase aktif:** Phase 12 — Final Integration & Production Release
 - **Task aktif:** P12.3 — Production Deployment (deploy berjalan; verifikasi lanjutan menunggu)
 - **Task berikutnya:** P12.4 — Backup & Recovery
-- **Update terakhir:** 24 November 2026
+- **Update terakhir:** 25 November 2026
 
 ## Kesiapan Proyek
 
@@ -795,6 +795,16 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
   - Latensi publik dari luar (10 sampel): `GET /api/health` p50 236 ms / p95 435 ms; `GET /api/health/ready` p50 497 ms / p95 1280 ms; `GET /api/public/work-logs/:token` (404) p50 178 ms / p95 402 ms. Angka mencakup Cloudflare + Render + jaringan + DB/R2.
 - Residu yang masih menunggu tindakan pengguna: login nyata lewat browser untuk memastikan cookie terpasang pada sesi, email Resend nyata (undangan/reset), unggah bukti dukung + buka tautan publik tanpa sesi, latensi endpoint berat terautentikasi (pembanding baseline P12.2b), dan pemeriksaan log Render tanpa `cookie`/`authorization`/token pada URL. Database dan bucket R2 masih sama dengan lingkungan pengembangan.
 
+### Tema — Slate (DONE)
+
+- Palet antarmuka diganti ke base color **Slate** shadcn/ui (cool blue-gray): `background`/`card` putih, `foreground` `oklch(0.129 0.042 264.695)`, `primary` monokrom slate-900 `oklch(0.208 0.042 265.755)`, dark mode slate-950 `oklch(0.129 0.042 264.695)` dengan card `oklch(0.208 0.042 265.755)`.
+- Chart light memakai palet default shadcn (oranye/teal/biru/kuning/amber); chart dark memakai blue/emerald/amber/purple/rose.
+- Radius `0.625rem`, font tetap Geist. `components.json` tidak berubah (`baseColor: neutral`, style `radix-nova`).
+- `frontend/src/app/globals.css` memuat seluruh token; `layout.tsx` `viewport.themeColor` light `#FFFFFF` / dark `#020617`; `manifest.ts` `theme_color` `#0F172A` dan `background_color` `#FFFFFF`.
+- Warna teal hardcoded pada pratinjau tautan di halaman publik `/` diganti token `primary`.
+- Aset brand (logo/favicon/OG) tidak diubah; logo navy/teal kini menjadi aksen sekunder.
+- Tanpa perubahan backend, schema, migration, dependency, atau env.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.
@@ -861,6 +871,7 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Health check dipisah: `/api/health` liveness (tanpa dependensi) dan `/api/health/ready` readiness (DB + R2, `200`/`503`, tanpa detail error di respons).
 - Baseline performa memakai harness Vitest terpisah (`vitest.perf.config.ts`, script `test:perf`) dengan dataset seed standar; tidak dijalankan pada suite biasa.
 - Input email pada form auth tidak memakai ikon; `PasswordInput` hanya memuat tombol tampil/sembunyikan.
+- Tema memakai base color Slate shadcn/ui (cool blue-gray, Geist, radius `0.625rem`) menggantikan palet brand navy/teal; aset brand tidak diubah.
 
 ## Urutan Pengembangan
 

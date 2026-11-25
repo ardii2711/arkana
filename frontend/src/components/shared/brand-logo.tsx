@@ -5,7 +5,6 @@ type BrandLogoProps = {
   className?: string;
   iconClassName?: string;
   wordmarkClassName?: string;
-  /** `dark` selalu menampilkan varian gelap (mis. di atas panel navy). */
   tone?: 'auto' | 'dark';
 };
 
@@ -14,12 +13,10 @@ const sources = {
     light: '/brand/arkana-icon.svg',
     dark: '/brand/arkana-icon-dark.svg',
   },
-  /** ARKANA + akronim "Arsip, Rekam Kinerja, dan Agenda" di bawahnya. */
   wordmark: {
     light: '/brand/arkana-wordmark.svg',
     dark: '/brand/arkana-wordmark-dark.svg',
   },
-  /** Hanya tulisan ARKANA, tanpa akronim (untuk lockup di samping ikon). */
   wordmarkOnly: {
     light: '/brand/arkana-wordmark-only.svg',
     dark: '/brand/arkana-wordmark-only-dark.svg',
