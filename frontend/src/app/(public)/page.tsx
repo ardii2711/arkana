@@ -17,11 +17,27 @@ import type { Metadata } from 'next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { env } from '@/config/env';
+import { siteDescription, siteName, siteUrl } from '@/config/site';
 
 export const metadata: Metadata = {
   title: { absolute: 'ARKANA — Arsip, Rekam Kinerja, dan Agenda' },
-  description:
-    'ARKANA membantu ASN mencatat pekerjaan, mengelola bukti dukung dan arsip pribadi, menyusun laporan kinerja, serta mengatur agenda dan catatan dalam satu tempat.',
+  description: siteDescription,
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    locale: 'id_ID',
+    url: '/',
+    siteName,
+    title: 'ARKANA — Arsip, Rekam Kinerja, dan Agenda',
+    description: siteDescription,
+    images: [{ url: '/brand/og-image.png', width: 1200, height: 630, alt: 'ARKANA' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ARKANA — Arsip, Rekam Kinerja, dan Agenda',
+    description: siteDescription,
+    images: ['/brand/og-image.png'],
+  },
 };
 
 const modules: { title: string; description: string; icon: LucideIcon }[] = [
@@ -99,6 +115,37 @@ const guarantees: { title: string; description: string; icon: LucideIcon }[] = [
   },
 ];
 
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${siteUrl}/#organization`,
+      name: siteName,
+      url: siteUrl,
+      logo: `${siteUrl}/brand/icon-512.png`,
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      url: siteUrl,
+      name: siteName,
+      inLanguage: 'id-ID',
+      publisher: { '@id': `${siteUrl}/#organization` },
+    },
+    {
+      '@type': 'WebApplication',
+      name: siteName,
+      url: siteUrl,
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      inLanguage: 'id-ID',
+      description: siteDescription,
+      publisher: { '@id': `${siteUrl}/#organization` },
+    },
+  ],
+};
+
 function HeroVisual() {
   return (
     <div aria-hidden="true" className="relative mx-auto w-full max-w-md">
@@ -171,6 +218,10 @@ function HeroVisual() {
 export default function PublicHomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <section className="relative overflow-hidden border-b">
         <div
           aria-hidden="true"

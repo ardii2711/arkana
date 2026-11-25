@@ -4,7 +4,7 @@ import { Geist } from 'next/font/google';
 import { QueryProvider } from '@/components/shared/query-provider';
 import { ThemeProvider } from '@/components/shared/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
-import { env } from '@/config/env';
+import { siteDescription, siteName, siteUrl } from '@/config/site';
 import { cn } from '@/lib/utils';
 
 import './globals.css';
@@ -12,13 +12,13 @@ import './globals.css';
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(siteUrl),
   title: {
-    default: 'ARKANA',
-    template: '%s · ARKANA',
+    default: siteName,
+    template: `%s · ${siteName}`,
   },
-  applicationName: 'ARKANA',
-  description: 'Arsip, Rekam Kinerja, dan Agenda',
+  applicationName: siteName,
+  description: siteDescription,
   icons: {
     icon: [
       { url: '/brand/favicon.svg', type: 'image/svg+xml' },
@@ -34,10 +34,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'id_ID',
-    siteName: 'ARKANA',
+    siteName,
     title: 'ARKANA — Arsip, Rekam Kinerja, dan Agenda',
-    description:
-      'ARKANA membantu ASN mencatat pekerjaan, mengelola bukti dukung dan arsip pribadi, menyusun laporan kinerja, serta mengatur agenda dan catatan dalam satu tempat.',
+    description: siteDescription,
     images: [{ url: '/brand/og-image.png', width: 1200, height: 630, alt: 'ARKANA' }],
   },
   twitter: {

@@ -18,4 +18,10 @@ if (!parsed.success) {
   );
 }
 
+if (process.env.NODE_ENV === 'production' && !parsed.data.NEXT_PUBLIC_SITE_URL) {
+  throw new Error(
+    'Konfigurasi environment tidak valid: NEXT_PUBLIC_SITE_URL wajib diisi pada build produksi agar canonical dan sitemap memakai domain yang benar.',
+  );
+}
+
 export const env = parsed.data;

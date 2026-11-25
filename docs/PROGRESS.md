@@ -805,6 +805,17 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Aset brand (logo/favicon/OG) tidak diubah; logo navy/teal kini menjadi aksen sekunder.
 - Tanpa perubahan backend, schema, migration, dependency, atau env.
 
+### SEO Teknis (DONE)
+
+- `frontend/src/config/site.ts` memusatkan `siteUrl` (dari `NEXT_PUBLIC_SITE_URL`), `siteName`, dan `siteDescription`; `NEXT_PUBLIC_SITE_URL` kini wajib pada build produksi.
+- `frontend/src/app/robots.ts` → `/robots.txt` mengizinkan crawl seluruh halaman dan menunjuk sitemap.
+- `frontend/src/app/sitemap.ts` → `/sitemap.xml` hanya memuat beranda; halaman auth, app, dan bukti dukung tidak dimasukkan.
+- Home menambahkan canonical `/`, `openGraph.url`, serta Twitter title/description/image; root metadata memakai konstanta `site.ts`.
+- Route group `(app)` dan `(auth)` memberi `robots: { index: false, follow: false }`; `/p/evidence/[token]` tetap noindex.
+- JSON-LD `@graph` di beranda: `Organization`, `WebSite`, `WebApplication` (`BusinessApplication`, `Web`, `id-ID`) tanpa rating/offers.
+- `frontend/src/app/not-found.tsx` menggantikan 404 bawaan: logo, status 404, tautan beranda dan masuk.
+- Tidak ada dependency baru, perubahan backend, atau migration. Verifikasi eksternal (Search Console, Rich Results Test) belum dijalankan.
+
 ### Temuan Di Luar Scope
 
 - Access token masih berupa JWT stateless: setelah ganti password atau penonaktifan, access token lama tetap valid maksimal 15 menit. Bila perlu pencabutan instan, tambahkan penanda versi sesi pada `User` dan periksa di `requireAuth`.

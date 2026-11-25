@@ -118,6 +118,8 @@ Environment wajib:
 | `NEXT_PUBLIC_SITE_URL`      | `https://<frontend-domain>` |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | email Admin                 |
 
+- `NEXT_PUBLIC_SITE_URL` wajib pada build produksi; nilainya dipakai untuk canonical, sitemap, dan JSON-LD. Build produksi gagal bila kosong.
+
 ### 4. Domain dan DNS
 
 - `arkana` → CNAME `cname.vercel-dns.com`.

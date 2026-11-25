@@ -1,9 +1,14 @@
 import { ArrowLeftIcon } from 'lucide-react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { BrandLogo } from '@/components/shared/brand-logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
