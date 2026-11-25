@@ -783,12 +783,17 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
   - `GET /api/health` → `200`; `GET /api/health/ready` → `200` dengan `database: ok`, `storage: ok`.
   - CORS preflight `OPTIONS /api/auth/login` → `204`, `access-control-allow-origin: https://arkana.mateng.my.id`, `allow-credentials: true`.
   - Helmet/CSP/HSTS aktif, `x-powered-by` tidak ada, 404 generik tanpa stack trace.
-  - Frontend `/`, `/login`, `/dashboard`, `/p/evidence/[token]`, `manifest.webmanifest`, `og-image.png` → `200`; bundle memuat `https://api.arkana.mateng.my.id/api`; metadata memakai domain frontend.
+  - Frontend `/`, `/login`, `/dashboard`, `/p/evidence/[token]`, `manifest.webmanifest`, `/brand/og-image.png` → `200`; bundle memuat `https://api.arkana.mateng.my.id/api`; metadata memakai domain frontend.
 - Perbaikan saat deploy:
   - `trust proxy` produksi dinaikkan ke `2` (`backend/src/app.ts`): klien → edge Cloudflare → proxy Render → app. Sebelumnya `1`, sehingga `req.ip` (rate limit, log, audit) menunjuk IP Cloudflare, bukan IP klien.
   - `engines.node` dipin ke `24.x` (`backend/package.json`); sebelumnya `>=24` membuat Render memakai Node 26.13.1, berbeda dari lingkungan dev/test (24.22.1).
   - Bagian **Deployment Produksi** ditambahkan ke `README.md` (urutan migration/seed, env backend/frontend, DNS, health check, verifikasi).
-- Residu: belum diverifikasi login/`Set-Cookie` `Secure`, rate limit per IP setelah perubahan `trust proxy`, email Resend nyata, unggah bukti dukung + tautan publik, dan latensi endpoint dari produksi (pembanding baseline P12.2b). Database dan bucket R2 masih sama dengan lingkungan pengembangan.
+- Verifikasi residu dari luar (25 November 2026):
+  - `POST /api/auth/logout` → `204` dengan `Set-Cookie: arkana_access=; Path=/; Expires=...; HttpOnly; Secure; SameSite=Lax` dan `arkana_refresh=; Path=/api/auth; ...; HttpOnly; Secure; SameSite=Lax`. Atribut cookie produksi terverifikasi tanpa perlu sesi login.
+  - Rate limit per IP berjalan: 35 `POST /api/auth/logout` berurutan lewat satu koneksi keep-alive → 20 × `204` lalu 15 × `429`; header `ratelimit-policy: "30-in-15min"; q=30`.
+  - Frontend `/`, `/login`, `/dashboard`, `/p/evidence/<token-tidak-valid>`, `/manifest.webmanifest`, `/brand/og-image.png`, `/brand/arkana-logo-horizontal.svg` → `200`.
+  - Latensi publik dari luar (10 sampel): `GET /api/health` p50 236 ms / p95 435 ms; `GET /api/health/ready` p50 497 ms / p95 1280 ms; `GET /api/public/work-logs/:token` (404) p50 178 ms / p95 402 ms. Angka mencakup Cloudflare + Render + jaringan + DB/R2.
+- Residu yang masih menunggu tindakan pengguna: login nyata lewat browser untuk memastikan cookie terpasang pada sesi, email Resend nyata (undangan/reset), unggah bukti dukung + buka tautan publik tanpa sesi, latensi endpoint berat terautentikasi (pembanding baseline P12.2b), dan pemeriksaan log Render tanpa `cookie`/`authorization`/token pada URL. Database dan bucket R2 masih sama dengan lingkungan pengembangan.
 
 ### Temuan Di Luar Scope
 
