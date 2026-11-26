@@ -795,6 +795,15 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
   - Latensi publik dari luar (10 sampel): `GET /api/health` p50 236 ms / p95 435 ms; `GET /api/health/ready` p50 497 ms / p95 1280 ms; `GET /api/public/work-logs/:token` (404) p50 178 ms / p95 402 ms. Angka mencakup Cloudflare + Render + jaringan + DB/R2.
 - Residu yang masih menunggu tindakan pengguna: login nyata lewat browser untuk memastikan cookie terpasang pada sesi, email Resend nyata (undangan/reset), unggah bukti dukung + buka tautan publik tanpa sesi, latensi endpoint berat terautentikasi (pembanding baseline P12.2b), dan pemeriksaan log Render tanpa `cookie`/`authorization`/token pada URL. Database dan bucket R2 masih sama dengan lingkungan pengembangan.
 
+### Keep-alive Render & Supabase (DONE)
+
+- `backend/src/lib/keep-alive.ts`: self-ping `https://${RENDER_EXTERNAL_HOSTNAME}/api/health` tiap 7 menit dan DB keep-alive `SELECT 1` tiap 12 jam, aktif hanya bila `NODE_ENV=production`; semua timer `.unref()` dan dihentikan saat shutdown.
+- `RENDER_EXTERNAL_HOSTNAME` ditambahkan sebagai env opsional (di-inject Render); tanpa nilainya self-ping nonaktif.
+- `backend/src/server.ts`: keep-alive dimulai setelah `listen` dan dihentikan sebelum `server.close`, ditambah force-exit 10 detik agar proses tidak menggantung.
+- `request-logger.ts`: request ke `/api/health` tidak dicatat agar self-ping tidak memenuhi log; kegagalan self-ping tetap tercatat `warn`.
+- Self-ping tidak bisa membangunkan instance yang sudah tidur. Monitor eksternal (UptimeRobot) ke `https://<api-domain>/api/health` interval 5 menit tetap diperlukan dan merupakan tindakan manual pengguna; `README.md` §6 diperbarui (sebelumnya menyarankan `/api/health/ready`).
+- Tanpa dependency, migration, atau perubahan API publik.
+
 ### Tema — Slate (DONE)
 
 - Palet antarmuka diganti ke base color **Slate** shadcn/ui (cool blue-gray): `background`/`card` putih, `foreground` `oklch(0.129 0.042 264.695)`, `primary` monokrom slate-900 `oklch(0.208 0.042 265.755)`, dark mode slate-950 `oklch(0.129 0.042 264.695)` dengan card `oklch(0.208 0.042 265.755)`.

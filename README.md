@@ -141,4 +141,8 @@ Environment wajib:
 ### 6. Probe dan monitoring
 
 - Render hanya memakai `/api/health` sebagai health check.
-- Uptime monitor eksternal menembak `/api/health/ready` dengan interval ≥30 detik; tiap probe melakukan satu query database dan satu `HeadBucket` R2.
+- Backend produksi (`src/lib/keep-alive.ts`) menjalankan self-ping ke `https://${RENDER_EXTERNAL_HOSTNAME}/api/health` tiap 7 menit agar instance free tidak tidur. `RENDER_EXTERNAL_HOSTNAME` di-inject otomatis oleh Render; bila kosong, self-ping nonaktif.
+- DB keep-alive `SELECT 1` tiap 12 jam mencegah Supabase free project pause.
+- Self-ping tidak dapat membangunkan instance yang sudah tidur (timer mati bersama proses). Untuk itu pasang monitor eksternal ke `https://<api-domain>/api/health` dengan interval 5 menit; request dari luar sekaligus membangunkan instance dan menguji jalur domain + Cloudflare.
+- Jangan mengarahkan monitor ke `/api/health/ready`: tiap probe melakukan query database dan `HeadBucket` R2.
+- Log `/api/health` dibisukan dari request log; kegagalan self-ping tetap tercatat sebagai `warn`.

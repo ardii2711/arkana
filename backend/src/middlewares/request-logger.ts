@@ -18,6 +18,8 @@ export function sanitizeRequestUrl(url: string): string {
 
 export const requestLogger = pinoHttp({
   logger,
+  // Self-ping dan probe platform tidak perlu memenuhi log.
+  autoLogging: { ignore: (request) => request.url === '/api/health' },
   serializers: {
     req(request: IncomingMessage) {
       return { ...stdSerializers.req(request), url: sanitizeRequestUrl(request.url ?? '') };
