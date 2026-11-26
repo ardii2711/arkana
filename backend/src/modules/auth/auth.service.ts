@@ -242,7 +242,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
     await sendPasswordResetEmail(user.name, user.email, token);
   } catch (error) {
     await prisma.accountToken.deleteMany({ where: { tokenHash } });
-    logger.error({ err: error }, 'Gagal mengirim email reset password');
+    logger.error({ err: error, userId: user.id }, 'Gagal mengirim email reset password');
   }
 }
 

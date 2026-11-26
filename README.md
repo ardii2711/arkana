@@ -92,6 +92,7 @@ npm run db:seed             # memakai ADMIN_EMAIL dan ADMIN_PASSWORD dari .env
 - Health check path: `/api/health` (liveness). Jangan `/health/ready`: probe yang bergantung pada database bisa memicu restart loop.
 - Instance: 1 (connection pool Prisma per instance).
 - Node mengikuti `engines` di `backend/package.json` (`24.x`).
+- Render free memblokir outbound SMTP (port 25/465/587). Karena itu produksi mengirim email lewat Resend HTTP API (`RESEND_API_KEY`), bukan SMTP; backend menolak start di produksi bila `RESEND_API_KEY` kosong. `MAIL_FROM` harus memakai domain yang diverifikasi di Resend.
 
 Environment wajib:
 
@@ -104,7 +105,8 @@ Environment wajib:
 | `DIRECT_URL`                                                                  | Supabase session pooler `:5432` (migration/seed)                   |
 | `JWT_ACCESS_SECRET`                                                           | minimal 32 karakter, khusus produksi                               |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` | bucket produksi                                                    |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`               | SMTP produksi (port 465 memakai TLS implisit)                      |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`               | fallback SMTP (lokal/test); wajib diisi karena skema env           |
+| `RESEND_API_KEY`                                                              | **wajib**; email produksi dikirim lewat Resend HTTP API (port 443) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`             | opsional; redirect `https://<api-domain>/api/auth/google/callback` |
 
 ### 3. Frontend (Vercel)

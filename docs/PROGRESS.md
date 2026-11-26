@@ -804,6 +804,16 @@ Checkpoint singkat kondisi proyek untuk melanjutkan pekerjaan lintas sesi.
 - Self-ping tidak bisa membangunkan instance yang sudah tidur. Monitor eksternal (UptimeRobot) ke `https://<api-domain>/api/health` interval 5 menit tetap diperlukan dan merupakan tindakan manual pengguna; `README.md` §6 diperbarui (sebelumnya menyarankan `/api/health/ready`).
 - Tanpa dependency, migration, atau perubahan API publik.
 
+### Perbaikan Email Produksi — Resend HTTP API (DONE)
+
+- Gejala: undangan dan reset password tidak sampai; log Render `ETIMEDOUT` / `timeoutType: CONNECT_TIMEOUT` / `command: CONN` dari nodemailer.
+- Penyebab: Render free memblokir outbound SMTP port 25/465/587 (changelog 26 September 2025), sehingga koneksi ke `smtp.resend.com:465` di-drop sebelum banner SMTP.
+- `backend/src/lib/mailer.ts`: bila `RESEND_API_KEY` terisi, kirim lewat `POST https://api.resend.com/emails` (port 443, timeout 10 detik, error memuat status + body Resend); selain itu tetap nodemailer SMTP untuk lokal/test (Mailpit).
+- `backend/src/config/env.ts`: `RESEND_API_KEY` opsional, wajib bila `NODE_ENV=production` (fail-fast saat boot).
+- `backend/src/modules/auth/auth.service.ts`: log kegagalan reset menyertakan `userId`, bukan email (tanpa PII).
+- `README.md` §2: catatan blokir SMTP Render free, env `RESEND_API_KEY`, dan syarat `MAIL_FROM` pada domain Resend yang terverifikasi.
+- Tanpa dependency, migration, atau perubahan API publik. Tindakan manual: set `RESEND_API_KEY` di Render, pastikan domain Resend `verified` dan `MAIL_FROM` memakai domain tersebut.
+
 ### Tema — Slate (DONE)
 
 - Palet antarmuka diganti ke base color **Slate** shadcn/ui (cool blue-gray): `background`/`card` putih, `foreground` `oklch(0.129 0.042 264.695)`, `primary` monokrom slate-900 `oklch(0.208 0.042 265.755)`, dark mode slate-950 `oklch(0.129 0.042 264.695)` dengan card `oklch(0.208 0.042 265.755)`.
